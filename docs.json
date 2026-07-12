@@ -8,12 +8,16 @@
     "light": "#8DCDFF",
     "dark": "#E78468"
   },
-  "favicon": "/favicon.ico",
+  "favicon": "/favicon.svg",
   "icons": {
     "library": "lucide"
   },
   "styling": {
     "eyebrows": "breadcrumbs"
+  },
+  "appearance": {
+    "default": "dark",
+    "strict": true
   },
   "contextual": {
     "options": [
@@ -96,8 +100,8 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/yourcompany",
-      "linkedin": "https://linkedin.com/company/yourcompany"
+      "x": "https://x.com/0mcpIO",
+      "linkedin": "https://www.linkedin.com/company/0mcp"
     }
   }
 }

@@ -308,8 +308,11 @@ body:has([data-product-guide-index]) #sidebar a.nav-anchor[href='/'] svg {
 }
 
 img.nav-logo {
-  max-width: 220px;
+  width: 120px;
+  max-width: 120px;
+  max-height: 40px;
   height: auto;
+  object-fit: contain;
 }
 
 :is(.card, [class*='rounded-'], button, input, textarea, select, kbd, pre, code) {
