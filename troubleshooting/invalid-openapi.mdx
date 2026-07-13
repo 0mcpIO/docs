@@ -1,18 +1,94 @@
 ---
 title: Invalid OpenAPI
-description: Fix documents that cannot be previewed or imported.
+description: Troubleshoot OpenAPI documents that can't be imported or previewed.
 ---
 
-## Check the basics
+If 0mcp can't parse your API specification, the document may contain formatting errors, unsupported structures, or missing required fields.
 
-- Use JSON or YAML in a `.json`, `.yaml`, or `.yml` file.
-- Keep the file at 10 MB or smaller.
-- Include an `openapi` field for OpenAPI 3.x or a `swagger` field for Swagger 2.0.
-- Make sure JSON brackets and YAML spacing are valid.
-- Give operations unique names, preferably with `operationId`.
-- Check that referenced schemas exist and do not point in a broken loop.
-- Include a usable API server or base URL.
+The checks below resolve most import issues.
 
-If you import by URL, open the URL in a private browser window. It must be reachable by 0mcp and return the document itself, not a login page.
+## Verify the file format
 
-Try a smaller document with one path if the error is unclear. Once it previews, add sections back until you find the invalid part.
+Make sure your specification:
+
+- Is in **JSON** or **YAML**
+- Uses a `.json`, `.yaml`, or `.yml` extension
+- Is **10 MB or smaller**
+
+## Verify the OpenAPI version
+
+Your document must contain one of the following top-level fields:
+
+- `openapi` for **OpenAPI 3.x**
+- `swagger` for **Swagger 2.0**
+
+<Warning>
+  Other specification formats aren't currently supported. Do not upload a GraphQL schema or Postman Collection through the OpenAPI importer.
+</Warning>
+
+## Check for syntax errors
+
+Invalid syntax is one of the most common causes of failed imports.
+
+Verify that:
+
+- JSON is well-formed
+- YAML indentation is consistent
+- Brackets, braces, and quotation marks are balanced
+
+## Review your operations
+
+For the best import experience:
+
+- Give every operation a unique `operationId`
+- Write clear summaries and descriptions
+- Remove duplicate operation IDs
+
+Unique operation IDs help 0mcp generate clear [MCP tool names](/capabilities/tools).
+
+## Validate references
+
+Check that all referenced schemas and components exist.
+
+Common issues include:
+
+- Missing `$ref` targets
+- Broken schema references
+- Circular references that cannot be resolved
+
+## Verify your server URL
+
+Ensure your specification defines a valid upstream API endpoint.
+
+For example:
+
+- OpenAPI 3.x uses the `servers` section.
+- Swagger 2.0 uses `host`, `basePath`, and `schemes`.
+
+0mcp uses this information when generating requests to your API.
+
+## Importing from a URL
+
+If you're importing from a public URL:
+
+- The URL must be publicly accessible.
+- It should return the OpenAPI document directly.
+- It must not redirect to a login page or HTML documentation.
+
+A quick test is to open the URL in a private browser window. If you see the raw JSON or YAML document, 0mcp should be able to access it as well.
+
+<Note>
+  A URL that works only after you sign in to a browser is not publicly accessible to the importer.
+</Note>
+
+## Isolate the problem
+
+If the error isn't obvious:
+
+1. Create a smaller version of the specification containing a single endpoint.
+2. Import the reduced document.
+3. Gradually add paths and components back until the error reappears.
+
+This approach makes it much easier to identify the section causing the import to fail.
+
+See [OpenAPI specification](/api-sources/openapi) for supported import methods and quality recommendations.

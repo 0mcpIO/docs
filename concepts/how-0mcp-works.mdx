@@ -1,21 +1,54 @@
 ---
 title: How 0mcp works
-description: Follow a request from your API document to your API.
+description: Understand how 0mcp connects an MCP client to your existing API.
 ---
 
-## From import to a live server
+0mcp sits between an MCP client and your API. It hosts the MCP server, translates tool calls into standard HTTP requests, forwards them to your API, and returns the response to the client.
 
-1. You add a supported [OpenAPI document](/api-sources/openapi).
-2. 0mcp reads its server address, paths, methods, inputs, and response details.
-3. You select the operations that should become tools.
-4. 0mcp saves a version containing your tools, resources, and prompts.
-5. You publish that version.
-6. Your MCP client connects to the hosted endpoint and lists its capabilities.
+Your API remains unchanged. 0mcp simply provides an MCP-compatible interface on top of it.
 
-## When a tool is called
+<Info>
+  0mcp translates and forwards requests. Your API still owns its business logic, data, authentication, and authorization decisions.
+</Info>
 
-The client sends a tool name, its inputs, and any needed credential. 0mcp checks the inputs, builds the upstream API request, and sends it to the base URL from your API setup. The API response is returned to the client. The [authentication model](/concepts/authentication-model) explains how Bearer tokens and API keys reach the upstream API.
+## Request flow
 
-Calls follow the tool limits set in the dashboard, including timeout, maximum response size, and redirect settings.
+When an AI client calls a [tool](/capabilities/tools), the request follows this path:
 
-<Note>Editing a draft does not change the live endpoint. The endpoint uses the published version until you publish another one. See [Versioning](/guides/versioning) for the full publish flow.</Note>
+```text
+MCP Client
+     │
+     ▼
+Hosted 0mcp Server
+     │
+Translate Tool → HTTP Request
+     │
+     ▼
+Your API
+     │
+HTTP Response
+     │
+     ▼
+Hosted 0mcp Server
+     │
+     ▼
+MCP Client
+```
+
+0mcp is responsible for translating between the MCP protocol and your existing REST API, allowing any compatible AI client to use your API without requiring changes to your backend.
+
+## Authentication
+
+Authentication stays with your API.
+
+When a tool requires authentication, the MCP client provides the necessary credentials, such as a Bearer token or API key, when invoking the tool.
+
+0mcp securely forwards those credentials to your upstream API as part of the HTTP request. Your API authenticates the request exactly as it would for any other client.
+
+This means:
+
+- No changes to your existing authentication system
+- No shared API secrets stored in 0mcp
+- Your API remains the source of truth for authorization
+
+Read the [authentication model](/concepts/authentication-model) for supported credential patterns and safe setup guidance.

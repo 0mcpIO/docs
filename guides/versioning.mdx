@@ -1,20 +1,69 @@
 ---
 title: Versioning
-description: Publish changes safely and return to an older setup.
+description: Publish changes with confidence.
 ---
 
-A version is a saved copy of your server's tools, resources, and prompts. The live MCP endpoint always uses one published version.
+Every time you make changes to your MCP server, 0mcp saves them as a **version**. A version is a snapshot of your server's configuration, including its [tools](/capabilities/tools), [resources](/capabilities/resources), and [prompts](/capabilities/prompts).
 
-## Publish changes
+Only one version can be **published** at a time, and all connected MCP clients interact with that published version.
 
-Make your edits, then open **Versions**. Review the capability counts and validation notes. Publish the new version when it is ready.
+<Info>
+  Draft changes do not affect connected clients. Your MCP endpoint continues using the current published version until you publish another one.
+</Info>
 
-Connected clients see the new capability list after they reconnect or refresh tools. Existing calls already in progress continue with the setup they started with.
+## Draft vs. published
 
-## Return to an older version
+Changes you make are first saved as a **draft**.
 
-Open **Versions**, choose a known good version, and publish it. This makes its saved capabilities live again. Your newer draft and version history remain available.
+Your live MCP endpoint continues serving the current published version until you explicitly publish a new one.
 
-Pausing is separate from versions. Pause serving when you need to stop all calls without changing which version is published.
+This allows you to review, test, and refine changes without affecting existing clients.
 
-<Tip>Add a short note to each version so you can tell why it was created.</Tip>
+## Publishing a version
+
+When you're ready to make changes available:
+
+1. Open **Versions**.
+2. Review the version summary and validation results.
+3. Publish the version.
+
+Once published, it becomes the live configuration for your MCP server.
+
+Clients discover the updated capabilities the next time they reconnect or refresh their available tools.
+
+<Warning>
+  Test important tool changes in the [Playground](/guides/playground) before publishing them to clients that use production data.
+</Warning>
+
+## Rolling back
+
+If a newly published version causes issues, you can quickly return to a previous version.
+
+Simply select an earlier version and publish it again.
+
+The selected version immediately becomes the active configuration, while your newer drafts and version history remain intact.
+
+## Version history
+
+Version history gives you a record of how your MCP server has evolved over time.
+
+For each version, consider adding a short description explaining what changed, such as:
+
+- Added customer management tools
+- Updated authentication configuration
+- Removed deprecated endpoints
+- Fixed tool descriptions
+
+Meaningful version notes make it easier to identify the correct version when reviewing history or performing a rollback.
+
+## Pausing vs. versioning
+
+Publishing controls **what** your MCP server exposes.
+
+Pausing controls **whether** your MCP server accepts requests.
+
+Pausing your server temporarily stops incoming MCP requests without changing the currently published version. When you resume serving, the same published version becomes available again.
+
+<Note>
+  Pausing does not create, publish, or remove a version.
+</Note>

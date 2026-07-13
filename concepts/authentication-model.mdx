@@ -1,22 +1,108 @@
 ---
 title: Authentication model
-description: Learn how credentials move through 0mcp.
+description: Understand how credentials are securely passed from an MCP client to your API.
 ---
 
-0mcp uses caller-provided credentials. The MCP client sends the credential with each request, and 0mcp passes it to the upstream API.
+0mcp uses a **pass-through authentication model**.
 
-## Supported patterns
+Instead of storing or managing your API credentials, 0mcp forwards the credentials provided by the MCP client to your upstream API. Your existing authentication and authorization logic continues to work exactly as it does today.
 
-- **Bearer or OAuth token:** Send `Authorization: Bearer YOUR_TOKEN`.
-- **Header API key:** Send the header named by the API, such as `X-API-Key`.
-- **Query API key:** The Setup page provides a safe gateway header. 0mcp turns it into the required query value for the upstream call.
+<Info>
+  **0mcp is a pass-through, not an authentication provider.** Your API remains responsible for checking credentials and deciding what the caller can access.
+</Info>
 
-Authentication can apply to the whole server or to a single [tool](/capabilities/tools). The Setup page checks the published tools and lists the credentials your client must provide.
+## How it works
 
-## Safe setup
+When a [tool](/capabilities/tools) requires authentication, the request follows this flow:
 
-Keep secret values in environment variables or the client's secure input. Do not paste them into a repository or shared screenshot.
+```text
+MCP Client
+     │
+Authorization / API Key
+     ▼
+Hosted 0mcp Server
+     │
+Credentials forwarded
+     ▼
+Your API
+```
 
-The playground keeps its AI provider key in browser session storage. Request payloads and credentials are not saved as activity data.
+0mcp does not authenticate the upstream request itself. It forwards the required credentials and returns your API's response to the client.
 
-<Warning>A valid 0mcp login does not replace the credential required by your upstream API. If a request is rejected, follow [Authentication errors](/troubleshooting/authentication-errors).</Warning>
+## Supported authentication methods
+
+0mcp supports the authentication methods commonly defined in [OpenAPI specifications](/api-sources/openapi).
+
+### Bearer tokens
+
+Forwarded using the standard HTTP header:
+
+```http
+Authorization: Bearer YOUR_TOKEN
+```
+
+Bearer tokens are suitable for JWTs, OAuth access tokens, and other bearer-based authentication.
+
+### Header API keys
+
+Forwarded using the header defined by your API.
+
+Example:
+
+```http
+X-API-Key: YOUR_API_KEY
+```
+
+### Query API keys
+
+Some APIs require authentication as a query parameter.
+
+To avoid exposing secrets in client configurations, 0mcp provides a secure gateway header. During the request, 0mcp automatically converts that header into the required query parameter before sending the request to your upstream API.
+
+<Warning>
+  Do not add an API key directly to your MCP endpoint URL. Use the gateway header generated on the **Setup** page.
+</Warning>
+
+## Authentication scope
+
+Authentication requirements are determined from your published OpenAPI specification.
+
+Credentials can be required:
+
+- For the entire MCP server
+- For specific tools only
+
+The [**Setup** page](/guides/setup) automatically detects these requirements and tells you which credentials your MCP client must provide.
+
+## Security best practices
+
+- Store credentials in environment variables or your client's secure credential store.
+- Never commit API keys or access tokens to source control.
+- Avoid sharing credentials in screenshots or configuration files.
+- Rotate credentials regularly using your existing API security practices.
+
+## What 0mcp stores
+
+0mcp is designed to pass requests through, not store secrets.
+
+0mcp does **not** store:
+
+- Bearer tokens
+- API keys
+- Authentication headers
+- Request payloads
+- Response payloads
+
+The [Playground](/guides/playground) stores your AI provider key only in your browser's session storage, and credentials are never recorded in [activity logs](/guides/logs).
+
+<Note>
+  Activity logs contain only the operational details needed to understand server health and usage, such as status, response time, capability name, and data size.
+</Note>
+
+## Important
+
+<Warning>
+  Signing in to your **0mcp account** only gives you access to the 0mcp dashboard. It does **not** authenticate requests to your upstream API. Every protected tool call still requires the credentials expected by your API.
+</Warning>
+
+If authentication fails, see [Authentication errors](/troubleshooting/authentication-errors) for troubleshooting.

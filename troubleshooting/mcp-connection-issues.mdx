@@ -1,18 +1,82 @@
 ---
 title: MCP connection issues
-description: Fix a client that cannot connect to your server.
+description: Troubleshoot clients that can't connect to your MCP server.
 ---
 
-Check these items in order:
+If your client can't establish a connection, work through the checks below in order.
 
-1. Confirm the server has a [published version](/guides/versioning).
-2. Confirm serving is not paused.
-3. Copy the endpoint again from **Setup**.
-4. Make sure the client is using Streamable HTTP, not a local command or old transport type.
-5. Check the required [authentication environment variables and headers](/concepts/authentication-model).
-6. Restart or reconnect the MCP client.
-7. Open **Activity** and use the [Logs guide](/guides/logs) to look for a request at the same time.
+## 1. Verify your server is published
 
-No activity entry usually means the request never reached 0mcp. Check the client config, DNS, and network. A `404` can mean the hostname or endpoint is wrong. A `503` can mean serving is paused.
+Only [**published versions**](/guides/versioning) can be accessed by MCP clients.
 
-For a custom domain, wait until its status is active before switching the client.
+If your server only has draft changes, publish a version before attempting to connect.
+
+<Note>
+  Creating or editing a draft does not update the live MCP endpoint.
+</Note>
+
+## 2. Check that serving is enabled
+
+If your server is paused, it won't accept incoming MCP requests.
+
+Resume serving and try connecting again.
+
+## 3. Verify the endpoint
+
+Open the [**Setup** page](/guides/setup) and copy the endpoint again.
+
+Small differences in the URL, such as an incorrect hostname or path, can prevent clients from connecting.
+
+## 4. Verify the transport
+
+0mcp uses **Streamable HTTP**.
+
+Make sure your MCP client is configured to use the hosted HTTP endpoint instead of a local command or an unsupported transport.
+
+<Warning>
+  Do not place a hosted 0mcp URL in a client field that expects a local command.
+</Warning>
+
+## 5. Review authentication
+
+If your server requires authentication, confirm that:
+
+- Required environment variables are configured.
+- Authentication headers are present.
+- Credentials are valid.
+
+See [**Authentication errors**](/troubleshooting/authentication-errors) if requests are being rejected with `401` or `403`.
+
+## 6. Restart your client
+
+Many MCP clients load their configuration only when they start.
+
+After updating your configuration or credentials, restart or reconnect the client before testing again.
+
+## 7. Check the logs
+
+Open [**Logs**](/guides/logs) and look for activity at the time you attempted to connect.
+
+- **A matching log entry exists:** The request reached 0mcp. Review the error details to continue troubleshooting.
+- **No log entry exists:** The request never reached 0mcp. The problem is likely in the client configuration, network, DNS, or endpoint URL.
+
+<Info>
+  No matching log entry is a useful signal. Check the client and network path before changing your tools or upstream API.
+</Info>
+
+## Common HTTP responses
+
+| Status | What it usually means |
+| --- | --- |
+| **404 Not Found** | The endpoint or hostname is incorrect. |
+| **401 Unauthorized** | Authentication credentials are missing or invalid. |
+| **403 Forbidden** | The credentials don't have permission to access the requested resource. |
+| **503 Service Unavailable** | The server is paused or temporarily unavailable. |
+
+## Using a custom domain
+
+If you're connecting through a [custom domain](/guides/custom-domain):
+
+- Wait until the domain status is **Active**.
+- Update your client to use the custom endpoint.
+- Verify that DNS propagation and TLS provisioning have completed before reconnecting.

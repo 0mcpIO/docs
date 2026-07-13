@@ -1,18 +1,135 @@
 ---
 title: What is MCP?
-description: Understand MCP in plain language.
+description: Understand the Model Context Protocol in plain language.
 ---
 
-Model Context Protocol, or MCP, is a shared way for AI apps to connect to outside systems. It gives clients a standard way to list and use tools, resources, and prompts.
+**Model Context Protocol (MCP)** is an open standard that allows AI applications to securely connect with external systems using a common protocol. Instead of every AI app needing a custom integration for every service, MCP provides one consistent way to discover and use capabilities.
 
-Think of MCP as a common plug. An AI app does not need a different custom connection for every service. It connects to an MCP server and asks what is available.
+Think of MCP like **USB-C for AI**.
+
+Rather than building a different connector for every application, an AI client connects to an MCP server, asks what capabilities are available, and invokes them using a standardized format.
+
+This makes integrations simpler, more portable, and easier to maintain.
+
+## Why MCP exists
+
+Before MCP, every AI application had its own way of integrating with external APIs. Developers often had to build and maintain separate integrations for each client.
+
+With MCP, an API or service can expose its capabilities once through an MCP server, and any compatible client can use them.
+
+Instead of building many integrations:
+
+```text
+API → Claude
+API → Cursor
+API → VS Code
+API → Codex
+API → Windsurf
+```
+
+You build one:
+
+```text
+API → MCP Server → Any MCP-compatible client
+```
 
 ## The main parts
 
-- **Client:** The app you use, such as Claude Code, Codex, Cursor, or VS Code.
-- **Server:** The service that offers capabilities. 0mcp hosts this part for you.
-- **Tool:** An action the client can call, such as getting an order.
-- **Resource:** Content the client can read, such as support rules.
-- **Prompt:** A reusable message template with optional inputs.
+### Client
 
-0mcp uses Streamable HTTP, so clients connect to a hosted web address. You do not need to keep a local process running.
+The AI application that connects to an MCP server.
+
+Examples include Claude Code, Cursor, Codex, VS Code, Windsurf, and other MCP-compatible applications.
+
+A client discovers available capabilities, decides which ones to use, and sends requests to the server.
+
+### Server
+
+The service that exposes capabilities through the Model Context Protocol.
+
+It tells clients what tools, resources, and prompts are available, validates incoming requests, and communicates with the underlying systems.
+
+With **0mcp**, you don't need to build or host this server yourself. 0mcp hosts and manages it for you.
+
+### Tool
+
+A [**tool**](/capabilities/tools) performs an action.
+
+Tools are usually backed by API operations and can retrieve or modify data.
+
+Examples:
+
+- Get an order
+- Search customers
+- Create a support ticket
+- Send an email
+- Update inventory
+
+When an AI client needs to perform an action, it calls a tool.
+
+### Resource
+
+A [**resource**](/capabilities/resources) is information that an AI client can read.
+
+Unlike tools, resources don't perform actions. They simply provide content.
+
+Examples:
+
+- Product documentation
+- Support policies
+- Pricing information
+- Internal knowledge
+- Markdown or JSON files
+
+Resources help AI models answer questions with reliable, up-to-date information.
+
+### Prompt
+
+A [**prompt**](/capabilities/prompts) is a reusable instruction template that can include optional inputs.
+
+Instead of rewriting the same instructions repeatedly, clients can reuse predefined prompts.
+
+Examples:
+
+- Summarize customer feedback
+- Generate release notes
+- Draft a support response
+- Analyze API logs
+
+Prompts make AI workflows more consistent across teams and applications.
+
+<Tip>
+  Use a tool for an action, a resource for read-only information, and a prompt for reusable instructions.
+</Tip>
+
+## How clients use an MCP server
+
+A typical request follows this flow:
+
+1. The client connects to an MCP server.
+2. The server advertises its available tools, resources, and prompts.
+3. The AI model decides which capability it needs.
+4. The client invokes that capability.
+5. The server executes the request and returns the result.
+6. The AI uses the result to continue the conversation.
+
+This standardized workflow allows the same MCP server to work across many different AI clients.
+
+## How 0mcp fits in
+
+0mcp turns your existing [**OpenAPI** specification](/api-sources/openapi) into a hosted MCP server.
+
+Instead of manually implementing the MCP protocol, you:
+
+- Import your OpenAPI document
+- Choose which API operations become tools
+- Publish your server
+- Connect any supported MCP client
+
+0mcp handles hosting, protocol compatibility, [versioning](/guides/versioning), and [client connectivity](/guides/setup) so you can focus on your API.
+
+## Transport
+
+0mcp uses **Streamable HTTP**, the modern transport defined by the MCP specification.
+
+Clients connect to your hosted MCP endpoint over HTTPS, eliminating the need to run a local process or maintain long-lived local connections. This makes deployment simpler while remaining compatible with modern MCP clients.

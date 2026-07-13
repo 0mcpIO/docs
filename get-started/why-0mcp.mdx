@@ -1,22 +1,32 @@
 ---
 title: Why 0mcp?
-description: See why 0mcp is a simple path from an API to MCP.
+description: See why 0mcp is the fastest way to turn an existing API into a hosted MCP server.
 ---
 
-Building an MCP server by hand means mapping every API operation, handling input rules, hosting the server, and keeping it in sync as the API changes. 0mcp handles that work from your API description.
+Building an MCP server from scratch means mapping API operations to tools, validating inputs, managing authentication, hosting infrastructure, and keeping everything in sync as your API evolves. 0mcp automates that workflow so you can publish an MCP server directly from your OpenAPI specification.
 
 ## Use what you already have
 
-Your OpenAPI document already explains paths, methods, inputs, and responses. 0mcp uses it to create tool definitions, so you do not repeat the same work.
+Your **OpenAPI 3.x** or **Swagger 2.0** document already defines your API's endpoints, parameters, request bodies, and responses. 0mcp uses that specification to generate MCP capabilities automatically, eliminating repetitive manual work.
 
 ## Stay in control
 
-You choose which operations are exposed. You can rename tools, improve their descriptions, pause serving, and publish a known version. Draft changes do not affect connected clients until you publish them.
+You decide exactly what AI clients can access.
+
+Select which API operations become tools, customize their names and descriptions, pause serving when needed, and publish versioned releases. Draft changes remain private until you choose to publish them.
+
+<Note>
+  Connected clients use only the published version. You can prepare and review draft changes without affecting them.
+</Note>
 
 ## Keep credentials with the caller
 
-Clients provide upstream credentials at request time. This avoids copying a shared API secret into the server setup.
+0mcp doesn't require you to store a shared upstream API secret.
 
-## See what is happening
+Instead, MCP clients provide the required **Bearer token** or **API key** at request time, and 0mcp securely passes those credentials through to your API.
 
-The dashboard shows calls, errors, response time, data size, and change history. This helps you find issues without reading server code.
+## Monitor everything
+
+Track how your MCP server is performing without managing server infrastructure.
+
+The dashboard provides usage metrics, request history, errors, response times, payload sizes, and version history, making it easy to monitor activity and troubleshoot issues.

@@ -1,23 +1,65 @@
 ---
 title: Tools
-description: Turn API operations into actions an MCP client can call.
+description: Learn how 0mcp turns your API operations into MCP tools.
 ---
 
-A tool is an action available to an MCP client. During OpenAPI import, 0mcp creates one tool for each selected API operation.
+A **tool** is an action that an MCP client can invoke.
 
-Each tool includes a name, description, HTTP method, path, inputs, request body, and response details. Clear names and descriptions help the client choose the right tool.
+In 0mcp, each tool is generated from an API operation in your [**OpenAPI** specification](/api-sources/openapi). When you import your API, 0mcp automatically creates a tool for every available operation, allowing AI clients to interact with your API through the Model Context Protocol.
 
-## Manage a tool
+For example:
 
-Open **Tools**, then select a tool. You can:
+| API operation | Generated tool |
+| --- | --- |
+| `GET /orders/{id}` | `get_order` |
+| `POST /tickets` | `create_ticket` |
+| `GET /users` | `list_users` |
 
-- Rename it or improve its description
+## What's included in a tool?
+
+Every generated tool contains the information needed for an AI client to use it, including:
+
+- Name
+- Description
+- HTTP method
+- API path
+- Parameters
+- Request body schema
+- Response schema
+- Authentication requirements
+
+AI clients use the tool's name and description to decide which action to invoke, so clear and descriptive metadata leads to better tool selection.
+
+## Managing tools
+
+From the **Tools** page, you can customize how each tool behaves without changing your API.
+
+You can:
+
+- Rename the tool
+- Edit its description
 - Enable or disable it
 - Review its inputs and request body
-- Set its [authentication](/concepts/authentication-model)
-- Set a timeout and maximum response size
-- Allow or block redirects
+- Configure [authentication](/concepts/authentication-model)
+- Set request timeout
+- Limit maximum response size
+- Allow or block HTTP redirects
 
-Use short action names such as `get_order` or `create_ticket`. Avoid exposing delete or payment operations until you have checked their inputs and access rules.
+These settings only affect how the tool is exposed through your MCP server. They never modify your upstream API.
 
-After changes, create and publish a [new version](/guides/versioning) before clients can see them. Use the [Playground](/guides/playground) to try a read-only call before connecting another client.
+## Best practices
+
+- Use clear, action-oriented names such as `get_order`, `list_customers`, or `create_ticket`.
+- Write descriptions that explain **when** the tool should be used, not just what endpoint it calls.
+- Disable operations you don't want AI clients to access.
+- Carefully review destructive operations such as deleting resources or processing payments before exposing them.
+
+<Warning>
+  Test tools that create, update, delete, send, or charge data with limited credentials before exposing them to production clients.
+</Warning>
+
+## Publishing changes
+
+Changes to tools are first saved as a **draft**.
+
+Connected MCP clients continue using the current published version until you [publish a new one](/guides/versioning). Before publishing, use the [**Playground**](/guides/playground) to verify that your tools behave as expected.

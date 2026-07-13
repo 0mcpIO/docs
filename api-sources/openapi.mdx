@@ -1,22 +1,77 @@
 ---
 title: OpenAPI specification
-description: Import an OpenAPI 3.x or Swagger 2.0 document.
+description: Import your API to create an MCP server.
 ---
 
-OpenAPI is the supported way to create a 0mcp server today. 0mcp accepts OpenAPI 3.x and Swagger 2.0 in JSON or YAML.
+0mcp generates MCP tools directly from your **OpenAPI** specification. Simply import your API definition, review the generated tools, and publish your MCP server.
 
-## Add a document
+Currently, 0mcp supports:
 
-Create a server and choose one source:
+- **OpenAPI 3.x**
+- **Swagger 2.0**
 
-- **File:** Upload a `.json`, `.yaml`, or `.yml` file up to 10 MB.
-- **URL:** Enter a public URL starting with `http://` or `https://`.
-- **Paste:** Paste the full JSON or YAML document.
+Both **JSON** and **YAML** formats are supported.
 
-0mcp shows the detected version, base URL, and operations before import. Review this preview carefully. Select only the operations you want clients to use, and edit unclear tool names or descriptions.
+## Import methods
 
-## Write a useful document
+You can import an API specification in three ways:
 
-Give every operation a unique `operationId` and a plain description. Define required inputs, request bodies, security schemes, and response types. Make sure the server URL points to the API that should receive calls.
+### File
 
-See [Invalid OpenAPI](/troubleshooting/invalid-openapi) if the preview fails.
+Upload a `.json`, `.yaml`, or `.yml` file up to **10 MB**.
+
+### URL
+
+Import from a publicly accessible `http://` or `https://` URL.
+
+<Note>
+  The URL must return the OpenAPI document directly without requiring a browser login.
+</Note>
+
+### Paste
+
+Paste the complete OpenAPI document directly into the editor.
+
+## What happens during import?
+
+Before importing, 0mcp analyzes your specification and displays a preview showing:
+
+- OpenAPI version
+- Server URL
+- Available API operations
+
+From there, you can:
+
+- Choose which operations become [MCP tools](/capabilities/tools)
+- Review generated tool names
+- Improve tool descriptions before creating your server
+
+This gives you full control over what AI clients can access.
+
+<Warning>
+  Review write, delete, administrative, and payment operations carefully before selecting them as tools.
+</Warning>
+
+## Writing a high-quality OpenAPI specification
+
+The quality of your MCP server depends on the quality of your OpenAPI document.
+
+For the best experience:
+
+- Give every operation a unique `operationId`.
+- Write clear summaries and descriptions.
+- Define request parameters and request bodies accurately.
+- Configure [authentication](/concepts/authentication-model) using OpenAPI security schemes.
+- Document response schemas.
+- Ensure the server URL points to the correct upstream API.
+
+Well-documented APIs produce more accurate and easier-to-use MCP tools.
+
+## Best practices
+
+- Use stable, descriptive `operationId` values, such as `get_order` instead of `get1`.
+- Write descriptions that explain what an operation does and when it should be used.
+- Remove deprecated or internal endpoints before exposing them to AI clients.
+- Keep your OpenAPI specification up to date as your API evolves.
+
+If your specification can't be parsed or validated, see [**Invalid OpenAPI**](/troubleshooting/invalid-openapi) for common issues and troubleshooting steps.

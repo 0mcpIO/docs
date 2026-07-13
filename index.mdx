@@ -1,67 +1,65 @@
 ---
 title: 0mcp documentation
-description: Your blueprint for turning an API into a safe, hosted MCP server.
-mode: frame
+description: Learn how to turn your API into a hosted MCP server.
 ---
 
-# Build your MCP server with a clear plan
+**Turn your existing API into a hosted MCP server.**
 
-0mcp turns an existing API into a hosted MCP server. Import an [OpenAPI document](/api-sources/openapi), choose the operations you want to share, publish a saved version, and connect an MCP client.
+Convert an OpenAPI document into a production-ready MCP server, choose which API operations AI clients can access, and connect it to your favorite MCP-compatible applications.
 
-<Note>OpenAPI 3.x and Swagger 2.0 imports are available now. Direct REST API, GraphQL, and Postman Collection imports are planned.</Note>
+<CardGroup cols={2}>
+  <Card title="Introduction" icon="sparkles" href="/get-started/introduction">
+    Learn what 0mcp is, how it works, and when to use it.
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/get-started/quick-start">
+    Create, publish, and connect your first MCP server in minutes.
+  </Card>
+  <Card title="What is MCP?" icon="book-open" href="/concepts/what-is-mcp">
+    Learn the fundamentals of the MCP, including clients, servers, tools.
+  </Card>
+  <Card title="How 0mcp works" icon="workflow" href="/concepts/how-0mcp-works">
+    Understand how requests flow from an AI client to your API through 0mcp.
+  </Card>
+</CardGroup>
 
-## The 0mcp blueprint
+## From API to MCP
+
+Turn your existing API into a hosted MCP server in four simple steps.
 
 <Steps>
-  <Step title="Describe your API">
-    Start with an OpenAPI document that has a correct server URL, clear operation names, input rules, response types, and security schemes. See [OpenAPI specification](/api-sources/openapi) for the supported formats and import choices.
+  <Step title="Import">
+    Import an OpenAPI 3.x or Swagger 2.0 specification.
   </Step>
-  <Step title="Choose what clients can use">
-    Review every detected operation. Expose only the actions a client needs, then improve each [tool name and description](/capabilities/tools) so its purpose is easy to understand.
+  <Step title="Choose">
+    Select which API operations should be exposed as MCP tools.
   </Step>
-  <Step title="Plan access before publishing">
-    Decide whether the API uses a Bearer token, header API key, or query API key. Learn how credentials pass from the caller to your API in the [authentication model](/concepts/authentication-model).
+  <Step title="Publish">
+    Publish a version of your MCP server to a hosted endpoint.
   </Step>
-  <Step title="Publish a known version">
-    Save a version that contains your tools, resources, and prompts. Publishing makes that saved setup live. Read [Versioning](/guides/versioning) before changing a server used by others.
-  </Step>
-  <Step title="Try a safe request">
-    Use the [Playground](/guides/playground) with a simple read-only tool. Check its inputs and result before trying actions that create, update, or delete data.
-  </Step>
-  <Step title="Connect and watch">
-    Copy a client configuration from Setup, then use [Analytics](/guides/analytics) and [Logs](/guides/logs) to watch calls, errors, response time, and changes.
+  <Step title="Connect">
+    Connect your MCP server to Claude Code, Cursor, Codex, VS Code, and other compatible clients.
   </Step>
 </Steps>
 
-## Choose your path
+## Popular guides
 
 <CardGroup cols={2}>
-  <Card title="I am new to MCP" icon="book-open" href="/concepts/what-is-mcp">
-    Learn clients, servers, tools, resources, and prompts in plain language.
+  <Card title="Authentication" icon="key-round" href="/concepts/authentication-model">
+    Learn how authentication is securely passed through to your API.
   </Card>
-  <Card title="I want a working server" icon="rocket" href="/get-started/quick-start">
-    Follow the shortest path from API document to connected client.
+  <Card title="Client setup" icon="plug" href="/guides/setup">
+    Connect your MCP server to supported AI clients.
   </Card>
-  <Card title="I need client setup" icon="plug" href="/guides/setup">
-    Connect Claude Code, Cursor, Codex, VS Code, or Windsurf.
+  <Card title="Versioning" icon="history" href="/guides/versioning">
+    Publish updates, manage versions, and roll back when needed.
   </Card>
-  <Card title="I need to fix a problem" icon="wrench" href="/troubleshooting/mcp-connection-issues">
-    Check connection, authentication, import, and tool discovery issues.
+  <Card title="Logs and privacy" icon="scroll-text" href="/guides/logs">
+    Learn what usage data 0mcp stores and what it never stores.
   </Card>
 </CardGroup>
 
-## What you can publish
+## Get help
 
-<CardGroup cols={3}>
-  <Card title="Tools" icon="wrench" href="/capabilities/tools">Actions created from selected API operations.</Card>
-  <Card title="Resources" icon="file-text" href="/capabilities/resources">Content that clients can read when needed.</Card>
-  <Card title="Prompts" icon="message-square" href="/capabilities/prompts">Reusable message templates with inputs.</Card>
-</CardGroup>
-
-## A safe first server
-
-For your first server, choose one or two read-only operations. Use a test account with limited access. Keep credentials in environment variables or secure client inputs. Publish only after the [Playground](/guides/playground) returns the result you expect. If something fails, use [Activity logs](/guides/logs) without placing secrets in your notes or screenshots.
-
-<Card title="Read common questions" icon="circle-help" href="/resources/faq">
-  Find answers about hosting, data, security, clients, usage, pricing, and plans.
-</Card>
+- Read the [FAQ](/resources/faq).
+- [Troubleshoot common MCP connection issues](/troubleshooting/mcp-connection-issues).
+- Email **[hello@0mcp.io](mailto:hello@0mcp.io)** if you need assistance.

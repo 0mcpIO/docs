@@ -1,18 +1,50 @@
 ---
 title: Analytics
-description: Understand usage and performance numbers.
+description: Monitor how your MCP server is being used.
 ---
 
-Analytics shows how clients use your server. Open a server dashboard or **Activity** to review the available totals and trends.
+Analytics provides an overview of your server's usage and performance, helping you understand how AI clients interact with your MCP capabilities over time.
 
-Common values include:
+Use Analytics to identify trends, monitor reliability, and quickly spot potential issues.
 
+## What you can monitor
+
+Analytics includes metrics such as:
+
+- Total MCP requests
 - Calls by tool, resource, or prompt
-- Successful and failed calls
+- Successful and failed requests
 - Response time
-- Request and response data size
+- Request and response size
 - MCP client usage
 
-Use the date and capability filters to narrow the view. A rise in errors may point to an expired credential, changed upstream API, invalid input, or paused server. Start with [Authentication errors](/troubleshooting/authentication-errors) for `401` or `403` results. A rise in response time may point to the upstream API or a large response.
+Use filters such as **date range** and **capability** to focus on specific activity.
 
-Analytics stores safe usage details. It does not need the credential or full payload to count a call. Use [Logs](/guides/logs) when you need to narrow the result to a specific time or capability.
+## Understanding your metrics
+
+Analytics can help you identify common issues:
+
+- An increase in **401** or **403** responses may indicate expired or invalid credentials.
+- More failed requests could suggest upstream API changes, invalid inputs, or disabled capabilities.
+- Higher response times often point to slower upstream APIs or larger responses.
+- Changes in usage can help you understand how clients are interacting with your server.
+
+For help with credential failures, see [Authentication errors](/troubleshooting/authentication-errors). For request-specific investigation, use [**Logs**](/guides/logs).
+
+## Privacy
+
+Analytics is designed to measure usage, not capture your data.
+
+0mcp records operational metrics needed to monitor your MCP server, such as request counts, response times, and status codes.
+
+It does **not** require API credentials or full request and response payloads to generate analytics. This helps you monitor performance while keeping your application data private.
+
+<Info>
+  Analytics stores operational measurements, not your API credentials, request bodies, or response bodies.
+</Info>
+
+## When to use Analytics vs. Logs
+
+Use **Analytics** to understand overall trends and server health.
+
+Use [**Logs**](/guides/logs) when you need to investigate a specific request, error, or capability in more detail.

@@ -1,21 +1,72 @@
 ---
 title: Resources
-description: Share content that clients can read.
+description: Share static content with MCP clients.
 ---
 
-A resource is content an MCP client can read without calling an API operation. It works well for product notes, policies, reference data, or instructions that change rarely.
+Share static content with MCP clients.
 
-Open **Resources** and choose **New resource**. Add a unique URI, a name, a description, a content type, and the content itself. Resources can contain text or base64-encoded file data.
+A **resource** is read-only content that an MCP client can access without calling an API operation.
 
-You can also set a MIME type, audience, priority, and last updated value. These details help clients understand the content.
+Unlike [**tools**](/capabilities/tools), which perform actions, resources simply provide information. They're ideal for documentation, policies, reference material, or other content that AI clients may need during conversations.
 
-## Good resource URIs
+## When to use resources
 
-Use a stable URI that explains the content:
+Resources work best for information that changes infrequently, such as:
+
+- Product documentation
+- User guides
+- Company policies
+- Security guidelines
+- Pricing information
+- API references
+- FAQs
+- Knowledge base articles
+
+If the content requires executing business logic or retrieving live data, use a [**tool**](/capabilities/tools) instead.
+
+<Tip>
+  Use resources for stable reference content. Use tools for live, user-specific, or frequently changing data.
+</Tip>
+
+## Creating a resource
+
+Each resource includes:
+
+- A unique URI
+- Name
+- Description
+- Content
+- MIME type
+
+Depending on the content type, resources can contain plain text, Markdown, JSON, YAML, or base64-encoded file data.
+
+## Resource URIs
+
+Every resource is identified by a unique URI.
+
+Choose a stable, descriptive URI that reflects the content rather than its implementation.
+
+Examples:
 
 ```text
 docs://support/refund-policy
+docs://api/authentication
 company://handbook/security
+knowledge://pricing/enterprise
 ```
 
-Enable the resource, save it, create a version, and publish that version. Disabled resources are not shown to connected clients.
+Once published, clients use the URI to identify and retrieve the resource.
+
+## Best practices
+
+- Keep each resource focused on a single topic.
+- Use descriptive names and summaries.
+- Prefer stable URIs that won't need to change over time.
+- Update resources when the underlying information changes.
+- Use tools for dynamic or user-specific data.
+
+## Publishing changes
+
+Resources are included in your MCP server only after they're published.
+
+Draft changes remain private until you [publish a new version](/guides/versioning), allowing you to update content without affecting connected clients.

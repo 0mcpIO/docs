@@ -1,22 +1,70 @@
 ---
 title: Prompts
-description: Create reusable message templates for MCP clients.
+description: Create reusable prompt templates for MCP clients.
 ---
 
-A prompt is a reusable set of messages. It can ask for inputs and place those values into a template. Prompts help users start a common task in the same way each time.
+A **prompt** is a reusable message template that helps AI clients start common tasks with consistent instructions.
 
-Open **Prompts** and choose **New prompt**. Add a name, title, description, arguments, and one or more messages.
+Unlike [**tools**](/capabilities/tools), prompts don't perform actions. Instead, they provide structured instructions that guide the AI model. Prompts can also accept user inputs, allowing the same template to be reused with different values.
+
+<Note>
+  A prompt guides the AI model but does not call your API by itself. Use a tool when the workflow must perform an action.
+</Note>
+
+## When to use prompts
+
+Prompts are useful for repeatable AI workflows, such as:
+
+- Summarizing support cases
+- Drafting customer emails
+- Writing release notes
+- Analyzing logs
+- Reviewing pull requests
+- Generating product descriptions
+
+Instead of rewriting the same instructions every time, clients can invoke a prompt and provide the required inputs.
+
+## Creating a prompt
+
+Each prompt includes:
+
+- Name
+- Title
+- Description
+- Arguments, if needed
+- One or more messages
+
+Messages can have either the **user** or **assistant** role and may contain plain text or reference existing [resources](/capabilities/resources).
 
 ## Arguments
 
-Argument names can use letters, numbers, and underscores. They must start with a letter or underscore. Mark an argument as required when the prompt cannot work without it.
+Arguments make prompts reusable.
 
-Use an argument in text with Go template syntax:
+Define the values a client must provide when invoking the prompt, such as a case ID, customer name, or product identifier.
+
+Argument names:
+
+- May contain letters, numbers, and underscores (`_`)
+- Must begin with a letter or underscore
+- Can be marked as required or optional
+
+Reference an argument using Go template syntax:
 
 ```text
 Summarize the support case for {{.case_id}}.
 ```
 
-Messages can have a `user` or `assistant` role and can contain text or resource content. A rendered prompt can be up to 256 KB.
+When the prompt runs, `{{.case_id}}` is replaced with the value provided by the client.
 
-Save, enable, version, and publish the prompt before clients can use it.
+## Best practices
+
+- Give prompts clear, task-oriented names.
+- Keep each prompt focused on a single workflow.
+- Use arguments instead of hardcoded values whenever possible.
+- Write instructions that produce consistent results across different inputs.
+
+## Publishing changes
+
+Prompts become available to MCP clients only after you [publish a new version](/guides/versioning) of your MCP server.
+
+Draft prompts remain private until they're published, allowing you to review and test changes before making them available.

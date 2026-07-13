@@ -1,36 +1,90 @@
 ---
 title: Logs
-description: Review calls and changes without exposing secrets.
+description: Review activity and troubleshoot your MCP server.
 ---
 
-Open **Activity** to see operational activity and audit events.
+Logs help you understand what happened during tool execution and track changes made to your server, without exposing sensitive application data.
 
-Operational entries help you review calls. They can include the capability name, result, response time, data size, and time. Audit events show changes such as imports, edits, [publishing](/guides/versioning), pausing, and [custom domain](/guides/custom-domain) updates.
+Use logs to investigate errors, monitor activity, and correlate events with your upstream API.
+
+## Types of logs
+
+### Operational logs
+
+Operational logs record activity generated when MCP clients use your server.
+
+Depending on the request, a log entry may include:
+
+- Capability type, such as Tool, Resource, or Prompt
+- Capability name
+- Request time
+- Success or failure status
+- HTTP status code or MCP result
+- Response time
+- Request and response size
+- MCP client information, when available
+- Safe error details for troubleshooting
+
+These logs help you monitor server health without exposing application data.
+
+### Audit logs
+
+Audit logs track configuration changes made to your MCP server.
+
+Examples include:
+
+- Importing an [OpenAPI specification](/api-sources/openapi)
+- Editing [tools](/capabilities/tools), [resources](/capabilities/resources), or [prompts](/capabilities/prompts)
+- Publishing a [new version](/guides/versioning)
+- Pausing or resuming a server
+- Updating a [custom domain](/guides/custom-domain)
+- Changing server settings
+
+Audit logs provide a history of administrative actions performed on your server.
 
 ## What 0mcp stores
 
-0mcp stores only the details needed to show server health and usage. These details can include:
+0mcp stores only the operational metadata needed to monitor usage and troubleshoot problems.
 
-- Request time
-- Capability type and name
-- HTTP status code or MCP result
-- Success or failure state
+This includes information such as:
+
+- Timestamp
+- Capability name
+- Request outcome
+- Status code
 - Response time
 - Request and response size
-- MCP client information when available
-- Safe error details needed to understand a failure
+- Safe error details
 
-## What 0mcp does not store
+## What 0mcp does **not** store
 
-0mcp does not store your API request body, response body, request headers, authorization header, API key, or other credential values in activity logs. Your API remains the source of truth for its data.
+To help protect your application data, 0mcp does **not** store:
 
-This separation gives you useful status and performance information without copying private API data into the log history. See the [authentication model](/concepts/authentication-model) for how credentials pass through a request.
+- Request bodies
+- Response bodies
+- HTTP request headers
+- Authorization headers
+- Bearer tokens
+- API keys
+- Other authentication credentials
 
-## Find an issue
+Your upstream API remains the source of truth for application data and request history.
 
-1. Set a time range close to when the issue happened.
-2. Filter by capability type, name, status, or MCP client.
-3. Open the matching entry and note its result and time.
-4. Compare it with the upstream API logs for the same period.
+<Info>
+  Logs provide the status and performance details needed for monitoring without copying credentials or API payloads into 0mcp.
+</Info>
 
-If you need the exact upstream request body or headers for debugging, use your own API logs with suitable secret filtering and access controls.
+## Troubleshooting with logs
+
+When investigating an issue:
+
+1. Filter logs by the time the problem occurred.
+2. Narrow the results by capability, status, or MCP client.
+3. Review the matching log entry and its execution details.
+4. Compare the timestamp with your upstream API logs for deeper debugging.
+
+<Warning>
+  If you need to inspect the full HTTP request, request body, or authentication headers, use your own API logs with appropriate access controls and secret filtering.
+</Warning>
+
+Use [Analytics](/guides/analytics) when you need overall trends rather than details for a specific request.

@@ -1,17 +1,73 @@
 ---
 title: Tool discovery problems
-description: Fix missing or outdated tools in an MCP client.
+description: Troubleshoot missing or outdated tools in your MCP client.
 ---
 
-If the server connects but tools are missing, check the published version first.
+If your client connects successfully but doesn't show the tools you expect, the issue is usually related to publishing, tool configuration, or the client's cached capability list.
 
-1. Open **Tools** and confirm the tool is enabled.
-2. Open **Versions** and confirm the version containing that tool is published.
-3. Check that import selection included the API operation.
-4. Fix duplicate or invalid tool names.
-5. Reconnect the client so it lists tools again.
-6. Check whether the client hides tools that have an unsupported input shape.
+## 1. Verify the tool is enabled
 
-Draft edits are not visible at the live endpoint. Creating a version is also not enough by itself. You must publish it.
+Open [**Tools**](/capabilities/tools) and confirm that the tool is enabled.
 
-If an old tool remains, stop the MCP server in the client, start it again, and open a new conversation or session.
+Disabled tools aren't advertised to MCP clients.
+
+## 2. Check the published version
+
+Only the [**published version**](/guides/versioning) of your MCP server is visible to connected clients.
+
+If you've recently added or edited a tool, make sure the version containing those changes has been published.
+
+Saving a draft or creating a version alone isn't enough.
+
+<Warning>
+  A saved draft does not update the tools available at the live MCP endpoint. You must publish the version that contains the changes.
+</Warning>
+
+## 3. Confirm the API operation was imported
+
+If a tool doesn't exist at all, verify that the corresponding API operation was selected during the [OpenAPI import](/api-sources/openapi).
+
+Operations that weren't imported won't appear as MCP tools.
+
+## 4. Review the tool configuration
+
+Check that the tool has:
+
+- A valid name
+- A clear description
+- No duplicate tool names
+
+Invalid or conflicting tool definitions can prevent clients from displaying them correctly.
+
+## 5. Refresh the client
+
+Many MCP clients cache the list of available capabilities.
+
+After publishing changes:
+
+- Restart or reconnect the MCP server.
+- Refresh the tool list if your client supports it.
+- Start a new conversation or session if tools still don't appear.
+
+<Note>
+  Reconnecting forces the client to request the published capability list again.
+</Note>
+
+## 6. Check client compatibility
+
+Some MCP clients may not support every possible input schema.
+
+If a tool has a complex or unsupported input shape, the client may choose not to display it.
+
+Review your tool's input definition and, if possible, simplify it.
+
+## Still missing?
+
+If the tool still doesn't appear:
+
+1. Confirm the latest version is published.
+2. Verify the tool is enabled.
+3. Reconnect the client.
+4. Check [**Logs**](/guides/logs) to confirm the client successfully refreshed the server's capabilities.
+
+If the client is connected but continues to display an outdated tool list, completely remove the MCP server from the client, add it again using [Client setup](/guides/setup), and start a new conversation.

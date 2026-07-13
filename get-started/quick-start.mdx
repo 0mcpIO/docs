@@ -1,21 +1,54 @@
 ---
 title: Quick start
-description: Create and connect your first 0mcp server.
+description: Create, publish, and connect your first MCP server in just a few minutes.
 ---
 
 ## Before you begin
 
-You need a 0mcp account and an [OpenAPI 3.x or Swagger 2.0 document](/api-sources/openapi) in JSON or YAML. The document can be a file, pasted text, or a public URL. Files must be 10 MB or smaller.
+You'll need:
 
-<Steps>
-  <Step title="Create a server">Open the dashboard, choose **Create server**, and enter a clear name.</Step>
-  <Step title="Add your OpenAPI document">Choose file, URL, or paste. 0mcp checks the document and shows the API operations it found.</Step>
-  <Step title="Choose tools">Clear any operation that the client should not use. Open a tool to improve its name or description, then choose **Create MCP Server**.</Step>
-  <Step title="Publish a version">Open **Versions** and publish the imported version. A client can only see capabilities from the published version. Learn how drafts and live versions differ in [Versioning](/guides/versioning).</Step>
-  <Step title="Try it in the playground">Open **Playground**, add a credential if your API needs one, and call a simple read-only tool. Review the [authentication model](/concepts/authentication-model) before adding a secret.</Step>
-  <Step title="Connect a client">Open **Setup**, select your client, and copy the generated command or configuration. Add any listed environment variables, then restart or reconnect the client.</Step>
-</Steps>
+- A 0mcp account
+- An [**OpenAPI 3.x** or **Swagger 2.0** specification](/api-sources/openapi)
+- Your API specification in **JSON** or **YAML** format
 
-<Warning>Do not put real credentials in a shared configuration file. Use the environment variable or secure input shown on the Setup page.</Warning>
+You can import your specification from a **file**, **public URL**, or **pasted text**. Uploaded files must be **10 MB or smaller**.
 
-If setup fails, start with [MCP connection issues](/troubleshooting/mcp-connection-issues).
+## 1. Create a server
+
+From the dashboard, select **Create Server** and give your MCP server a descriptive name.
+
+## 2. Import your OpenAPI specification
+
+Upload a file, provide a public URL, or paste your specification.
+
+0mcp validates the document and automatically discovers the available API operations.
+
+## 3. Choose your tools
+
+Select which API operations should be exposed as [MCP tools](/capabilities/tools).
+
+You can also customize tool names and descriptions before creating your MCP server.
+
+## 4. Publish a version
+
+Open the **Versions** page and publish your server.
+
+Only the **published version** is visible to connected MCP clients. Any unpublished changes remain in draft until you publish them. Learn more in [Versioning](/guides/versioning).
+
+## 5. Test in the Playground
+
+Open the [**Playground**](/guides/playground) to verify that your server works as expected.
+
+If your API requires [authentication](/concepts/authentication-model), provide the appropriate credentials and test a read-only tool before connecting an AI client.
+
+## 6. Connect your client
+
+Open **Setup**, choose your MCP client, such as Claude Code, Cursor, Codex, or VS Code, and copy the generated configuration. See [Client setup](/guides/setup) for guidance.
+
+Add any required environment variables, then restart or reconnect your client.
+
+<Warning>
+  **Security tip:** Never store production API credentials in shared configuration files. Use the environment variables or secure credential inputs recommended on the **Setup** page.
+</Warning>
+
+If you run into connection problems, see the [MCP connection troubleshooting guide](/troubleshooting/mcp-connection-issues).

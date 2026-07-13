@@ -1,19 +1,60 @@
 ---
 title: Playground
-description: Try your published server before connecting another client.
+description: Test your MCP server before connecting an AI client.
 ---
 
-The playground is a chat screen for trying tools, resources, and prompts from your published version.
+The **Playground** lets you interact with your published MCP server through a chat interface. It's the fastest way to verify that your [tools](/capabilities/tools), [resources](/capabilities/resources), and [prompts](/capabilities/prompts) behave as expected before using them in applications like Claude Code or Cursor.
 
-## Use the playground
+## Before you start
 
-1. Publish a version of your server.
-2. Open **Playground** from the server menu.
-3. Open settings and add an AI provider key if requested.
-4. Add the upstream API credential required by your tools.
-5. Ask for a simple task, such as listing one record.
-6. Open the playground logs to review the MCP calls.
+Before using the Playground, make sure you have:
 
-Start with a read-only tool. Check the input and result before trying an operation that creates, updates, or deletes data.
+- Published a version of your MCP server
+- An AI provider API key, if required
+- Any upstream API credentials needed by your tools
 
-<Note>The AI provider key stays in browser session storage. 0mcp does not save playground credentials or request payloads in activity records.</Note>
+## Using the Playground
+
+1. Publish your MCP server.
+2. Open **Playground** from your server.
+3. Add your AI provider API key if prompted.
+4. Provide any required upstream API credentials.
+5. Start chatting and invoke your tools, resources, or prompts.
+6. Review the execution logs to see how each MCP request was processed.
+
+<Note>
+  The Playground always uses the **currently published version** of your MCP server. Draft changes are not available until you [publish a new version](/guides/versioning).
+</Note>
+
+## What you can test
+
+The Playground supports everything available in your published server, including:
+
+- Tools
+- Resources
+- Prompts
+
+This allows you to verify behavior before connecting external MCP clients.
+
+## Best practices
+
+- Start by testing read-only tools.
+- Verify tool inputs and outputs before exposing write operations.
+- Confirm [authentication](/concepts/authentication-model) is working correctly.
+- Review [execution logs](/guides/logs) when troubleshooting unexpected results.
+
+<Warning>
+  Test operations that create, update, delete, send, or charge data with a limited test account before using production credentials.
+</Warning>
+
+## Privacy
+
+Your credentials stay under your control.
+
+- AI provider API keys are stored only in your browser's session storage.
+- Upstream API credentials are used only to execute requests.
+- 0mcp does not store Playground credentials, request payloads, or response payloads as activity data.
+
+<Info>
+  Activity records keep only the operational details needed for usage and troubleshooting, such as status, response time, capability name, and data size.
+</Info>
