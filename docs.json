@@ -4,7 +4,10 @@
   "name": "0mcp",
   "description": "Learn how to turn an API into a hosted MCP server with 0mcp.",
   "colors": { "primary": "#E78468", "light": "#E78468", "dark": "#E78468" },
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/favicon-light.svg",
+    "dark": "/favicon-dark.svg"
+  },
   "icons": { "library": "lucide" },
   "styling": { "eyebrows": "breadcrumbs" },
   "appearance": { "default": "dark", "strict": true },
