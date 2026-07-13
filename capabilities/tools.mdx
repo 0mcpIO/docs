@@ -14,10 +14,10 @@ Open **Tools**, then select a tool. You can:
 - Rename it or improve its description
 - Enable or disable it
 - Review its inputs and request body
-- Set its authentication
+- Set its [authentication](/concepts/authentication-model)
 - Set a timeout and maximum response size
 - Allow or block redirects
 
 Use short action names such as `get_order` or `create_ticket`. Avoid exposing delete or payment operations until you have checked their inputs and access rules.
 
-After changes, create and publish a new version before clients can see them.
+After changes, create and publish a [new version](/guides/versioning) before clients can see them. Use the [Playground](/guides/playground) to try a read-only call before connecting another client.

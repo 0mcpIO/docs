@@ -5,13 +5,13 @@ description: Fix a client that cannot connect to your server.
 
 Check these items in order:
 
-1. Confirm the server has a published version.
+1. Confirm the server has a [published version](/guides/versioning).
 2. Confirm serving is not paused.
 3. Copy the endpoint again from **Setup**.
 4. Make sure the client is using Streamable HTTP, not a local command or old transport type.
-5. Check required environment variables and headers.
+5. Check the required [authentication environment variables and headers](/concepts/authentication-model).
 6. Restart or reconnect the MCP client.
-7. Open **Activity** and look for a request at the same time.
+7. Open **Activity** and use the [Logs guide](/guides/logs) to look for a request at the same time.
 
 No activity entry usually means the request never reached 0mcp. Check the client config, DNS, and network. A `404` can mean the hostname or endpoint is wrong. A `503` can mean serving is paused.
 

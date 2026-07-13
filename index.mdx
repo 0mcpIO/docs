@@ -1,15 +1,67 @@
 ---
 title: 0mcp documentation
-description: Turn your API into a hosted MCP server that AI apps can use.
+description: Your blueprint for turning an API into a safe, hosted MCP server.
 mode: frame
 ---
 
-# Connect your API to AI apps
+# Build your MCP server with a clear plan
 
-0mcp reads your OpenAPI document and creates a hosted MCP server. You choose which API operations become tools, publish a version, and connect it to an MCP client.
+0mcp turns an existing API into a hosted MCP server. Import an [OpenAPI document](/api-sources/openapi), choose the operations you want to share, publish a saved version, and connect an MCP client.
 
-<Card title="Read the introduction" icon="book-open" href="/get-started/introduction">
-  Learn what 0mcp does and find the right guide for your next step.
+<Note>OpenAPI 3.x and Swagger 2.0 imports are available now. Direct REST API, GraphQL, and Postman Collection imports are planned.</Note>
+
+## The 0mcp blueprint
+
+<Steps>
+  <Step title="Describe your API">
+    Start with an OpenAPI document that has a correct server URL, clear operation names, input rules, response types, and security schemes. See [OpenAPI specification](/api-sources/openapi) for the supported formats and import choices.
+  </Step>
+  <Step title="Choose what clients can use">
+    Review every detected operation. Expose only the actions a client needs, then improve each [tool name and description](/capabilities/tools) so its purpose is easy to understand.
+  </Step>
+  <Step title="Plan access before publishing">
+    Decide whether the API uses a Bearer token, header API key, or query API key. Learn how credentials pass from the caller to your API in the [authentication model](/concepts/authentication-model).
+  </Step>
+  <Step title="Publish a known version">
+    Save a version that contains your tools, resources, and prompts. Publishing makes that saved setup live. Read [Versioning](/guides/versioning) before changing a server used by others.
+  </Step>
+  <Step title="Try a safe request">
+    Use the [Playground](/guides/playground) with a simple read-only tool. Check its inputs and result before trying actions that create, update, or delete data.
+  </Step>
+  <Step title="Connect and watch">
+    Copy a client configuration from Setup, then use [Analytics](/guides/analytics) and [Logs](/guides/logs) to watch calls, errors, response time, and changes.
+  </Step>
+</Steps>
+
+## Choose your path
+
+<CardGroup cols={2}>
+  <Card title="I am new to MCP" icon="book-open" href="/concepts/what-is-mcp">
+    Learn clients, servers, tools, resources, and prompts in plain language.
+  </Card>
+  <Card title="I want a working server" icon="rocket" href="/get-started/quick-start">
+    Follow the shortest path from API document to connected client.
+  </Card>
+  <Card title="I need client setup" icon="plug" href="/guides/setup">
+    Connect Claude Code, Cursor, Codex, VS Code, or Windsurf.
+  </Card>
+  <Card title="I need to fix a problem" icon="wrench" href="/troubleshooting/mcp-connection-issues">
+    Check connection, authentication, import, and tool discovery issues.
+  </Card>
+</CardGroup>
+
+## What you can publish
+
+<CardGroup cols={3}>
+  <Card title="Tools" icon="wrench" href="/capabilities/tools">Actions created from selected API operations.</Card>
+  <Card title="Resources" icon="file-text" href="/capabilities/resources">Content that clients can read when needed.</Card>
+  <Card title="Prompts" icon="message-square" href="/capabilities/prompts">Reusable message templates with inputs.</Card>
+</CardGroup>
+
+## A safe first server
+
+For your first server, choose one or two read-only operations. Use a test account with limited access. Keep credentials in environment variables or secure client inputs. Publish only after the [Playground](/guides/playground) returns the result you expect. If something fails, use [Activity logs](/guides/logs) without placing secrets in your notes or screenshots.
+
+<Card title="Read common questions" icon="circle-help" href="/resources/faq">
+  Find answers about hosting, data, security, clients, usage, pricing, and plans.
 </Card>
-
-<Note>REST API, GraphQL, and Postman Collection imports are planned. OpenAPI import is available now.</Note>

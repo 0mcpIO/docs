@@ -5,7 +5,7 @@ description: Follow a request from your API document to your API.
 
 ## From import to a live server
 
-1. You add an OpenAPI document.
+1. You add a supported [OpenAPI document](/api-sources/openapi).
 2. 0mcp reads its server address, paths, methods, inputs, and response details.
 3. You select the operations that should become tools.
 4. 0mcp saves a version containing your tools, resources, and prompts.
@@ -14,8 +14,8 @@ description: Follow a request from your API document to your API.
 
 ## When a tool is called
 
-The client sends a tool name, its inputs, and any needed credential. 0mcp checks the inputs, builds the upstream API request, and sends it to the base URL from your API setup. The API response is returned to the client.
+The client sends a tool name, its inputs, and any needed credential. 0mcp checks the inputs, builds the upstream API request, and sends it to the base URL from your API setup. The API response is returned to the client. The [authentication model](/concepts/authentication-model) explains how Bearer tokens and API keys reach the upstream API.
 
 Calls follow the tool limits set in the dashboard, including timeout, maximum response size, and redirect settings.
 
-<Note>Editing a draft does not change the live endpoint. The endpoint uses the published version until you publish another one.</Note>
+<Note>Editing a draft does not change the live endpoint. The endpoint uses the published version until you publish another one. See [Versioning](/guides/versioning) for the full publish flow.</Note>

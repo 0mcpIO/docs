@@ -5,7 +5,26 @@ description: Review calls and changes without exposing secrets.
 
 Open **Activity** to see operational activity and audit events.
 
-Operational entries help you review calls. They can include the capability name, result, response time, data size, and time. Audit events show changes such as imports, edits, publishing, pausing, and domain updates.
+Operational entries help you review calls. They can include the capability name, result, response time, data size, and time. Audit events show changes such as imports, edits, [publishing](/guides/versioning), pausing, and [custom domain](/guides/custom-domain) updates.
+
+## What 0mcp stores
+
+0mcp stores only the details needed to show server health and usage. These details can include:
+
+- Request time
+- Capability type and name
+- HTTP status code or MCP result
+- Success or failure state
+- Response time
+- Request and response size
+- MCP client information when available
+- Safe error details needed to understand a failure
+
+## What 0mcp does not store
+
+0mcp does not store your API request body, response body, request headers, authorization header, API key, or other credential values in activity logs. Your API remains the source of truth for its data.
+
+This separation gives you useful status and performance information without copying private API data into the log history. See the [authentication model](/concepts/authentication-model) for how credentials pass through a request.
 
 ## Find an issue
 
@@ -14,4 +33,4 @@ Operational entries help you review calls. They can include the capability name,
 3. Open the matching entry and note its result and time.
 4. Compare it with the upstream API logs for the same period.
 
-0mcp keeps log data safe by leaving out credentials and request payloads. If you need the exact upstream request body, use your own API logs with suitable secret filtering.
+If you need the exact upstream request body or headers for debugging, use your own API logs with suitable secret filtering and access controls.

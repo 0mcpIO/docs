@@ -11,7 +11,7 @@ description: Learn how credentials move through 0mcp.
 - **Header API key:** Send the header named by the API, such as `X-API-Key`.
 - **Query API key:** The Setup page provides a safe gateway header. 0mcp turns it into the required query value for the upstream call.
 
-Authentication can apply to the whole server or to a single tool. The Setup page checks the published tools and lists the credentials your client must provide.
+Authentication can apply to the whole server or to a single [tool](/capabilities/tools). The Setup page checks the published tools and lists the credentials your client must provide.
 
 ## Safe setup
 
@@ -19,4 +19,4 @@ Keep secret values in environment variables or the client's secure input. Do not
 
 The playground keeps its AI provider key in browser session storage. Request payloads and credentials are not saved as activity data.
 
-<Warning>A valid 0mcp login does not replace the credential required by your upstream API.</Warning>
+<Warning>A valid 0mcp login does not replace the credential required by your upstream API. If a request is rejected, follow [Authentication errors](/troubleshooting/authentication-errors).</Warning>

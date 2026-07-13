@@ -5,14 +5,14 @@ description: Create and connect your first 0mcp server.
 
 ## Before you begin
 
-You need a 0mcp account and an OpenAPI 3.x or Swagger 2.0 document in JSON or YAML. The document can be a file, pasted text, or a public URL. Files must be 10 MB or smaller.
+You need a 0mcp account and an [OpenAPI 3.x or Swagger 2.0 document](/api-sources/openapi) in JSON or YAML. The document can be a file, pasted text, or a public URL. Files must be 10 MB or smaller.
 
 <Steps>
   <Step title="Create a server">Open the dashboard, choose **Create server**, and enter a clear name.</Step>
   <Step title="Add your OpenAPI document">Choose file, URL, or paste. 0mcp checks the document and shows the API operations it found.</Step>
   <Step title="Choose tools">Clear any operation that the client should not use. Open a tool to improve its name or description, then choose **Create MCP Server**.</Step>
-  <Step title="Publish a version">Open **Versions** and publish the imported version. A client can only see capabilities from the published version.</Step>
-  <Step title="Try it in the playground">Open **Playground**, add a credential if your API needs one, and call a simple read-only tool.</Step>
+  <Step title="Publish a version">Open **Versions** and publish the imported version. A client can only see capabilities from the published version. Learn how drafts and live versions differ in [Versioning](/guides/versioning).</Step>
+  <Step title="Try it in the playground">Open **Playground**, add a credential if your API needs one, and call a simple read-only tool. Review the [authentication model](/concepts/authentication-model) before adding a secret.</Step>
   <Step title="Connect a client">Open **Setup**, select your client, and copy the generated command or configuration. Add any listed environment variables, then restart or reconnect the client.</Step>
 </Steps>
 

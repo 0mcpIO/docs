@@ -1,36 +1,106 @@
 ---
 title: FAQ
-description: Short answers to common 0mcp questions.
+description: Answers about 0mcp, security, clients, usage, and plans.
 ---
 
-## Do I need to write MCP server code?
+## Product
 
-No. Import an OpenAPI document, choose capabilities, and publish a version.
+### What is 0mcp?
 
-## Which API formats work today?
+0mcp is a managed platform that turns an existing OpenAPI document into a hosted MCP server. It handles conversion, hosting, monitoring, and [versioning](/guides/versioning), so you do not need to build that server yourself.
 
-OpenAPI 3.x and Swagger 2.0 in JSON or YAML. Direct REST, GraphQL, and Postman Collection imports are planned.
+### What is MCP?
 
-## Where is the MCP server hosted?
+Model Context Protocol is a shared way for AI apps to discover and use outside capabilities. Read [What is MCP?](/concepts/what-is-mcp) for a plain explanation of clients, servers, tools, resources, and prompts.
 
-0mcp hosts it at the endpoint shown on the server Setup page. You can also connect a custom domain.
+### Do I need to change my existing API?
 
-## Does 0mcp store my upstream API key?
+No. Your API and its business rules stay in place. Import its [OpenAPI specification](/api-sources/openapi), choose the operations to expose, and publish them as MCP tools.
 
-The client provides upstream credentials with requests. 0mcp passes them to the upstream API and leaves them out of activity records.
+### Which API formats work today?
 
-## When do edits become live?
+0mcp accepts OpenAPI 3.x and Swagger 2.0 in JSON or YAML. You can upload a file, paste the document, or provide a public URL. Direct REST API, GraphQL, and Postman Collection imports are planned.
 
-After you create and publish a version. Draft changes do not change the live endpoint.
+### Can I expose only selected endpoints?
 
-## Can I stop calls without deleting the server?
+Yes. You choose exactly which operations become [tools](/capabilities/tools). Leave internal, administrative, payment, or sensitive operations out unless clients truly need them.
 
-Yes. Pause serving in server settings, then resume it when ready.
+### Can I create more than one MCP server?
 
-## Which clients can connect?
+Yes. You can create servers for different products, customers, partners, or teams. Each server has its own capabilities, published version, endpoint, and settings.
 
-The dashboard generates setup for Claude Code, Claude Desktop, Codex, VS Code, and Cursor. Other clients can connect if they support remote Streamable HTTP MCP servers and the needed headers.
+### Does 0mcp host the server?
 
-## Can one account have more than one workspace?
+Yes. 0mcp hosts the Streamable HTTP endpoint shown on the server Setup page. You can also connect a [custom domain](/guides/custom-domain).
 
-Yes. Servers and their activity belong to a workspace. Use the workspace switcher to move between them.
+### Which MCP clients can connect?
+
+0mcp provides setup for Claude Code, Claude Desktop, Cursor, Codex, and VS Code. Other clients can connect when they support remote Streamable HTTP servers and the required headers. Start with [Client setup](/guides/setup), then choose your app from the Setup group in the sidebar.
+
+### How quickly can I get started?
+
+A small, clear OpenAPI document can become a working server in minutes. Follow the [Quick start](/get-started/quick-start) to import, publish, try, and connect it.
+
+## Security and data
+
+### Does 0mcp store API request or response payloads?
+
+No. Your API remains the source of truth. 0mcp records safe operational details such as status, response time, data size, and errors for [Analytics](/guides/analytics) and [Logs](/guides/logs), without saving request or response payloads.
+
+### Does 0mcp store my upstream API key?
+
+Upstream credentials are provided by the caller for each request. 0mcp passes them to your API and leaves them out of activity records. Learn which headers are supported in the [authentication model](/concepts/authentication-model).
+
+### Can I keep my existing authentication and permissions?
+
+Yes. Your upstream API still decides what a Bearer token or API key can do. A valid 0mcp account does not give a caller extra access to your API.
+
+### Can I stop calls without deleting a server?
+
+Yes. Pause serving in the server settings. This stops calls without removing the server or changing its published version.
+
+### Is 0mcp suitable for a production API?
+
+0mcp includes managed hosting, saved versions, custom domains, authentication forwarding, analytics, and activity logs. Before production use, review every exposed tool, test with limited credentials, and follow the [safe first-server blueprint](/#a-safe-first-server).
+
+## Versions and usage
+
+### When do my edits become live?
+
+Draft edits do not change the endpoint. Create a version and publish it. Connected clients may need to reconnect before they see the new capability list. See [Versioning](/guides/versioning).
+
+### What counts as a capability use?
+
+One tool call, resource read, or prompt read counts as one capability use. The count works the same regardless of which compatible AI client made the request.
+
+### Are capability uses shared across servers and workspaces?
+
+Yes. Included capability uses are counted across the MCP servers and workspaces in the same account during the billing period.
+
+### Does 0mcp charge for each AI client?
+
+No. Usage is based on capabilities consumed, not the number of connected clients, users, or integrations.
+
+### Do unused included capabilities roll over?
+
+No. Included capabilities reset at the start of the next billing period.
+
+### What happens when I need more capabilities?
+
+You can purchase an additional capability pack for the current billing period without changing your main plan.
+
+## Plans and billing
+
+### Can I upgrade or downgrade my plan?
+
+Yes. Upgrades take effect immediately. Downgrades apply at the start of the next billing cycle.
+
+### Do I need a credit card to start?
+
+No. You can explore 0mcp without a credit card. Payment details are needed when you choose a paid plan.
+
+### Can I cancel at any time?
+
+Yes. After cancellation, the subscription remains active until the end of the current billing period.
+
+For current allowances, plan features, and prices, visit the [0mcp pricing page](https://0mcp.io/pricing).

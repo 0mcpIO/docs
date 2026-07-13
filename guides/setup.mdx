@@ -1,0 +1,27 @@
+---
+title: Client setup
+description: Choose a guide for connecting your MCP client to 0mcp.
+---
+
+Publish a server version before connecting a client. Then open **Setup** in the 0mcp dashboard to get the endpoint, configuration, and credential names for that server.
+
+## Choose your client
+
+Use the **Setup** group in the left sidebar to open the guide for:
+
+- Claude Code
+- Cursor
+- Codex
+- VS Code
+- Windsurf
+
+The dashboard generates configuration for Claude Code, Claude Desktop, Cursor, Codex, and VS Code. Windsurf can connect when its installed version supports remote Streamable HTTP MCP servers.
+
+## Before you connect
+
+1. Confirm that a [version is published](/guides/versioning).
+2. Review the required [authentication headers](/concepts/authentication-model).
+3. Keep secret values in environment variables or secure client inputs.
+4. Reconnect the client after changing its configuration.
+
+If the client cannot reach the server, follow [MCP connection issues](/troubleshooting/mcp-connection-issues). If it connects but shows no tools, follow [Tool discovery problems](/troubleshooting/tool-discovery-problems).
