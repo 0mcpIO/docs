@@ -1,0 +1,15 @@
+---
+title: Cursor
+description: Connect your published 0mcp server to Cursor.
+---
+
+Publish a server version and open **Setup**, then select **Cursor**.
+
+<Steps>
+  <Step title="Copy the configuration">Copy the generated `mcpServers` entry. It includes your hosted endpoint and credential mapping.</Step>
+  <Step title="Choose where it applies">Add it to `.cursor/mcp.json` for one project or `~/.cursor/mcp.json` for your user account.</Step>
+  <Step title="Set credentials">Set the environment variables listed in Setup. Do not place secret values in the JSON file.</Step>
+  <Step title="Restart Cursor">Open Cursor settings, choose **MCP**, and confirm that the server is enabled.</Step>
+</Steps>
+
+You can also register the endpoint through **Cursor Settings > MCP**. Use the values shown by 0mcp instead of typing the endpoint from memory.

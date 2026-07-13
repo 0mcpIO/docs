@@ -1,0 +1,18 @@
+---
+title: What is MCP?
+description: Understand MCP in plain language.
+---
+
+Model Context Protocol, or MCP, is a shared way for AI apps to connect to outside systems. It gives clients a standard way to list and use tools, resources, and prompts.
+
+Think of MCP as a common plug. An AI app does not need a different custom connection for every service. It connects to an MCP server and asks what is available.
+
+## The main parts
+
+- **Client:** The app you use, such as Claude Code, Codex, Cursor, or VS Code.
+- **Server:** The service that offers capabilities. 0mcp hosts this part for you.
+- **Tool:** An action the client can call, such as getting an order.
+- **Resource:** Content the client can read, such as support rules.
+- **Prompt:** A reusable message template with optional inputs.
+
+0mcp uses Streamable HTTP, so clients connect to a hosted web address. You do not need to keep a local process running.

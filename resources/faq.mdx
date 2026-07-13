@@ -1,0 +1,36 @@
+---
+title: FAQ
+description: Short answers to common 0mcp questions.
+---
+
+## Do I need to write MCP server code?
+
+No. Import an OpenAPI document, choose capabilities, and publish a version.
+
+## Which API formats work today?
+
+OpenAPI 3.x and Swagger 2.0 in JSON or YAML. Direct REST, GraphQL, and Postman Collection imports are planned.
+
+## Where is the MCP server hosted?
+
+0mcp hosts it at the endpoint shown on the server Setup page. You can also connect a custom domain.
+
+## Does 0mcp store my upstream API key?
+
+The client provides upstream credentials with requests. 0mcp passes them to the upstream API and leaves them out of activity records.
+
+## When do edits become live?
+
+After you create and publish a version. Draft changes do not change the live endpoint.
+
+## Can I stop calls without deleting the server?
+
+Yes. Pause serving in server settings, then resume it when ready.
+
+## Which clients can connect?
+
+The dashboard generates setup for Claude Code, Claude Desktop, Codex, VS Code, and Cursor. Other clients can connect if they support remote Streamable HTTP MCP servers and the needed headers.
+
+## Can one account have more than one workspace?
+
+Yes. Servers and their activity belong to a workspace. Use the workspace switcher to move between them.

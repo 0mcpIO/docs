@@ -1,0 +1,16 @@
+---
+title: Windsurf
+description: Connect a 0mcp endpoint to Windsurf.
+---
+
+0mcp does not currently generate a Windsurf-specific configuration in the Setup screen. You can still connect if your Windsurf version supports remote Streamable HTTP MCP servers.
+
+## What you need
+
+- The endpoint shown on your server's **Setup** page
+- The authentication headers and environment variables shown there
+- A published server version
+
+Open Windsurf's MCP settings and add a remote HTTP server using those values. Keep credentials in environment variables or secure inputs, then reload Windsurf and check its MCP server list.
+
+<Warning>Windsurf setup can differ by app version. If your version only accepts local command servers, do not try to place a remote URL in a command field. Use a supported bridge or another client until remote HTTP setup is available.</Warning>

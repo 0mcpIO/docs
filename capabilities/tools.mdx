@@ -1,0 +1,23 @@
+---
+title: Tools
+description: Turn API operations into actions an MCP client can call.
+---
+
+A tool is an action available to an MCP client. During OpenAPI import, 0mcp creates one tool for each selected API operation.
+
+Each tool includes a name, description, HTTP method, path, inputs, request body, and response details. Clear names and descriptions help the client choose the right tool.
+
+## Manage a tool
+
+Open **Tools**, then select a tool. You can:
+
+- Rename it or improve its description
+- Enable or disable it
+- Review its inputs and request body
+- Set its authentication
+- Set a timeout and maximum response size
+- Allow or block redirects
+
+Use short action names such as `get_order` or `create_ticket`. Avoid exposing delete or payment operations until you have checked their inputs and access rules.
+
+After changes, create and publish a new version before clients can see them.

@@ -1,0 +1,22 @@
+---
+title: Authentication model
+description: Learn how credentials move through 0mcp.
+---
+
+0mcp uses caller-provided credentials. The MCP client sends the credential with each request, and 0mcp passes it to the upstream API.
+
+## Supported patterns
+
+- **Bearer or OAuth token:** Send `Authorization: Bearer YOUR_TOKEN`.
+- **Header API key:** Send the header named by the API, such as `X-API-Key`.
+- **Query API key:** The Setup page provides a safe gateway header. 0mcp turns it into the required query value for the upstream call.
+
+Authentication can apply to the whole server or to a single tool. The Setup page checks the published tools and lists the credentials your client must provide.
+
+## Safe setup
+
+Keep secret values in environment variables or the client's secure input. Do not paste them into a repository or shared screenshot.
+
+The playground keeps its AI provider key in browser session storage. Request payloads and credentials are not saved as activity data.
+
+<Warning>A valid 0mcp login does not replace the credential required by your upstream API.</Warning>

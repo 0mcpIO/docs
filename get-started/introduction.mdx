@@ -1,0 +1,39 @@
+---
+title: Introduction
+description: Learn what 0mcp does and when to use it.
+---
+
+0mcp turns an existing API into a hosted [Model Context Protocol](https://modelcontextprotocol.io/) server. This lets an MCP client, such as Claude Code or Cursor, find and call your API operations as tools.
+
+You do not need to build or host a separate MCP server. Give 0mcp an OpenAPI 3.x or Swagger 2.0 document, review the operations, and publish the ones you want to share.
+
+## What you get
+
+- A hosted MCP endpoint
+- Tools made from selected API operations
+- Resources for fixed content
+- Prompts with reusable inputs
+- Saved versions that you can publish or restore
+- Usage numbers and activity logs
+- A playground for trying capabilities before client setup
+
+## What you keep
+
+Your upstream API stays in place. The client sends the needed Bearer token or API key when it makes a request. 0mcp passes that value to your API for the call.
+
+## Explore the docs
+
+<CardGroup cols={2}>
+  <Card title="Start in minutes" icon="rocket" href="/get-started/quick-start">
+    Import an API and connect your first client.
+  </Card>
+  <Card title="Understand 0mcp" icon="book-open" href="/concepts/how-0mcp-works">
+    See what happens from import to tool call.
+  </Card>
+  <Card title="Set up a client" icon="plug" href="/guides/setup/claude-code">
+    Connect Claude Code, Cursor, Codex, VS Code, or Windsurf.
+  </Card>
+  <Card title="Fix a problem" icon="wrench" href="/troubleshooting/mcp-connection-issues">
+    Find quick checks for common setup problems.
+  </Card>
+</CardGroup>

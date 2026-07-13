@@ -1,0 +1,22 @@
+---
+title: OpenAPI specification
+description: Import an OpenAPI 3.x or Swagger 2.0 document.
+---
+
+OpenAPI is the supported way to create a 0mcp server today. 0mcp accepts OpenAPI 3.x and Swagger 2.0 in JSON or YAML.
+
+## Add a document
+
+Create a server and choose one source:
+
+- **File:** Upload a `.json`, `.yaml`, or `.yml` file up to 10 MB.
+- **URL:** Enter a public URL starting with `http://` or `https://`.
+- **Paste:** Paste the full JSON or YAML document.
+
+0mcp shows the detected version, base URL, and operations before import. Review this preview carefully. Select only the operations you want clients to use, and edit unclear tool names or descriptions.
+
+## Write a useful document
+
+Give every operation a unique `operationId` and a plain description. Define required inputs, request bodies, security schemes, and response types. Make sure the server URL points to the API that should receive calls.
+
+See [Invalid OpenAPI](/troubleshooting/invalid-openapi) if the preview fails.

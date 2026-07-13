@@ -1,0 +1,18 @@
+---
+title: Custom domain
+description: Serve your MCP endpoint from your own domain.
+---
+
+A custom domain gives your MCP server an address under a domain you control.
+
+## Connect a domain
+
+1. Open your server and go to **Settings**.
+2. Find **Custom domain** and enter the full hostname, such as `mcp.example.com`.
+3. Copy the DNS record shown by 0mcp into your DNS provider.
+4. Return to 0mcp and wait for the status to show that the domain is active.
+5. Update your client configuration with the custom endpoint shown in **Setup**.
+
+DNS updates can take time. Keep the record unproxied while ownership and certificate setup are being checked, unless the dashboard tells you otherwise.
+
+Use a hostname only for one server. If setup fails, check for an old record with the same name and make sure you entered a hostname, not a path or full page URL.

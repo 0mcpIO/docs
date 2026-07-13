@@ -1,0 +1,19 @@
+---
+title: Claude Code
+description: Connect your published 0mcp server to Claude Code.
+---
+
+## Before you begin
+
+Publish a server version, then open **Setup** in 0mcp and select **Claude Code**. The page creates a command for your server and its authentication needs.
+
+<Steps>
+  <Step title="Choose a scope">Use project scope to share the server through `.mcp.json`. Use user scope to make it available across your own projects.</Step>
+  <Step title="Set credentials">Set each environment variable listed by 0mcp. Keep its value out of source control.</Step>
+  <Step title="Run the command">Copy and run the generated Claude Code CLI command.</Step>
+  <Step title="Approve the server">Start Claude Code, enter `/mcp`, and approve the new connection.</Step>
+</Steps>
+
+If you edit configuration by hand, use the exact server URL, header names, and environment variable names from Setup. Reconnect after any change.
+
+See [Tool discovery problems](/troubleshooting/tool-discovery-problems) if the server connects but tools are missing.

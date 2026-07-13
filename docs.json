@@ -2,106 +2,25 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "0mcp",
-  "description": "Step-by-step guides for every product—platform setup, analytics, and integrations in one place.",
-  "colors": {
-    "primary": "#E78468",
-    "light": "#8DCDFF",
-    "dark": "#E78468"
-  },
+  "description": "Learn how to turn an API into a hosted MCP server with 0mcp.",
+  "colors": { "primary": "#E78468", "light": "#E78468", "dark": "#E78468" },
   "favicon": "/favicon.svg",
-  "icons": {
-    "library": "lucide"
-  },
-  "styling": {
-    "eyebrows": "breadcrumbs"
-  },
-  "appearance": {
-    "default": "dark",
-    "strict": true
-  },
-  "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "assistant",
-      "mcp",
-      "add-mcp"
-    ]
-  },
+  "icons": { "library": "lucide" },
+  "styling": { "eyebrows": "breadcrumbs" },
+  "appearance": { "default": "dark", "strict": true },
+  "contextual": { "options": ["copy", "view", "assistant", "mcp", "add-mcp"] },
   "navigation": {
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Home",
-          "icon": "house",
-          "href": "/"
-        },
-        {
-          "anchor": "Changelog",
-          "icon": "scroll-text",
-          "href": "https://www.mintlify.com/docs/changelog"
-        },
-        {
-          "anchor": "Help",
-          "icon": "life-buoy",
-          "href": "https://www.mintlify.com/docs/contact-support"
-        }
-      ]
-    },
-    "directory": "card",
     "groups": [
-      {
-        "group": "Platform",
-        "icon": "layers",
-        "expanded": true,
-        "pages": [
-          "platform/quickstart",
-          "platform/key-concepts",
-          "platform/configuration/settings",
-          "platform/configuration/user-management",
-          "platform/administration/roles-permissions"
-        ]
-      },
-      {
-        "group": "Analytics",
-        "icon": "chart-bar",
-        "expanded": true,
-        "pages": [
-          "analytics/quickstart",
-          "analytics/connect-data",
-          "analytics/dashboards/create-dashboard",
-          "analytics/reports/scheduled-reports"
-        ]
-      },
-      {
-        "group": "Integrations",
-        "icon": "plug",
-        "expanded": true,
-        "pages": [
-          "integrations/quickstart",
-          "integrations/authentication",
-          "integrations/connectors/crm",
-          "integrations/webhooks/configure"
-        ]
-      }
+      { "group": "Get started", "icon": "rocket", "expanded": true, "pages": ["get-started/introduction", "get-started/why-0mcp", "get-started/quick-start"] },
+      { "group": "Concepts", "icon": "book-open", "pages": ["concepts/what-is-mcp", "concepts/how-0mcp-works", "concepts/authentication-model"] },
+      { "group": "Capabilities", "icon": "blocks", "pages": ["capabilities/tools", "capabilities/resources", "capabilities/prompts"] },
+      { "group": "API sources", "icon": "file-code", "pages": ["api-sources/openapi", "api-sources/rest-api", "api-sources/graphql", "api-sources/postman"] },
+      { "group": "Guides", "icon": "map", "pages": ["guides/playground", "guides/custom-domain", "guides/analytics", "guides/logs", "guides/versioning", { "group": "Setup", "pages": ["guides/setup/claude-code", "guides/setup/cursor", "guides/setup/codex", "guides/setup/vscode", "guides/setup/windsurf"] }] },
+      { "group": "Troubleshooting", "icon": "wrench", "pages": ["troubleshooting/authentication-errors", "troubleshooting/invalid-openapi", "troubleshooting/mcp-connection-issues", "troubleshooting/tool-discovery-problems"] },
+      { "group": "Resources", "icon": "library", "pages": ["resources/faq", "resources/tutorials", "resources/blog"] }
     ]
   },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/0mcpIO",
-      "linkedin": "https://www.linkedin.com/company/0mcp"
-    }
-  }
+  "logo": { "light": "/logo/light.svg", "dark": "/logo/dark.svg" },
+  "navbar": { "links": [], "primary": { "type": "button", "label": "Dashboard", "href": "https://0mcp.io/dashboard" } },
+  "footer": { "socials": { "x": "https://x.com/0mcpIO", "linkedin": "https://www.linkedin.com/company/0mcp" } }
 }

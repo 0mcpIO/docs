@@ -1,0 +1,21 @@
+---
+title: Resources
+description: Share content that clients can read.
+---
+
+A resource is content an MCP client can read without calling an API operation. It works well for product notes, policies, reference data, or instructions that change rarely.
+
+Open **Resources** and choose **New resource**. Add a unique URI, a name, a description, a content type, and the content itself. Resources can contain text or base64-encoded file data.
+
+You can also set a MIME type, audience, priority, and last updated value. These details help clients understand the content.
+
+## Good resource URIs
+
+Use a stable URI that explains the content:
+
+```text
+docs://support/refund-policy
+company://handbook/security
+```
+
+Enable the resource, save it, create a version, and publish that version. Disabled resources are not shown to connected clients.

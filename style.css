@@ -4,10 +4,10 @@
   --default-border-color: var(--gray-200);
   --docs-dashboard-bg: #0b0b0b;
   --docs-dashboard-sidebar: #0b0b0b;
-  --docs-dashboard-surface: #101010;
+  --docs-dashboard-surface: #171717;
   --docs-dashboard-surface-raised: #171717;
-  --docs-dashboard-border: rgb(255 255 255 / 0.1);
-  --docs-dashboard-border-strong: rgb(255 255 255 / 0.16);
+  --docs-dashboard-border: #171717;
+  --docs-dashboard-border-strong: #171717;
   --docs-dashboard-text: #f4f4f5;
   --docs-dashboard-muted: #a3a3a3;
   --docs-dashboard-subtle: #737373;
@@ -330,6 +330,17 @@ img.nav-logo {
 [data-component-part='card-content-container'] {
   border-color: var(--docs-dashboard-border) !important;
   box-shadow: none !important;
+}
+
+#content :is(.card, [data-component-part='card-content-container']) {
+  background-color: var(--docs-dashboard-surface) !important;
+}
+
+#content a.card:hover,
+#content a:has(> [data-component-part='card-content-container']):hover
+  [data-component-part='card-content-container'] {
+  background-color: var(--docs-dashboard-surface-raised) !important;
+  border-color: var(--docs-dashboard-border-strong) !important;
 }
 
 #content-area,

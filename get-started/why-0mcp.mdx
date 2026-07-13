@@ -1,0 +1,22 @@
+---
+title: Why 0mcp?
+description: See why 0mcp is a simple path from an API to MCP.
+---
+
+Building an MCP server by hand means mapping every API operation, handling input rules, hosting the server, and keeping it in sync as the API changes. 0mcp handles that work from your API description.
+
+## Use what you already have
+
+Your OpenAPI document already explains paths, methods, inputs, and responses. 0mcp uses it to create tool definitions, so you do not repeat the same work.
+
+## Stay in control
+
+You choose which operations are exposed. You can rename tools, improve their descriptions, pause serving, and publish a known version. Draft changes do not affect connected clients until you publish them.
+
+## Keep credentials with the caller
+
+Clients provide upstream credentials at request time. This avoids copying a shared API secret into the server setup.
+
+## See what is happening
+
+The dashboard shows calls, errors, response time, data size, and change history. This helps you find issues without reading server code.

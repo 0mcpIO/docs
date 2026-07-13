@@ -1,0 +1,15 @@
+---
+title: Codex
+description: Connect your published 0mcp server to Codex.
+---
+
+Publish a version, open **Setup**, and select **Codex**. 0mcp provides both a CLI command and TOML configuration.
+
+<Steps>
+  <Step title="Choose a method">Use the generated CLI command for the quickest setup, or copy the TOML block for manual setup.</Step>
+  <Step title="Choose a scope">Use `~/.codex/config.toml` for your user account or `.codex/config.toml` for one project.</Step>
+  <Step title="Set credentials">Set every environment variable listed by 0mcp before starting Codex.</Step>
+  <Step title="Reconnect">Restart Codex or reopen your IDE session, then confirm that the server appears in the MCP list.</Step>
+</Steps>
+
+Keep any existing TOML entries when adding the new server block. If the file already has a block with the same name, update it instead of creating a duplicate.

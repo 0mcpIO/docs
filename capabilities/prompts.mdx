@@ -1,0 +1,22 @@
+---
+title: Prompts
+description: Create reusable message templates for MCP clients.
+---
+
+A prompt is a reusable set of messages. It can ask for inputs and place those values into a template. Prompts help users start a common task in the same way each time.
+
+Open **Prompts** and choose **New prompt**. Add a name, title, description, arguments, and one or more messages.
+
+## Arguments
+
+Argument names can use letters, numbers, and underscores. They must start with a letter or underscore. Mark an argument as required when the prompt cannot work without it.
+
+Use an argument in text with Go template syntax:
+
+```text
+Summarize the support case for {{.case_id}}.
+```
+
+Messages can have a `user` or `assistant` role and can contain text or resource content. A rendered prompt can be up to 256 KB.
+
+Save, enable, version, and publish the prompt before clients can use it.

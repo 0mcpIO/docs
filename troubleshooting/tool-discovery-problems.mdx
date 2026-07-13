@@ -1,0 +1,17 @@
+---
+title: Tool discovery problems
+description: Fix missing or outdated tools in an MCP client.
+---
+
+If the server connects but tools are missing, check the published version first.
+
+1. Open **Tools** and confirm the tool is enabled.
+2. Open **Versions** and confirm the version containing that tool is published.
+3. Check that import selection included the API operation.
+4. Fix duplicate or invalid tool names.
+5. Reconnect the client so it lists tools again.
+6. Check whether the client hides tools that have an unsupported input shape.
+
+Draft edits are not visible at the live endpoint. Creating a version is also not enough by itself. You must publish it.
+
+If an old tool remains, stop the MCP server in the client, start it again, and open a new conversation or session.

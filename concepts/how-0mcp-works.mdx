@@ -1,0 +1,21 @@
+---
+title: How 0mcp works
+description: Follow a request from your API document to your API.
+---
+
+## From import to a live server
+
+1. You add an OpenAPI document.
+2. 0mcp reads its server address, paths, methods, inputs, and response details.
+3. You select the operations that should become tools.
+4. 0mcp saves a version containing your tools, resources, and prompts.
+5. You publish that version.
+6. Your MCP client connects to the hosted endpoint and lists its capabilities.
+
+## When a tool is called
+
+The client sends a tool name, its inputs, and any needed credential. 0mcp checks the inputs, builds the upstream API request, and sends it to the base URL from your API setup. The API response is returned to the client.
+
+Calls follow the tool limits set in the dashboard, including timeout, maximum response size, and redirect settings.
+
+<Note>Editing a draft does not change the live endpoint. The endpoint uses the published version until you publish another one.</Note>

@@ -1,0 +1,18 @@
+---
+title: Invalid OpenAPI
+description: Fix documents that cannot be previewed or imported.
+---
+
+## Check the basics
+
+- Use JSON or YAML in a `.json`, `.yaml`, or `.yml` file.
+- Keep the file at 10 MB or smaller.
+- Include an `openapi` field for OpenAPI 3.x or a `swagger` field for Swagger 2.0.
+- Make sure JSON brackets and YAML spacing are valid.
+- Give operations unique names, preferably with `operationId`.
+- Check that referenced schemas exist and do not point in a broken loop.
+- Include a usable API server or base URL.
+
+If you import by URL, open the URL in a private browser window. It must be reachable by 0mcp and return the document itself, not a login page.
+
+Try a smaller document with one path if the error is unclear. Once it previews, add sections back until you find the invalid part.
