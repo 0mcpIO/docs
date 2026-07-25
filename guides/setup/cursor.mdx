@@ -1,9 +1,11 @@
 ---
 title: Cursor
-description: Connect your published 0mcp server to Cursor.
+description: Connect a published 0mcp server to Cursor with project or user-level MCP configuration, secure environment variables, and the hosted endpoint.
 ---
 
-Publish a server version and open **Setup**, then select **Cursor**.
+Publish a server version and open **Setup**, then select **[Cursor](https://docs.cursor.com/context/model-context-protocol)**.
+
+See [Client setup](/guides/setup) for the shared connection and credential workflow.
 
 <Steps>
   <Step title="Copy the configuration">Copy the generated `mcpServers` entry. It includes your hosted endpoint and credential mapping.</Step>
@@ -12,7 +14,7 @@ Publish a server version and open **Setup**, then select **Cursor**.
   <Step title="Restart Cursor">Open Cursor settings, choose **MCP**, and confirm that the server is enabled.</Step>
 </Steps>
 
-You can also register the endpoint through **Cursor Settings > MCP**. Use the values shown by 0mcp instead of typing the endpoint from memory.
+You can also register the endpoint through **Cursor Settings > MCP**. Use the values shown by [0mcp](https://0mcp.io) instead of typing the endpoint from memory.
 
 <Note>
   Project configuration can be shared with a repository. Keep secret values in environment variables, not in `.cursor/mcp.json`.

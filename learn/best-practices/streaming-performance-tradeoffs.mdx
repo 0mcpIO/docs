@@ -1,0 +1,152 @@
+---
+title: MCP streaming performance and transport trade-offs
+description: Understand MCP Streamable HTTP, SSE, stdio, progress updates, resumability, latency, scaling, and long-running operation trade-offs.
+---
+
+MCP does not define a general-purpose token streaming API. It defines transports and message patterns that can support incremental server-to-client communication, progress updates, and long-running work.
+
+For current remote servers, the standard transport is **[Streamable HTTP](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)**. Local process integrations commonly use **stdio**.
+
+## Compare the transports
+
+| Consideration | `stdio` | Streamable HTTP |
+| --- | --- | --- |
+| Best fit | Local server launched by a client | Remote or shared server |
+| Connection | Process input and output streams | HTTP POST with optional SSE |
+| Authentication | Usually local process controls | HTTP authorization |
+| Scaling | One process per client or configuration | Load balancers and shared infrastructure |
+| Logging | Use `stderr`; reserve `stdout` | Use server logs and MCP log notifications |
+| Network recovery | Process restart | Reconnect and optional SSE resumption |
+
+Choose the transport based on deployment location and operating model, not because one is always faster.
+
+## How Streamable HTTP works
+
+A client sends JSON-RPC messages to one MCP endpoint using HTTP POST. The server may return:
+
+- `application/json` for a single response, or
+- `text/event-stream` for an SSE stream containing protocol messages.
+
+A client may also send GET to open an SSE stream for server-initiated communication. A server can reject that GET with `405 Method Not Allowed` if it does not provide such a stream.
+
+The older standalone HTTP+SSE transport is deprecated. Do not describe it as the current remote transport.
+
+## What should stream?
+
+Streaming is useful when:
+
+- The server needs to send notifications over time.
+- An operation reports progress.
+- Results are delivered after variable latency.
+- A connection must carry server-initiated requests.
+- Resumability reduces the effect of a network interruption.
+
+Streaming adds limited value when a tool completes quickly and returns one small result. A normal JSON response is simpler and often cheaper.
+
+## Use progress notifications
+
+For a long operation, a requester can include a progress token. The receiver can send progress notifications associated with that token.
+
+Progress should be:
+
+- Monotonically increasing
+- Bounded by a total when known
+- Descriptive enough for the user
+- Rate-limited to avoid excessive traffic
+
+Progress does not replace a timeout, cancellation policy, or durable job model.
+
+## Consider tasks for durable work
+
+The MCP `2025-11-25` specification introduced tasks as an experimental feature for tracking deferred results through polling.
+
+Use tasks only when both sides support the feature and the operation benefits from durable state. Keep a fallback design for clients that do not support experimental tasks.
+
+## Understand the main performance costs
+
+### Connection and framing overhead
+
+Remote requests include HTTP headers, authentication, proxies, TLS, and possible SSE framing. Reuse connections where supported and avoid unnecessary round trips.
+
+### Tool discovery size
+
+Large tool catalogs consume context and slow selection. Expose a focused set of task-level [tools](/learn/core-concepts/tools) and keep descriptions concise.
+
+### Result size
+
+Large tool results increase serialization time, network transfer, model context use, and cost.
+
+Prefer:
+
+- Pagination
+- Filtering
+- Resource links
+- Summaries plus stable identifiers
+- Structured output containing only required fields
+
+### Upstream latency
+
+The MCP layer cannot make a slow REST or GraphQL operation fast. Measure MCP handling and upstream duration separately.
+
+### Logging volume
+
+Verbose logs and progress events can become a bottleneck. Use levels, sampling, aggregation, and retention policies.
+
+## Plan for backpressure and cancellation
+
+Protect the server when clients or upstream systems are slow:
+
+- Limit concurrent tool calls.
+- Bound queues and result sizes.
+- Apply per-tool deadlines.
+- Stop upstream work after cancellation when safe.
+- Avoid buffering an unbounded SSE stream in memory.
+- Close idle streams according to a documented policy.
+
+Return a clear overload or timeout response instead of allowing resource exhaustion.
+
+## Add resumability carefully
+
+Streamable HTTP can use SSE event IDs. After disconnection, a client can reconnect with `Last-Event-ID` to request messages after the last event it received.
+
+If you support resumption:
+
+- Generate unique event IDs.
+- Bind resumed streams to the correct authenticated session.
+- Store events for a bounded period.
+- Handle duplicate delivery safely.
+- Define what happens after the retention window.
+
+Do not treat a session identifier or event ID as authentication.
+
+## Scale remote servers
+
+A stateless server is easiest to load balance. If your implementation keeps session or resumability state, store it in a shared system or use an explicit affinity strategy.
+
+Measure:
+
+- Requests and active streams per instance
+- p50, p95, and p99 latency
+- Time to first response message
+- Stream duration and reconnect rate
+- Serialization and result sizes
+- Queue depth and rejected work
+- Upstream API latency and errors
+
+Load-test both short calls and long-lived streams.
+
+## Performance checklist
+
+- [ ] Transport matches the deployment model
+- [ ] Streamable HTTP uses the current MCP rules
+- [ ] Quick operations return simple responses
+- [ ] Long operations provide bounded progress or a supported task flow
+- [ ] Tool catalogs and results are kept focused
+- [ ] Timeouts, concurrency, queues, and sizes are limited
+- [ ] Cancellation stops unnecessary work
+- [ ] Resumption is authenticated and duplicate-safe
+- [ ] Performance is measured separately from upstream latency
+
+## Key takeaway
+
+**Use streaming for incremental communication and long-running work, not by default. Control tool size, result size, concurrency, backpressure, and reconnection behavior to protect performance.**

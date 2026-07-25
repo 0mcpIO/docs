@@ -1,0 +1,180 @@
+---
+title: Error handling and debugging for MCP servers
+description: Diagnose MCP connection, protocol, tool, transport, authentication, and upstream API errors with a repeatable debugging workflow.
+---
+
+Good [MCP error handling](https://modelcontextprotocol.io/docs/tools/debugging) tells the client what failed, whether it can recover, and what it should do next. Good debugging preserves the technical detail operators need without exposing it to the model or user.
+
+## Classify the error first
+
+| Error class | Example | Where to return or record it |
+| --- | --- | --- |
+| Protocol | Unknown JSON-RPC method | JSON-RPC error response |
+| Tool execution | Order ID is invalid | Tool result with `isError: true` |
+| Transport | HTTP connection closes | HTTP status, client log, and server log |
+| Authentication | Token is expired | HTTP auth response and safe client guidance |
+| Authorization | User cannot access the record | Safe tool or transport response and audit log |
+| Upstream | REST API returns `429` | Tool error plus internal dependency log |
+| Internal | Unhandled exception | Safe generic result plus detailed private log |
+
+This distinction matters. Protocol errors indicate that the MCP message itself cannot be processed. Tool execution errors describe a failure that the model may be able to correct.
+
+## Return actionable tool errors
+
+An expected operation failure should normally return a tool result that explains the safe next step:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "The order ID must start with ord_. Ask the user for a valid order ID."
+    }
+  ],
+  "isError": true
+}
+```
+
+An effective message contains:
+
+- What failed
+- Which input or state caused it
+- Whether retrying is useful
+- A safe corrective action
+
+Do not include stack traces, SQL text, access tokens, internal hostnames, or raw upstream responses.
+
+## Use protocol errors correctly
+
+Standard JSON-RPC errors include:
+
+| Code | Meaning |
+| --- | --- |
+| `-32700` | Parse error |
+| `-32600` | Invalid request |
+| `-32601` | Method not found |
+| `-32602` | Invalid protocol parameters |
+| `-32603` | Internal error |
+
+Use these for failures at the protocol layer. For example, an unknown MCP method is a protocol error. Invalid business input passed to a known tool is usually a tool execution error.
+
+## Preserve a private diagnostic record
+
+Return a safe message to the client and log the detailed failure internally:
+
+```json
+{
+  "level": "error",
+  "request_id": "req_8f31",
+  "method": "tools/call",
+  "tool": "get_order",
+  "error_category": "upstream_timeout",
+  "duration_ms": 5000,
+  "retryable": true
+}
+```
+
+Use the same request or trace identifier across the MCP server and upstream services. This lets support teams find the technical details without placing them in model-visible output.
+
+## Follow a repeatable debugging workflow
+
+1. Reproduce the smallest failing request.
+2. Confirm the server process or remote endpoint is reachable.
+3. Inspect the `initialize` exchange and negotiated capabilities.
+4. Test the server with [MCP Inspector](/learn/fundamentals/mcp-inspector-guide).
+5. Check client, server, and upstream logs using one correlation ID.
+6. Identify whether the failure is protocol, transport, auth, execution, or dependency related.
+7. Add a regression test before fixing the behavior.
+8. Retest in the target MCP client.
+
+Change one variable at a time. A small reproducible case is more useful than a complete conversation transcript.
+
+## Common connection failures
+
+### The local server does not start
+
+Check:
+
+- The command and executable exist.
+- File paths are absolute.
+- The working directory is not assumed.
+- Required environment variables are present.
+- The server has permission to access required files.
+- Dependencies are installed for the correct runtime.
+
+For `stdio`, never write ordinary logs to `stdout`. Use `stderr`.
+
+### The client connects but sees no tools
+
+Check:
+
+- The server declared the `tools` capability.
+- `tools/list` returns valid JSON-RPC.
+- Tool schemas are valid JSON Schema objects.
+- Tool names are unique.
+- Client and server protocol versions are compatible.
+- A startup exception did not stop tool registration.
+
+### A remote server disconnects
+
+Check HTTP status codes, TLS, proxy timeouts, `Origin` validation, session identifiers, authentication expiry, SSE handling, and load-balancer affinity if session state is local.
+
+## Debug authentication and authorization
+
+Separate identity failures from permission failures:
+
+- **Authentication:** Who is the caller?
+- **Authorization:** May that caller perform this operation on this object?
+
+Validate issuer, audience, expiry, signature, and scopes. Do not accept a token intended for another service. Log the safe reason for denial and never log the token itself.
+
+See [MCP authentication](/learn/security/authentication) and [MCP authorization](/learn/security/authorization).
+
+## Handle upstream API failures
+
+Normalize upstream behavior into stable MCP errors:
+
+| Upstream condition | Recommended behavior |
+| --- | --- |
+| Invalid input | Identify the correctable field |
+| Not found | State that the target does not exist |
+| Conflict | Explain the state conflict |
+| Rate limited | Include safe retry guidance when available |
+| Timeout | Mark as temporary and avoid unsafe automatic repeats |
+| Server failure | Return a generic temporary failure and log details |
+
+Retry only operations that are safe to repeat. Use idempotency keys for supported write operations.
+
+## Prevent error loops
+
+Models may repeatedly retry a tool when its error is vague.
+
+To prevent loops:
+
+- Say when retrying with the same input will not work.
+- Return field-specific validation guidance.
+- Include rate-limit timing when safe.
+- Limit retries at the server and upstream client.
+- Use stable error categories for client policy.
+- Require fresh confirmation before retrying a sensitive write.
+
+## Use 0mcp logs during debugging
+
+For hosted [0mcp](https://0mcp.io) servers, review [Logs](/guides/logs) to trace calls from generated tools to the upstream API. Use the [Playground](/guides/playground) to reproduce a failure with controlled input.
+
+If a newly published configuration introduces failures, compare it with the previous version and use [version rollback](/guides/versioning) when needed.
+
+## Debugging checklist
+
+- [ ] Failure reproduced with a minimal request
+- [ ] Error class identified
+- [ ] Initialization and capability negotiation checked
+- [ ] Client, server, and upstream logs correlated
+- [ ] Sensitive data removed from logs and responses
+- [ ] Retry behavior reviewed for side effects
+- [ ] Root cause covered by a regression test
+- [ ] Fix verified in Inspector and a target client
+
+## Key takeaway
+
+**Separate protocol, execution, transport, auth, and upstream failures. Give the client a safe recovery path while keeping detailed diagnostics in protected logs.**

@@ -1,0 +1,182 @@
+---
+title: "MCP vs traditional AI SDKs: What builders should know"
+description: Compare MCP servers with traditional API and AI SDKs, including consumers, interfaces, distribution, authentication, and when to use both.
+---
+
+[MCP](https://modelcontextprotocol.io/) and traditional SDKs solve different integration problems.
+
+- An **SDK** gives developers language-specific code for calling an API or platform.
+- An **MCP server** gives compatible AI applications a protocol-based interface for discovering and using external capabilities.
+
+Most API providers do not need to choose one. SDKs serve developers writing application code. MCP serves AI applications selecting tools and context at runtime.
+
+![Side-by-side flow showing a developer application using an SDK and an AI host using an MCP server to reach an API](https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/MCP%20vs%20traditional%20AI%20SDKs.webp)
+
+## MCP vs SDK at a glance
+
+| Factor | Traditional SDK | MCP server |
+| --- | --- | --- |
+| Primary consumer | Software developer | MCP-compatible AI application |
+| Interface | Language-specific methods and types | Protocol methods and JSON schemas |
+| Usage | Explicit calls written in code | Capabilities discovered and selected at runtime |
+| Distribution | Package registry or source repository | Local executable or remote service |
+| Typical connection | Direct API request | MCP session, often followed by an API request |
+| Versioning | Package and API versions | Protocol, server, and underlying API versions |
+| Best for | Building deterministic applications | Giving AI applications tools and context |
+
+## How a traditional SDK works
+
+A developer installs a package, creates a client, and calls methods.
+
+```text
+Developer code -> SDK method -> HTTP API
+```
+
+The developer decides exactly which method runs and when. The programming language provides types, editor completion, and familiar error handling.
+
+SDKs are ideal for:
+
+- Product application code
+- Backend services
+- Scripts and automation
+- Mobile and web clients
+- Deterministic workflows
+- High-volume programmatic API access
+
+## How an MCP integration works
+
+An AI host connects to an MCP server and discovers its capabilities.
+
+```text
+User -> AI host -> MCP client -> MCP server -> API
+```
+
+The model or application logic may select a tool based on its name, description, and schema. The host then controls approval and execution.
+
+MCP is ideal for:
+
+- AI assistants
+- Coding agents
+- Natural-language workflows
+- Reusable integrations across compatible AI clients
+- Runtime capability discovery
+
+Read [How MCP works](/learn/fundamentals/how-mcp-works) for the protocol sequence.
+
+## Different consumers require different design
+
+SDK users read documentation and write code. AI applications interpret capability metadata.
+
+An SDK method may work well with a concise method name because the developer has types and documentation. An MCP tool needs a description that helps a model decide:
+
+- When to use the tool
+- When not to use it
+- Which inputs are required
+- What effect the action has
+- What the result contains
+
+Do not expose an entire API mechanically without reviewing the AI-facing interface.
+
+## MCP does not replace your SDK
+
+An MCP server is not a general replacement for a language SDK.
+
+Developers still need SDKs when they want:
+
+- Compile-time types
+- Direct control over execution
+- Native language conventions
+- Efficient bulk operations
+- Application-specific retry logic
+- Fine-grained API coverage
+
+MCP adds an interface for AI systems. It does not make traditional application integration unnecessary.
+
+## SDKs can power MCP servers
+
+An MCP server can use an existing SDK internally:
+
+```text
+MCP tool -> Server implementation -> SDK -> API
+```
+
+This lets the server reuse:
+
+- Authentication helpers
+- Request and response types
+- Pagination
+- Retry behavior
+- API error handling
+
+Keep the MCP tool interface focused even when the SDK exposes hundreds of methods.
+
+## Authentication differences
+
+SDKs often receive an API key or access token directly from application code.
+
+MCP authentication depends on deployment:
+
+- Local servers may receive credentials through host configuration or the operating-system credential store.
+- Remote servers may use OAuth, scoped tokens, or service credentials.
+- The underlying API may still require its normal credentials.
+
+In both cases, the upstream API should remain the authority for data access and business permissions.
+
+## Versioning differences
+
+An SDK has its own package version and depends on an API version.
+
+An MCP integration may involve:
+
+- MCP protocol version
+- MCP server version
+- Tool schema version
+- Underlying API version
+- Client-specific feature support
+
+Test changes at every affected boundary. Renaming a tool or changing its schema can alter model behavior even when the API endpoint remains compatible.
+
+## When to ship an SDK
+
+Ship an SDK when developers need to embed your API in software.
+
+Prioritize:
+
+- Strong types
+- Language conventions
+- Complete API coverage
+- Code examples
+- Stable versioning
+- Predictable errors
+
+## When to ship an MCP server
+
+Ship an MCP server when AI applications need to discover and use your product.
+
+Prioritize:
+
+- Focused capabilities
+- Descriptive tool metadata
+- Safe defaults
+- Clear approval boundaries
+- Structured results
+- Client compatibility
+- Observability
+
+## When to ship both
+
+Ship both when your API serves developers and AI applications.
+
+Use one API and one source of truth where possible:
+
+```text
+                 +-> SDKs -> Developer applications
+OpenAPI + API ---|
+                 +-> MCP server -> AI applications
+```
+
+[0mcp](https://0mcp.io) can turn an [OpenAPI specification](/api-sources/openapi) into a hosted MCP server while your existing SDKs and API remain unchanged.
+
+## Key takeaway
+
+**SDKs help developers call your API in code. MCP helps AI applications discover and use selected capabilities. Strong API products can support both.**

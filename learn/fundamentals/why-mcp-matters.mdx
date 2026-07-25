@@ -1,0 +1,103 @@
+---
+title: Why MCP matters?
+description: Understand why the Model Context Protocol matters for AI builders, API providers, product teams, and people who use AI applications.
+---
+
+The **[Model Context Protocol](https://modelcontextprotocol.io/) (MCP)** matters because it gives AI applications a shared way to connect to external data, tools, and workflows.
+
+Before MCP, each AI application needed a custom integration for every external system. MCP replaces much of that repeated connector work with a common protocol.
+
+```text
+Without a shared protocol: many clients x many custom integrations
+With MCP: compatible clients x one standard interface
+```
+
+If MCP is new to you, start with [What is MCP?](/learn/fundamentals/what-is-mcp).
+
+![Before-and-after diagram comparing many custom AI integrations with one shared MCP interface](https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/why%20mcp%20matter.webp)
+
+## MCP reduces integration fragmentation
+
+AI applications become more useful when they can work with current information and real systems. They may need to read a file, search a database, inspect an account, or call an API.
+
+Custom integrations make this possible, but they create repeated work. Every integration may need its own connection logic, capability definitions, authentication flow, error handling, and maintenance plan.
+
+MCP standardizes the interface between compatible AI applications and external systems. A server can describe its capabilities once. Compatible clients can then discover and use those capabilities through the same protocol.
+
+This does not eliminate all integration work. You still need to design safe tools, configure authentication, and maintain the underlying system. It does reduce the amount of client-specific plumbing.
+
+## Why MCP matters for AI builders
+
+MCP gives AI builders a reusable integration layer.
+
+Instead of writing a different connector for each application, you can connect to MCP servers that expose well-defined [tools](/learn/core-concepts/tools), [resources](/learn/core-concepts/resources), and [prompts](/learn/core-concepts/prompts).
+
+This helps builders:
+
+- Add capabilities without embedding every integration in the application
+- Separate AI orchestration from business logic
+- Reuse servers across compatible clients
+- Test protocol behavior independently from the model
+- Add or remove integrations without redesigning the entire application
+
+The result is a more modular AI system. The host manages the user experience and model interaction. Each MCP server remains focused on a specific system or responsibility.
+
+## Why MCP matters for API providers
+
+APIs were designed primarily for developers writing deterministic software. AI applications are different consumers. They need clear capability descriptions, structured inputs, predictable outputs, and enough context to choose the right operation.
+
+An MCP server gives an API provider an AI-facing interface. Selected API operations can become tools that compatible AI clients can discover and call.
+
+For an API-first company, this creates another distribution channel:
+
+```text
+Existing API -> MCP server -> Compatible AI applications
+```
+
+You do not need to replace the API. The API continues to own its data, business rules, authentication, and authorization.
+
+With [0mcp](https://0mcp.io), you can turn an [OpenAPI specification](/api-sources/openapi) into a hosted MCP server while keeping your API unchanged.
+
+## Why MCP matters for product teams
+
+MCP lets product teams add useful AI capabilities without coupling every workflow to one model vendor or client.
+
+A support product might expose tools for retrieving a customer, creating a ticket, and updating a case. A project platform might expose tasks, comments, and status changes. A commerce platform might expose products, orders, and refunds.
+
+Clear protocol boundaries make these capabilities easier to govern. Teams can decide:
+
+- Which operations an AI application may discover
+- Which actions require user approval
+- Which credentials and scopes are required
+- What information a tool returns
+- How calls are logged and monitored
+
+MCP provides the connection standard. Your product still defines the permissions and business rules.
+
+## Why MCP matters for users
+
+MCP can make AI applications more relevant to a user's actual work.
+
+With approved connections, an assistant can use current information instead of relying only on model training or pasted context. It can also request actions in connected systems.
+
+Examples include:
+
+- Finding the status of an order
+- Reading a project document
+- Creating a support ticket
+- Checking a calendar
+- Updating a CRM record
+
+The user benefit depends on safe implementation. A useful MCP integration should make access visible, request approval for sensitive actions, and follow least-privilege permissions.
+
+## The larger impact of a shared standard
+
+Standards become valuable when independent products can implement the same interface.
+
+MCP allows clients, servers, tools, and developer libraries to evolve around a common protocol. A growing ecosystem can give builders more reusable integrations and give service providers access to more AI surfaces.
+
+Compatibility is not automatic. Clients may support different MCP features or protocol versions. Server developers should test their implementation against the clients they plan to support.
+
+## Key takeaway
+
+**MCP matters because it reduces repeated integration work and gives AI applications a consistent, governable way to use external systems.**

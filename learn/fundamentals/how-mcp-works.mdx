@@ -1,0 +1,173 @@
+---
+title: How MCP works?
+description: Follow the MCP connection lifecycle from initialization and capability discovery to tool calls, results, notifications, and shutdown.
+---
+
+The **[Model Context Protocol](https://modelcontextprotocol.io/docs/learn/architecture) (MCP)** works by creating a structured session between an MCP client and an MCP server. They exchange JSON-RPC messages to initialize the connection, discover supported capabilities, make requests, return results, and close the session.
+
+This page focuses on the interaction sequence. For component-level design, read [MCP architecture explained](/learn/fundamentals/mcp-architecture-explained).
+
+![Numbered MCP session flow from client connection through initialization, discovery, tool call, result, and shutdown](https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/how%20mcp%20works.webp)
+
+## The MCP request flow
+
+A typical MCP session follows this sequence:
+
+1. The host creates an MCP client.
+2. The client connects to an MCP server.
+3. The client and server initialize the session.
+4. Both sides declare the protocol features they support.
+5. The client discovers available server capabilities.
+6. The AI application selects a capability when needed.
+7. The client sends a request to the server.
+8. The server performs the operation and returns a result.
+9. Either side may send supported notifications during the session.
+10. The connection closes when the session ends.
+
+The exact messages depend on the features and transport in use.
+
+## Step 1: The host creates a client
+
+The host is the AI application that manages the model, user interaction, permissions, and connections.
+
+When the host needs to connect to a server, it creates an MCP client instance. Each client maintains a connection to one server.
+
+```text
+User -> Host application -> MCP client
+```
+
+The client handles protocol communication. It does not replace the host or the model.
+
+## Step 2: The client connects to the server
+
+The client uses a supported transport to reach the server.
+
+Common choices are:
+
+- `stdio` for a local server process
+- Streamable HTTP for a remote server
+
+The transport carries MCP messages. The protocol defines the message behavior above that transport.
+
+Read [local MCP servers](/learn/fundamentals/local-mcp-servers) and [remote MCP servers](/learn/fundamentals/remote-mcp-servers) for the deployment differences.
+
+## Step 3: The session initializes
+
+Initialization is the first protocol exchange.
+
+The client sends an `initialize` request containing information such as its supported protocol version and client capabilities. The server responds with its selected protocol version, server capabilities, and implementation information.
+
+After the response, the client sends an initialized notification. Normal operations can then begin.
+
+<Info>
+  Initialization prevents the client and server from assuming that the other side supports a feature that was never declared.
+</Info>
+
+## Step 4: The client discovers capabilities
+
+After initialization, the client can request lists of the features the server exposes.
+
+A server may provide:
+
+- [Tools](/learn/core-concepts/tools) for model-invoked actions
+- [Resources](/learn/core-concepts/resources) for readable context
+- [Prompts](/learn/core-concepts/prompts) for user-selectable templates
+
+For example, a client can request the tool list. Each returned tool includes a name, description, and input schema. These details help the AI application decide whether the tool fits the user's request.
+
+## Step 5: The AI application chooses an operation
+
+The host provides relevant capability definitions to the model or uses application logic to choose one.
+
+Suppose a user asks:
+
+> What is the status of order 1042?
+
+The model may select a tool named `get_order` because its description and schema match the request. The host remains responsible for its approval and permission experience.
+
+## Step 6: The client sends a JSON-RPC request
+
+MCP uses JSON-RPC 2.0 message structures. A simplified tool request looks like this:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tools/call",
+  "params": {
+    "name": "get_order",
+    "arguments": {
+      "order_id": "1042"
+    }
+  }
+}
+```
+
+The request ID lets the client match the response to the original request.
+
+## Step 7: The server executes the capability
+
+The server validates the request and runs the underlying operation.
+
+The implementation might:
+
+- Call an API
+- Query a database
+- Read an approved file
+- Run a calculation
+- Trigger a business workflow
+
+If the server wraps an API, the API still enforces its normal authentication, authorization, validation, and business rules.
+
+## Step 8: The server returns a structured result
+
+The server sends either a result or a JSON-RPC error.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Order 1042 has shipped."
+      }
+    ]
+  }
+}
+```
+
+The host gives the result to the model or application. The model can then present an answer, request more information, or continue a multi-step workflow.
+
+## Step 9: The session may exchange notifications
+
+Notifications are messages that do not expect a response.
+
+Depending on negotiated capabilities, they can communicate events such as progress, logging information, resource changes, or updated tool lists.
+
+Clients and servers should only use features declared during initialization.
+
+## Step 10: The session closes
+
+When the interaction ends, the client and server release the connection and related resources.
+
+Local server processes may terminate when the host closes them. Remote connections may end while the remote service remains available for other authorized clients.
+
+## How errors move through MCP
+
+Errors can occur at several layers:
+
+- The transport cannot connect
+- The JSON-RPC message is invalid
+- The requested method is unavailable
+- The input does not match the schema
+- Authentication or authorization fails
+- The underlying API returns an error
+- The operation times out
+
+A good implementation preserves useful error details without exposing secrets. Use [MCP Inspector](/learn/fundamentals/mcp-inspector-guide) to inspect requests and responses during development.
+
+## Key takeaway
+
+**MCP works through an initialized client-server session: discover capabilities, send structured requests, execute operations, and return structured results.**

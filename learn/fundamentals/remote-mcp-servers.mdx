@@ -1,0 +1,144 @@
+---
+title: Remote MCP servers
+description: Learn what a remote MCP server is, when to use one, how clients connect, and what production security and operations require.
+---
+
+A **remote [MCP server](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)** is an MCP server that runs on network-accessible infrastructure instead of the user's device. Authorized clients connect to it over HTTP, usually through a secure HTTPS endpoint.
+
+Remote servers are well suited to shared APIs, SaaS products, team workflows, and production integrations.
+
+```text
+MCP client -> HTTPS -> Remote MCP server -> API or service
+```
+
+![Remote MCP server diagram showing several authorized AI clients connecting to one hosted HTTPS endpoint](https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/remote%20MCP%20server.webp)
+
+## What makes an MCP server remote?
+
+The server runs outside the client environment and remains available independently of one user's computer.
+
+It may run on:
+
+- A virtual machine
+- A container platform
+- Kubernetes
+- A serverless platform
+- An edge runtime
+- A managed MCP hosting service
+
+The defining property is network access. The client reaches a URL rather than starting a local server process.
+
+## How remote MCP connections work
+
+Modern remote MCP servers commonly use Streamable HTTP.
+
+The client sends MCP messages through HTTP requests. The server may return a complete response or stream supported messages. The server can maintain an MCP session when its implementation requires one.
+
+Remote deployment does not change the core protocol concepts. Clients still initialize, negotiate capabilities, discover features, and send JSON-RPC requests.
+
+Read [How MCP works](/learn/fundamentals/how-mcp-works) for the full session sequence.
+
+## When to use a remote MCP server
+
+Choose a remote server when:
+
+- Several users or applications need the same capabilities
+- The underlying system is already an internet-accessible API
+- You need centralized updates and configuration
+- You need production monitoring and availability
+- The workload requires scalable infrastructure
+- A SaaS product wants to publish an MCP endpoint
+
+Remote hosting lets every authorized client use the same deployed version. Teams do not need to install and update the server separately on every device.
+
+## Benefits of remote MCP servers
+
+### Shared access
+
+One deployment can serve multiple authorized users and clients.
+
+### Centralized maintenance
+
+You can update tools, fix bugs, rotate credentials, and apply policies in one place.
+
+### Production operations
+
+Hosted infrastructure can support logging, metrics, alerts, rate limits, load balancing, and regional deployment.
+
+### API proximity
+
+A remote MCP server can run near its upstream API or data services, reducing internal network hops and keeping service credentials on controlled infrastructure.
+
+## Remote server responsibilities
+
+A production remote server needs more than protocol support.
+
+Plan for:
+
+- HTTPS
+- Authentication and authorization
+- Secure token handling
+- Tenant isolation
+- Input validation
+- Rate limiting
+- Request timeouts
+- Structured logs and metrics
+- Health checks
+- Version management
+- Safe error responses
+
+MCP does not replace these web-service responsibilities.
+
+## Authentication and authorization
+
+A remote server must identify callers and decide which capabilities they may use.
+
+Use the authentication model supported by your clients and deployment. OAuth-based authorization is common for user-facing remote servers. Service-to-service environments may use scoped tokens or other established credentials.
+
+The server should apply least privilege. A user who can read orders should not automatically receive access to refund tools.
+
+If your MCP server wraps an API, the upstream API should continue enforcing its own authorization rules. Review the [0mcp authentication model](/concepts/authentication-model) for API-backed servers.
+
+## Stateless and stateful deployment
+
+Some MCP interactions use session state. If you run more than one server replica, decide where that state lives.
+
+Common approaches include:
+
+- Keep state in a shared store
+- Route a session consistently to one replica
+- Design operations to minimize server-side session state
+
+Do not assume that adding replicas automatically creates a reliable deployment. Test reconnection, timeouts, server restarts, and partial failures.
+
+## Scaling a remote MCP server
+
+AI applications may call tools in bursts or chains. Protect the server and upstream systems with:
+
+- Concurrency limits
+- Per-user and per-tool rate limits
+- Bounded response sizes
+- Pagination
+- Caching for safe read operations
+- Queues for long-running work
+- Idempotency for retryable write operations
+
+Monitor the upstream API separately from the MCP layer. A healthy MCP endpoint can still return failures if its dependency is unavailable.
+
+## Remote MCP with 0mcp
+
+[0mcp](https://0mcp.io) turns an existing API definition into a hosted remote MCP server.
+
+You can import an [OpenAPI specification](/api-sources/openapi), select operations, publish an MCP endpoint, and monitor it with [logs](/guides/logs) and [analytics](/guides/analytics).
+
+This keeps the protocol and hosting layer separate from your existing API.
+
+## Remote vs local
+
+A remote server is not always the right choice. Local servers can access device resources directly and may be simpler for personal workflows or development.
+
+Use [Local vs remote MCP](/learn/fundamentals/local-vs-remote-mcp) to choose based on access, privacy, maintenance, and scale.
+
+## Key takeaway
+
+**A remote MCP server provides centrally hosted capabilities through a network endpoint, making it the natural model for shared and production AI integrations.**

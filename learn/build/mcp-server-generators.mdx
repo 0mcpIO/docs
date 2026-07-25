@@ -1,0 +1,156 @@
+---
+title: "MCP server generators: Tools compared"
+description: Compare hosted, code-generating, gateway-based, and SDK approaches for creating MCP servers from OpenAPI, REST APIs, GraphQL APIs, and custom code.
+---
+
+An **[MCP server](https://modelcontextprotocol.io/) generator** turns an API definition or configuration into an MCP-compatible server or hosted endpoint.
+
+The right choice depends on whether you want a managed service, generated source code, gateway configuration, or complete control through an SDK.
+
+## MCP server generator approaches
+
+| Approach | What you receive | You manage | Best for |
+| --- | --- | --- | --- |
+| Hosted generator | A hosted MCP endpoint | Tool selection and API configuration | Shipping quickly without server operations |
+| Source-code generator | A generated server project | Code, dependencies, deployment, and updates | Teams that want editable source |
+| Gateway converter | Gateway or proxy configuration | Gateway deployment and policies | Existing API-gateway environments |
+| Official SDK | Building blocks rather than generated output | All design and implementation | Custom behavior and protocol control |
+
+No option removes the need to review tool design, authentication, authorization, and generated schemas.
+
+## Tools compared
+
+| Tool | Type | Input | Output or runtime | Best fit |
+| --- | --- | --- | --- | --- |
+| **0mcp** | Hosted platform | OpenAPI 3.x, Swagger 2.0, direct REST API, or GraphQL | Hosted MCP endpoint | Teams that want API conversion, tool configuration, testing, versioning, and hosting together |
+| **Stainless** | API platform with MCP generation | OpenAPI specification and platform configuration | Generated and managed API/MCP artifacts | API teams already using an SDK and documentation generation workflow |
+| **openapi-mcp-generator** | Open-source Node.js CLI | OpenAPI 3.x JSON or YAML | Editable TypeScript server project | Developers who want local generated source and multiple transport options |
+| **Higress openapi-to-mcpserver** | Open-source gateway converter | OpenAPI document | Higress remote MCP server configuration | Teams using Higress as their API gateway |
+| **Official MCP SDKs** | Code libraries | Handwritten TypeScript, Python, or another supported language | Fully custom client or server | Complex workflows and protocol-level control |
+
+<Note>
+Features, compatibility, release status, and pricing can change. Confirm current requirements in each project's official documentation before choosing.
+</Note>
+
+## 0mcp
+
+[0mcp](https://0mcp.io) converts OpenAPI, REST API, and GraphQL operations into MCP tools and hosts the MCP endpoint.
+
+The workflow includes:
+
+- OpenAPI 3.x and Swagger 2.0 import from a file, public URL, or pasted text
+- Direct REST API-to-MCP conversion without requiring an OpenAPI document
+- GraphQL API-to-MCP conversion through the GraphQL source option
+- Operation selection
+- Editable tool names and descriptions
+- Resources and reusable prompts
+- A test Playground
+- Published versions and rollback
+- Analytics and logs
+- Setup guidance for supported MCP clients
+
+All three API source options use the same hosted 0mcp platform capabilities. Choose 0mcp when you want to keep your existing API but avoid building and operating the MCP translation layer.
+
+Follow the [0mcp quick start](/get-started/quick-start).
+
+## Stainless
+
+Stainless integrates MCP generation with a broader API tooling workflow.
+
+It is designed for API teams that want MCP server generation to evolve alongside generated SDKs and API documentation. Review its current generation languages, deployment options, authentication support, and platform requirements directly with Stainless.
+
+## openapi-mcp-generator
+
+`openapi-mcp-generator` is an independent open-source CLI that generates a TypeScript proxy server from an OpenAPI document.
+
+Its documented features include:
+
+- OpenAPI 3.x input
+- TypeScript project generation
+- Zod input validation
+- `stdio` and Streamable HTTP options
+- Authentication through environment configuration
+- Operation filtering with an `x-mcp` extension
+
+Choose it when you want editable Node.js source and are prepared to maintain the generated project.
+
+Generated code should still receive dependency scanning, security review, integration tests, and client compatibility tests.
+
+## Higress openapi-to-mcpserver
+
+The Higress converter produces remote MCP server configuration for the Higress gateway ecosystem.
+
+This is a specialized option for teams that already use, or plan to use, Higress for API traffic and policy enforcement. It is less suitable when you need a standalone server project outside that gateway environment.
+
+## Official MCP SDKs
+
+The official SDKs are not OpenAPI generators. They are the baseline for building custom MCP implementations.
+
+Use an SDK when you need:
+
+- Workflow-level tools that combine several API operations
+- Custom resources or prompts
+- Specialized authorization
+- Sampling, elicitation, or other client features
+- Fine-grained transport and lifecycle behavior
+- Custom observability and error handling
+
+Read the [TypeScript SDK guide](/learn/build/typescript-sdk) or [Python SDK guide](/learn/build/python-sdk).
+
+## How to evaluate a generator
+
+### API source support
+
+Check which input sources the generator supports:
+
+- OpenAPI or Swagger documents
+- Direct REST API configuration
+- GraphQL schemas and operations
+- Handwritten or SDK-defined capabilities
+
+For OpenAPI, also check `$ref` resolution, callbacks, polymorphic schemas, file uploads, and external references. For REST and GraphQL, verify how the platform discovers operations, models inputs and outputs, and configures authentication.
+
+### Tool design
+
+Confirm that you can:
+
+- Select operations
+- Rename tools
+- Rewrite descriptions
+- Simplify schemas
+- Exclude unsafe operations
+- Control tool output
+
+### Authentication
+
+Verify API keys, bearer tokens, OAuth, per-user credentials, token forwarding, and secret storage.
+
+### Transport and deployment
+
+Determine whether the output supports `stdio`, Streamable HTTP, or both. For hosted servers, check TLS, scaling, regions, uptime, and custom domains.
+
+### Maintenance
+
+Ask what happens when the API specification changes:
+
+- Can the server be regenerated safely?
+- Are custom changes preserved?
+- Is there a version diff?
+- Can you roll back?
+- Can generation run in CI/CD?
+
+### Testing and observability
+
+Look for schema validation, MCP Inspector compatibility, request logs, metrics, tracing, and safe error reporting.
+
+## Generator or custom SDK?
+
+Choose a generator when the API can be described through OpenAPI, direct REST configuration, or GraphQL and most capabilities map cleanly to tools.
+
+Choose custom SDK development when the MCP interface needs substantial workflow logic, combines several systems, or differs significantly from the underlying API surface.
+
+A hybrid approach is also valid: generate the repetitive API mapping and add reviewed custom behavior around it.
+
+## Key takeaway
+
+**Choose an MCP server generator based on the output you want to own: a hosted endpoint, editable source code, gateway configuration, or a fully custom implementation.**

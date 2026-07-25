@@ -1,0 +1,110 @@
+---
+title: What is MCP?
+description: Learn what the Model Context Protocol (MCP) is, what the name means, and how it connects AI applications to external data, tools, and workflows.
+---
+
+The **[Model Context Protocol](https://modelcontextprotocol.io/) (MCP)** is an open standard for connecting AI applications to external systems.
+
+It gives AI applications a consistent way to access data, use [tools](/learn/core-concepts/tools), and work with reusable instructions. These external capabilities can come from APIs, databases, files, SaaS products, developer tools, or internal business systems.
+
+In plain English, MCP is a shared connection language for AI applications.
+
+```text
+AI application <-> MCP <-> External system
+```
+
+You can think of MCP as a universal connector. The same type of connection can work across different AI applications and external services, as long as both support the protocol.
+
+<Frame caption="MCP provides a standard connection between AI applications and external systems.">
+  <img
+    src="https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/what-is-mcp.png"
+    alt="Model Context Protocol diagram showing an AI application connecting to external data, tools, and workflows"
+    loading="lazy"
+  />
+</Frame>
+
+## What does MCP stand for?
+
+MCP stands for **Model Context Protocol**:
+
+- **Model** refers to the AI model or AI-powered application that needs outside information or capabilities.
+- **Context** means the data, tools, and instructions that help the AI understand a request and respond usefully.
+- **Protocol** is an agreed set of rules that lets different software systems communicate.
+
+Together, these words describe a standard way to give AI applications access to useful context beyond what the model already knows.
+
+## What does MCP connect?
+
+MCP connects an AI application to an external system through an MCP-compatible interface.
+
+The AI application might be:
+
+- An AI assistant
+- A coding assistant
+- An autonomous agent
+- An internal company chatbot
+- An AI feature inside a SaaS product
+
+The external system might be:
+
+- An API
+- A database
+- A file system
+- A source code repository
+- A CRM or support platform
+- A search service
+- An internal business application
+
+MCP does not turn these systems into AI models. It makes their approved information and capabilities available to AI applications in a standard format.
+
+## What can an MCP server provide?
+
+An MCP server can expose three common types of capabilities:
+
+| Capability | What it provides | Simple example |
+| --- | --- | --- |
+| **Tools** | Actions an AI application can request | Create a support ticket |
+| **Resources** | Data or content an AI application can read | Retrieve a product policy |
+| **Prompts** | Reusable instruction templates | Prepare a customer summary |
+
+These capabilities describe what an external system makes available through MCP. The system owner controls which data and actions the server exposes.
+
+## A simple MCP example
+
+Imagine an AI assistant that needs current order information.
+
+The order data lives in an e-commerce API, not inside the AI model. An MCP server can expose an approved capability for retrieving an order. The assistant can then use that capability when a user asks:
+
+> Where is order 1042?
+
+The AI assistant still handles the conversation. The external system remains the source of the order data. MCP provides the standard connection between them.
+
+## Is MCP the same as an API?
+
+No. MCP and APIs are related, but they are not the same.
+
+An API defines how software interacts with a particular service. MCP defines a standard interface that AI applications can use to discover and access external capabilities.
+
+An MCP server often sits in front of an existing API:
+
+```text
+AI application <-> MCP server <-> API
+```
+
+The API continues to handle the underlying business data and operations. The MCP server presents selected capabilities in a format designed for MCP-compatible AI applications.
+
+## What MCP is not
+
+MCP is not:
+
+- An AI model
+- A replacement for an API
+- A database or knowledge base
+- A guarantee that an AI application can access every connected system
+- A permission to bypass authentication or security controls
+
+MCP is the communication standard between compatible AI applications and external capabilities. Access still depends on the server configuration, authentication, permissions, and user approval.
+
+## MCP in one sentence
+
+**MCP is an open standard that lets AI applications connect to external data, tools, and workflows through a consistent interface.**

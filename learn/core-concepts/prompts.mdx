@@ -1,0 +1,123 @@
+---
+title: Prompts
+description: Learn how MCP prompts provide reusable, user-controlled message templates with arguments and optional embedded context.
+---
+
+**[MCP prompts](https://modelcontextprotocol.io/specification/2025-11-25/server/prompts)** are reusable message templates that an MCP server exposes to a client.
+
+They help users start common AI workflows with consistent instructions and context. A prompt might prepare a code review, summarize an incident, analyze a customer account, or draft a project update.
+
+In MCP's control model, prompts are **user-controlled**. The user explicitly chooses a prompt, often through a slash command, menu item, or command palette.
+
+## How MCP prompts work
+
+A typical prompt flow is:
+
+1. The client discovers prompts with `prompts/list`.
+2. The user selects a prompt.
+3. The client requests it with `prompts/get` and supplies any arguments.
+4. The server returns one or more structured messages.
+5. The client adds the messages to the AI interaction.
+
+```text
+User         Client                         Server
+ |             |---- prompts/list ----------->|
+ |             |<--- available prompts --------|
+ |-- selects ->|---- prompts/get + arguments ->|
+ |             |<--- structured messages -------|
+```
+
+Servers declare the `prompts` capability during initialization when they support this feature.
+
+## What defines a prompt?
+
+A prompt definition can include:
+
+- A unique programmatic `name`
+- An optional display `title`
+- A human-readable `description`
+- Optional arguments
+- Optional icons and metadata supported by the protocol version
+
+```json
+{
+  "name": "review_pull_request",
+  "title": "Review pull request",
+  "description": "Review a pull request for correctness, security, and maintainability.",
+  "arguments": [
+    {
+      "name": "pull_request_url",
+      "description": "The full URL of the pull request.",
+      "required": true
+    }
+  ]
+}
+```
+
+Arguments let one prompt template adapt to a specific repository, customer, date range, language, or other user-selected input.
+
+## What does `prompts/get` return?
+
+The server returns a description and an ordered list of prompt messages. Each message has a `user` or `assistant` role and supported content.
+
+```json
+{
+  "description": "Review pull request 1042",
+  "messages": [
+    {
+      "role": "user",
+      "content": {
+        "type": "text",
+        "text": "Review this pull request. Identify correctness, security, and maintainability issues."
+      }
+    }
+  ]
+}
+```
+
+Prompt messages can contain text and other content types supported by the negotiated protocol version. They can also embed server-provided resources so the workflow arrives with relevant context.
+
+## Prompts, resources, and tools
+
+| MCP primitive | Main purpose | Typical controller |
+| --- | --- | --- |
+| **Prompt** | Start a reusable AI workflow | User |
+| **Resource** | Supply readable context | Application |
+| **Tool** | Perform an operation | Model |
+
+A prompt can guide the model to use [resources](/learn/core-concepts/resources) or [tools](/learn/core-concepts/tools), but it does not replace them.
+
+For example, a “Prepare account review” prompt can define the workflow. A customer resource can supply account context. A tool can retrieve current usage or create a follow-up task.
+
+## Examples of MCP prompts
+
+| Prompt | Arguments | Intended result |
+| --- | --- | --- |
+| `review_pull_request` | Pull request URL | Structured code review |
+| `summarize_incident` | Incident ID | Timeline and lessons learned |
+| `prepare_customer_brief` | Customer ID | Account briefing |
+| `explain_error` | Error message, language | Plain-English diagnosis |
+| `draft_release_notes` | Version, audience | Release-note draft |
+
+## Design prompts for clear selection
+
+- Use an action-oriented name and title.
+- Explain when the user should choose the prompt.
+- State the expected output.
+- Keep each argument focused and well described.
+- Validate required arguments before generating messages.
+- Keep instructions concise and specific.
+- Avoid silently adding unrelated goals.
+- Test prompts with missing, empty, and unusual inputs.
+
+Prompt output should be treated as untrusted content. A prompt can influence model behavior, so clients and servers should avoid inserting secrets and should make the generated messages visible when appropriate.
+
+## Prompt updates
+
+A server can declare `listChanged` support. If the available prompt list changes, it can send `notifications/prompts/list_changed` so the client can refresh its view.
+
+Clients should not assume every server or protocol version supports the same metadata or content types. They should follow negotiated capabilities.
+
+## Key takeaway
+
+**An MCP prompt is a user-selected, reusable template that returns structured messages for a consistent AI workflow.**

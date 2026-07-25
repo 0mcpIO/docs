@@ -1,0 +1,215 @@
+---
+title: "From REST API to MCP server: A migration guide"
+description: Convert a REST API directly into an MCP server and follow a staged migration plan covering tool design, authentication, testing, and deployment.
+---
+
+Moving from a REST API to [MCP](https://modelcontextprotocol.io/) usually does **not** mean replacing the REST API.
+
+You keep the API, business logic, database, and authorization rules. You add an MCP server that translates model-friendly tool calls into approved HTTP requests.
+
+```text
+Traditional application ---> REST API
+                               ^
+                               |
+AI application ---> MCP server-+
+```
+
+This approach lets traditional clients and AI applications use the same backend.
+
+## REST API and MCP server compared
+
+| REST API | MCP server |
+| --- | --- |
+| Designed for software developers and applications | Designed for MCP-compatible AI applications |
+| Exposes paths and HTTP methods | Exposes tools, resources, and prompts |
+| Clients are programmed to choose endpoints | A model can choose tools from descriptions and schemas |
+| Uses HTTP request semantics directly | Uses MCP messages over `stdio` or Streamable HTTP |
+| Often contains the business logic | Usually delegates business logic to the existing API |
+
+An MCP server is an adapter, not a second backend.
+
+## What should migrate?
+
+Migrate user tasks, not endpoints.
+
+For example, an order API may have endpoints for orders, shipments, payments, and refunds. A first MCP release might expose only:
+
+- `get_order`
+- `track_shipment`
+- `list_recent_orders`
+
+Keep high-risk operations such as `issue_refund` out of the first release until approval, authorization, and audit controls are ready.
+
+## Phase 1: Assess the API
+
+Before building the MCP layer:
+
+1. List the user tasks the AI application should support.
+2. Identify the API operations required for each task.
+3. Classify each operation as read-only, write, destructive, or sensitive.
+4. Document authentication and authorization requirements.
+5. Check rate limits, pagination, latency, and error behavior.
+6. Decide whether to import an [OpenAPI specification](/api-sources/openapi) or convert the REST API directly.
+
+If you have an OpenAPI document, validate it before conversion. If you do not have one, document the REST API's base URL, endpoints, methods, inputs, responses, and authentication requirements.
+
+## Phase 2: Design the MCP interface
+
+Map API behavior to the correct MCP primitive.
+
+| API capability | MCP primitive |
+| --- | --- |
+| Perform an action or parameterized query | [Tool](/learn/core-concepts/tools) |
+| Supply addressable context | [Resource](/learn/core-concepts/resources) |
+| Start a reusable workflow | [Prompt](/learn/core-concepts/prompts) |
+
+One endpoint does not always equal one tool. You may combine several API calls into one task-level tool or hide low-level implementation details.
+
+Good tool design should:
+
+- Use clear, action-oriented names
+- Explain when the model should call the tool
+- Accept the minimum required input
+- Return focused output
+- Avoid overlapping tools with ambiguous purposes
+
+## Phase 3: Build the adapter
+
+For each tool, the MCP server should:
+
+1. Validate the tool arguments.
+2. Obtain the correct user or service credential.
+3. Build the HTTP path, query, headers, and body.
+4. Call the REST API.
+5. Interpret the status code and response.
+6. Return safe MCP content or structured output.
+
+```text
+tools/call
+    |
+validate input
+    |
+authorize operation
+    |
+build HTTP request
+    |
+call REST API
+    |
+normalize result
+```
+
+You can write this adapter with the [TypeScript SDK](/learn/build/typescript-sdk), the [Python SDK](/learn/build/python-sdk), or an [MCP server generator](/learn/build/mcp-server-generators).
+
+## Phase 4: Preserve authentication and authorization
+
+Choose a credential model deliberately:
+
+- **Credential forwarding:** The MCP layer passes an approved user token to the API.
+- **Server credential:** The server uses its own credential and maps MCP identities to API permissions.
+- **OAuth:** The client obtains an access token for the protected MCP server.
+- **Token exchange:** The server exchanges an incoming token for an API-specific token.
+
+The upstream API should continue to enforce resource-level authorization. The MCP server should also restrict which tools and parameters a caller can use.
+
+Never place API secrets in tool descriptions, tool arguments, or model-visible errors.
+
+## Phase 5: Translate errors
+
+REST errors and MCP errors have different audiences.
+
+| API response | MCP behavior |
+| --- | --- |
+| `400 Bad Request` | Explain which input is invalid |
+| `401 Unauthorized` | Request valid authentication without exposing details |
+| `403 Forbidden` | State that the operation is not permitted |
+| `404 Not Found` | Report that the requested object was not found |
+| `409 Conflict` | Explain the state conflict and possible recovery |
+| `429 Too Many Requests` | Return retry guidance when safe |
+| `5xx` | Return a safe temporary-failure message and log details internally |
+
+Expected operation failures should normally be tool execution errors that the model can understand. Malformed MCP messages should use protocol errors.
+
+## Phase 6: Test before rollout
+
+Test three layers separately:
+
+### Contract tests
+
+Confirm that each tool schema maps correctly to its API request and response.
+
+### Protocol tests
+
+Use [MCP Inspector](/learn/fundamentals/mcp-inspector-guide) to test initialization, discovery, calls, results, notifications, and transport behavior.
+
+### Model-behavior tests
+
+Use realistic prompts to check whether the model:
+
+- Selects the right tool
+- Supplies valid arguments
+- Avoids unnecessary write operations
+- Understands empty and error results
+- Requests confirmation when required
+
+## Phase 7: Roll out gradually
+
+A safe rollout can follow this order:
+
+1. Read-only tools in a development environment
+2. Internal users with test accounts
+3. A small production audience
+4. Low-risk write tools with confirmation
+5. Broader access after monitoring and audit review
+
+Track tool usage, errors, latency, authorization failures, and upstream API changes.
+
+## Keep the API and MCP server synchronized
+
+When the REST API changes:
+
+- Update the REST API configuration or revalidate its OpenAPI document.
+- Detect changed or removed operations.
+- Regenerate affected schemas.
+- Run contract and protocol tests.
+- Publish a new MCP server version.
+- Preserve the previous version for rollback when possible.
+
+[0mcp](https://0mcp.io) supports published versions and rollback workflows. Read [Versioning](/guides/versioning) for details.
+
+## Convert a REST API to MCP with 0mcp
+
+[0mcp](https://0mcp.io) can convert your REST API directly into a hosted MCP server. You do not need to create an OpenAPI specification first.
+
+Provide your REST API details, configure its endpoints and authentication, and choose which operations should become MCP tools. 0mcp handles the MCP-compatible interface while your existing REST API remains unchanged.
+
+The direct REST API workflow includes the same 0mcp platform capabilities available when importing an OpenAPI specification:
+
+- A hosted MCP endpoint
+- MCP tools generated from selected API operations
+- Resources for sharing contextual content
+- Reusable prompts with configurable inputs
+- Authentication forwarding to your upstream API
+- An interactive Playground for testing
+- Published versions and rollback
+- Usage analytics and activity logs
+- Setup guidance for supported MCP clients
+
+A typical workflow is:
+
+1. Create a server in the 0mcp dashboard.
+2. Select the REST API source option.
+3. Add your API details and authentication requirements.
+4. Choose and review the operations exposed as tools.
+5. Improve tool names and descriptions.
+6. Test the server in the Playground.
+7. Publish the server and connect your MCP client.
+
+Your REST API continues to own its data, business logic, authentication, and authorization. [0mcp](https://0mcp.io) provides the hosted MCP layer that translates tool calls into API requests.
+
+<Note>
+0mcp also supports converting GraphQL APIs into MCP servers. GraphQL has its own schema and operation model, so it should be configured through the GraphQL source option rather than the REST API workflow.
+</Note>
+
+## Key takeaway
+
+**You can convert a REST API directly into a hosted MCP server with 0mcp while keeping your existing API as the source of truth.**

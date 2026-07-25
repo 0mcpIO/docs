@@ -1,0 +1,168 @@
+---
+title: The MCP specification explained
+description: Learn how the Model Context Protocol specification defines messages, lifecycle, transports, features, versioning, and security requirements.
+---
+
+The **[MCP specification](https://modelcontextprotocol.io/specification/2025-11-25)** is the authoritative technical definition of the Model Context Protocol. It tells client and server developers which messages exist, how sessions behave, how capabilities are negotiated, and what compliant implementations must do.
+
+Use the specification when implementation behavior must be exact. Use explanatory documentation when you first need a conceptual overview.
+
+## What the MCP specification defines
+
+The specification covers:
+
+- Client-host-server architecture
+- JSON-RPC message structures
+- Connection lifecycle
+- Protocol version negotiation
+- Standard transports
+- Authorization for HTTP-based connections
+- Server features
+- Client features
+- Shared utilities
+- Security and trust considerations
+
+It does not define the business logic behind a tool or the database behind a resource.
+
+## The base protocol
+
+The base protocol defines the common communication layer.
+
+It uses JSON-RPC 2.0 and includes:
+
+- Requests
+- Responses
+- Notifications
+- Initialization
+- Capability negotiation
+- Progress
+- Cancellation
+- Error reporting
+- Logging
+
+Every feature builds on this common message behavior.
+
+## Lifecycle and initialization
+
+An MCP session begins with initialization.
+
+The client proposes a protocol version and declares its capabilities. The server selects a compatible version and declares its own capabilities. Normal requests begin only after initialization completes.
+
+This exchange lets implementations evolve without assuming feature support.
+
+Read [How MCP works](/learn/fundamentals/how-mcp-works) for a step-by-step walkthrough.
+
+## Standard transports
+
+The current specification defines:
+
+- `stdio` for communication with a local process
+- Streamable HTTP for network communication
+
+The transport carries JSON-RPC messages. It does not change what those messages mean.
+
+Older implementations may use the previous HTTP+SSE transport. New network implementations should follow the current Streamable HTTP requirements unless they need backward compatibility.
+
+## Server features
+
+Servers can expose features such as:
+
+- **Tools:** Functions the model can request
+- **Resources:** Context and data the application can read
+- **Prompts:** Templated messages and workflows for users
+
+Each feature has its own methods, schemas, and optional behaviors.
+
+## Client features
+
+Clients can expose features to servers, including:
+
+- **Roots:** Boundaries that identify relevant files or URIs
+- **Sampling:** Requests for model generation through the client
+- **Elicitation:** Requests for additional user information
+
+A server must not use a client feature unless the client declared support for it.
+
+## Utilities
+
+The specification includes shared utilities that make sessions more usable:
+
+- Progress notifications
+- Request cancellation
+- Ping
+- Logging
+- Completion suggestions
+
+These utilities support reliability and user experience but do not replace application-specific observability.
+
+## Protocol versions
+
+MCP versions use date-based identifiers.
+
+The client and server negotiate a version during initialization. Implementations should:
+
+- Declare versions accurately
+- Reject incompatible behavior clearly
+- Test against supported clients
+- Read the key changes for each new version
+- Avoid linking product logic to undocumented behavior
+
+Use the `/latest` specification URL when you want the newest stable specification. Pin a dated version in implementation tests when reproducibility matters.
+
+## Normative language
+
+The specification uses words such as `MUST`, `SHOULD`, and `MAY` with formal meanings.
+
+- `MUST` indicates a requirement.
+- `SHOULD` indicates a strong recommendation with possible exceptions.
+- `MAY` indicates an optional behavior.
+
+Do not treat examples or explanatory prose as stronger than a normative requirement.
+
+## What compliance means
+
+A compliant implementation:
+
+- Produces valid protocol messages
+- Follows lifecycle requirements
+- Advertises supported capabilities accurately
+- Uses methods according to their schemas
+- Respects negotiated protocol versions
+- Implements its selected transport correctly
+- Handles errors and cancellation as required
+
+Compliance does not guarantee that every client interprets tool descriptions equally well. Test protocol correctness and real-client behavior separately.
+
+Use [MCP Inspector](/learn/fundamentals/mcp-inspector-guide) for interactive protocol testing.
+
+## Security in the specification
+
+MCP can provide access to sensitive data and actions. The specification emphasizes user consent, data privacy, tool safety, and clear authorization.
+
+Implementers should:
+
+- Keep users in control
+- Avoid exposing unnecessary data
+- Treat tool metadata as untrusted
+- Require approval for sensitive operations
+- Apply access controls to connected systems
+
+The specification provides a foundation. Each host and server must still implement a complete security model.
+
+## How to read the specification
+
+A practical reading order is:
+
+1. [Architecture](/learn/fundamentals/mcp-architecture-explained)
+2. Base protocol overview
+3. Lifecycle
+4. Transports
+5. The server or client features you need
+6. Authorization and security
+7. Schema reference
+
+Start with only the features your implementation requires.
+
+## Key takeaway
+
+**The MCP specification is the contract that lets independent clients and servers communicate predictably.**

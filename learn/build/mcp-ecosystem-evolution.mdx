@@ -1,0 +1,184 @@
+---
+title: How the MCP ecosystem is evolving
+description: Understand how MCP is evolving across remote deployment, discovery, SDKs, extensions, governance, security, and production agent workflows.
+---
+
+The [MCP](https://modelcontextprotocol.io/) ecosystem is evolving from local, developer-focused integrations into infrastructure for remote, production AI applications.
+
+The protocol's core idea remains stable: clients and servers exchange standardized capabilities. The surrounding ecosystem is expanding through hosted servers, official SDKs, a server registry, extensions, formal governance, and stronger enterprise controls.
+
+<Info>
+This overview was last reviewed in July 2026. Features described as preview, experimental, draft, or planned can change.
+</Info>
+
+## The direction of MCP at a glance
+
+| Earlier pattern | Evolving pattern |
+| --- | --- |
+| Local servers launched through `stdio` | Remote servers over Streamable HTTP |
+| Manually shared configuration | Registry-backed discovery and standardized metadata |
+| Small, handwritten tool servers | Generated and platform-managed API integrations |
+| One-off protocol proposals | Formal Specification Enhancement Proposals |
+| Core protocol handles every use case | Extensions add optional capabilities |
+| Short synchronous calls | Durable and agent-oriented workflows |
+| Basic credentials | More explicit OAuth discovery and enterprise security guidance |
+
+These are ecosystem trends, not requirements. Local `stdio` servers remain useful for private files and developer tools.
+
+## Remote MCP is becoming a production interface
+
+Early MCP examples often used a local process and `stdio`. Production services increasingly need:
+
+- A stable HTTPS endpoint
+- Multi-user access
+- OAuth and resource authorization
+- Rate limiting
+- Observability
+- Versioning
+- Independent deployment and scaling
+
+Streamable HTTP provides the standard transport foundation for remote servers. Builders still need normal web-service controls around it.
+
+Compare the two deployment models in [Local vs remote MCP](/learn/fundamentals/local-vs-remote-mcp).
+
+## Server discovery is becoming structured
+
+An ecosystem cannot scale if users must copy unknown commands and configuration from arbitrary pages.
+
+The official MCP Registry provides standardized metadata for publicly accessible servers. It supports:
+
+- Publishing server metadata
+- DNS-based namespace verification
+- Installation and configuration information
+- Discovery through a registry API
+
+The registry is still marked as preview. Server publishers should expect metadata requirements and workflows to evolve before general availability.
+
+## SDKs are maturing
+
+Official SDKs reduce the amount of protocol code each implementation must write.
+
+The ecosystem now has language SDKs with different support tiers and release cycles. Major SDK generations may change package names, high-level APIs, schema libraries, or transport adapters.
+
+Builders should:
+
+- Pin production dependencies
+- Follow the documentation for the installed major version
+- Read migration guides before upgrading
+- Test protocol compatibility separately from type checking
+- Track specification and SDK support as related but distinct concerns
+
+Read the [TypeScript SDK](/learn/build/typescript-sdk), [Python SDK](/learn/build/python-sdk), and [SDK comparison](/learn/fundamentals/mcp-sdk-comparison).
+
+## MCP server generation is expanding
+
+API teams can increasingly generate MCP tools from OpenAPI documents, direct REST API configurations, and GraphQL schemas instead of writing every schema and handler manually.
+
+Generation is moving MCP closer to existing API lifecycles:
+
+```text
+API design
+   |
+API source: OpenAPI, REST, or GraphQL
+   |
+SDKs + documentation + MCP server
+   |
+Versioned deployment and testing
+```
+
+The difficult work is shifting from protocol boilerplate to interface quality:
+
+- Which operations should become tools?
+- Are descriptions clear enough for model selection?
+- Are permissions preserved?
+- Are results concise and structured?
+- Does regeneration stay synchronized with API changes?
+
+See [Turning OpenAPI specs into MCP servers](/learn/build/openapi-to-mcp-server) and [From REST API to MCP server](/learn/build/rest-api-to-mcp-server).
+
+## The protocol is supporting richer workflows
+
+The `2025-11-25` specification added or expanded features for production and agent-oriented use cases, including:
+
+- Tool use inside sampling
+- URL-based elicitation
+- Richer authorization discovery
+- Icons for implementations and capabilities
+- Experimental durable tasks
+
+Tasks allow long-running requests to expose state and deferred results, but they remain experimental in that specification. Builders should negotiate capabilities and avoid assuming every client implements new features.
+
+## Extensions protect the core protocol
+
+Not every useful capability belongs in the core specification.
+
+Official extensions provide a path for adding optional behavior without forcing every client and server to implement it. This lets the community test new patterns while keeping the base protocol smaller and more stable.
+
+When using an extension:
+
+- Confirm client and server support
+- Keep the core MCP behavior functional where possible
+- Namespace metadata correctly
+- Treat extension content as untrusted
+- Follow the extension's own versioning rules
+
+## Governance is becoming formal
+
+MCP now uses a formal governance structure under LF Projects.
+
+Major protocol changes are proposed through **Specification Enhancement Proposals (SEPs)**. Working Groups develop concrete proposals and implementations, while Interest Groups explore problem areas.
+
+For builders, this makes the evolution process more visible. You can distinguish:
+
+- A deployed stable specification feature
+- An experimental feature
+- An accepted proposal awaiting implementation
+- A draft idea under discussion
+- A roadmap priority
+
+Do not build production dependencies around a roadmap item as if it were already standardized.
+
+## Security is becoming an ecosystem concern
+
+As MCP servers move from local utilities to shared remote services, security requirements become more demanding.
+
+The ecosystem is developing stronger guidance for:
+
+- OAuth authorization-server discovery
+- Protected resource metadata
+- Incremental scope consent
+- Origin validation
+- Tool and prompt injection risks
+- Human approval for sensitive actions
+- Enterprise identity and policy enforcement
+
+MCP does not make a tool safe by standardizing its schema. Hosts and servers must still authenticate, authorize, validate, isolate, monitor, and audit operations.
+
+## What the 2026 roadmap emphasizes
+
+The official 2026 roadmap identifies four priority areas:
+
+1. Transport evolution and scalability
+2. Agent communication
+3. Governance maturation
+4. Enterprise readiness
+
+It also describes areas under exploration, including event-driven updates, streamed or reference-based results, deeper security work, and a more mature extensions ecosystem.
+
+These priorities show direction. They do not guarantee a feature or release date.
+
+## What builders should do now
+
+- Build against a stable protocol revision.
+- Negotiate capabilities instead of assuming support.
+- Use standard transports.
+- Keep SDK versions pinned.
+- Design small, clear, task-oriented tools.
+- Test with several clients.
+- Add production authentication and authorization.
+- Monitor the official specification, SDK releases, registry, and SEPs.
+- Separate stable features from experiments in your product promises.
+
+## Key takeaway
+
+**MCP is evolving beyond local tool connections into a governed, discoverable, extensible, and production-oriented ecosystem—but compatibility and security still require deliberate engineering.**

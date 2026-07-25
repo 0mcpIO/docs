@@ -1,0 +1,145 @@
+---
+title: Resources
+description: Learn how MCP resources provide application-controlled context through URIs, resource templates, read requests, and optional subscriptions.
+---
+
+**[MCP resources](https://modelcontextprotocol.io/specification/2025-11-25/server/resources)** are data or content that an MCP server makes available for clients to read and use as context.
+
+A resource can represent a file, document, database record, schema, log, source-code snapshot, or other information. Resources provide context; reading one should not perform a business action.
+
+In MCP's control model, resources are **application-controlled**. The host application decides how to discover, select, retrieve, and include them.
+
+## How resources work
+
+A typical resource flow is:
+
+1. The client discovers resources with `resources/list`.
+2. The host or user selects relevant context.
+3. The client requests the content with `resources/read`.
+4. The server returns text or binary content and its metadata.
+
+```text
+Client                           Server
+  |---- resources/list ----------->|
+  |<--- resource names and URIs -----|
+  |---- resources/read + URI ------>|
+  |<--- resource contents -----------|
+```
+
+Servers declare the `resources` capability during initialization when they support this feature.
+
+## Resource URIs
+
+Each resource has a URI that identifies it.
+
+```text
+file:///workspace/src/app.ts
+docs://handbook/security-policy
+crm://customers/CUS-1042
+```
+
+The URI scheme is defined by the server. A good URI is stable, descriptive, and safe to validate.
+
+Resource metadata can include:
+
+- `uri`
+- `name`
+- `title`
+- `description`
+- `mimeType`
+- `size`
+- Icons and other metadata supported by the protocol version
+
+## Direct resources and resource templates
+
+MCP supports two discovery patterns.
+
+### Direct resources
+
+A direct resource has a concrete URI. It can appear in a `resources/list` response.
+
+```json
+{
+  "uri": "docs://handbook/security-policy",
+  "name": "security_policy",
+  "title": "Security policy",
+  "mimeType": "text/markdown"
+}
+```
+
+### Resource templates
+
+A resource template describes a family of parameterized URIs.
+
+```json
+{
+  "uriTemplate": "crm://customers/{customer_id}",
+  "name": "customer_record",
+  "title": "Customer record",
+  "mimeType": "application/json"
+}
+```
+
+Templates are useful when a server cannot list every possible item. The client fills in the variables to create a valid resource URI.
+
+## Resource content types
+
+A read response can contain one or more resource contents.
+
+- **Text content** uses UTF-8 text and may represent Markdown, source code, JSON, logs, or other readable data.
+- **Binary content** uses base64-encoded data and an appropriate MIME type.
+
+Servers should return accurate MIME types so clients can display and process content correctly.
+
+## Updates and subscriptions
+
+A server can declare optional resource features:
+
+- `listChanged` indicates that the server may notify the client when the available resource list changes.
+- `subscribe` indicates that clients can subscribe to updates for individual resources.
+
+If supported, a server can send resource list change or resource update notifications. Clients should use only features negotiated during initialization.
+
+## Resources vs tools
+
+Both resources and tools can help a model access information, but they express different intent.
+
+| Resource | Tool |
+| --- | --- |
+| Supplies readable context | Executes an operation |
+| Identified by a URI | Identified by a tool name |
+| Retrieved with `resources/read` | Invoked with `tools/call` |
+| Managed by the application | Commonly selected by the model |
+| Can support templates and subscriptions | Accepts a JSON Schema-defined input |
+
+Use a resource for addressable context that a client may browse, cache, or attach. Use a [tool](/learn/core-concepts/tools) for search, computation, or an operation with arguments.
+
+## Examples of MCP resources
+
+| Resource URI | Content |
+| --- | --- |
+| `docs://product/refund-policy` | Current refund policy |
+| `repo://project/main/README.md` | Repository documentation |
+| `logs://service/errors/2026-07-25` | Error log for a date |
+| `schema://analytics/orders` | Order table schema |
+| `crm://customers/CUS-1042` | An approved customer record |
+
+## Design resources clearly
+
+- Use stable and descriptive URIs.
+- Include a useful name, title, description, and MIME type.
+- Use templates for large or dynamic collections.
+- Paginate large resource lists.
+- Keep returned content focused enough for an AI context window.
+- Define update and caching behavior.
+- Return clear errors for unknown or unauthorized URIs.
+
+## Security responsibilities
+
+Treat every resource URI as untrusted input.
+
+The server should authenticate and authorize each read, prevent path traversal, restrict accessible roots, avoid leaking sensitive metadata, and return only the content the caller may access. A resource being read-only does not make its data public or harmless.
+
+## Key takeaway
+
+**An MCP resource is application-controlled, URI-addressed context that a server exposes for clients to discover and read.**

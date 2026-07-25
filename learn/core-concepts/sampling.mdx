@@ -1,0 +1,127 @@
+---
+title: Sampling
+description: Learn how MCP sampling lets servers request model generations through a client while the client retains control over models, permissions, and user approval.
+---
+
+**[MCP sampling](https://modelcontextprotocol.io/specification/2025-11-25/client/sampling)** lets an MCP server request a language-model generation through the MCP client.
+
+The server supplies messages and generation preferences. The client decides whether to approve the request, which model to use, and what result to return.
+
+```text
+MCP server -> sampling request -> MCP client -> AI model
+MCP server <- approved result  <- MCP client <- AI model
+```
+
+This design lets a server use AI capabilities without holding the user's model-provider API key.
+
+## Why sampling exists
+
+Most server features provide something to the client. Sampling reverses that direction: the server asks the client to use its model.
+
+A server may use sampling to:
+
+- Summarize a long resource
+- Interpret logs or error messages
+- Extract structured data from text
+- Generate an intermediate plan
+- Analyze content as one step in a larger workflow
+- Implement a controlled agentic loop
+
+Sampling is an optional client feature. A server cannot assume that every client supports it.
+
+## How MCP sampling works
+
+A typical sampling flow is:
+
+1. During initialization, the client declares the `sampling` capability.
+2. The server sends a `sampling/createMessage` request.
+3. The client reviews the messages and parameters.
+4. The client may modify, reject, or ask the user to approve the request.
+5. The client selects a model and requests a generation.
+6. The client reviews the generated result.
+7. The client returns an approved result to the server.
+
+The client remains the control point throughout the flow.
+
+## What is in a sampling request?
+
+A request can include:
+
+- Conversation messages
+- A system prompt
+- Model preferences
+- A maximum token count
+- Stop sequences
+- Temperature and other optional generation settings
+- Metadata
+- Tools when both sides support tool-enabled sampling
+
+```json
+{
+  "method": "sampling/createMessage",
+  "params": {
+    "messages": [
+      {
+        "role": "user",
+        "content": {
+          "type": "text",
+          "text": "Summarize the incident log in five bullet points."
+        }
+      }
+    ],
+    "maxTokens": 500
+  }
+}
+```
+
+Model preferences are preferences, not commands. The client has final control over model selection.
+
+## Who controls sampling?
+
+| Decision | Controller |
+| --- | --- |
+| Whether sampling is supported | Client |
+| Whether a request proceeds | Client and user |
+| Which model is used | Client |
+| What prompt reaches the model | Client |
+| What result returns to the server | Client |
+| How the result is used afterward | Server, within its authorization |
+
+The MCP specification recommends keeping a human in the loop. Applications should let users inspect, edit, approve, or reject sampling requests and review results.
+
+## Sampling vs tool calls
+
+Sampling and [tools](/learn/core-concepts/tools) move in opposite directions.
+
+| Sampling | Tool call |
+| --- | --- |
+| Server asks the client to use an AI model | Client asks the server to perform an operation |
+| Uses `sampling/createMessage` | Uses `tools/call` |
+| Model access and selection stay with the client | Tool implementation and system access stay with the server |
+| Requires a client sampling capability | Requires a server tools capability |
+
+A server can combine both concepts. For example, it can call sampling to interpret an error and then return a suggested recovery plan as its tool result.
+
+## Tool-enabled sampling
+
+The current MCP specification allows clients to declare support for tools inside sampling. A server can then include tool definitions and tool-choice preferences in a sampling request.
+
+This feature supports multi-step model interactions, but it is capability-dependent. Servers must not send tool-enabled sampling requests to clients that did not declare the required support.
+
+## Security and privacy
+
+Sampling requests can contain sensitive instructions or data. Clients should:
+
+- Show the user what the server wants to send
+- Minimize unnecessary context
+- Prevent hidden access to full conversation history
+- Apply model-provider and organizational policies
+- Filter or reject unsafe requests
+- Review results before returning them
+- Avoid exposing credentials in prompts or responses
+
+Servers should treat sampling results as untrusted model output. Validate any structured data before using it in a tool, query, command, or business process.
+
+## Key takeaway
+
+**MCP sampling lets a server request AI generation through a client without taking control of the client's model access, credentials, or approval process.**

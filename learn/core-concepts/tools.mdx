@@ -1,0 +1,129 @@
+---
+title: Tools
+description: Learn what MCP tools are, how models discover and call them, how tool schemas and results work, and how tools differ from resources.
+---
+
+**[MCP tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)** are executable functions that an MCP server exposes to an AI application.
+
+Tools let a model request actions or retrieve dynamic information. A tool might search orders, create a ticket, query a database, send a message, or run a calculation.
+
+In MCP's control model, tools are **model-controlled**. The model can choose a relevant tool based on the conversation, but the application should keep the user informed and require confirmation for sensitive actions.
+
+## How an MCP tool works
+
+A basic tool interaction has two stages:
+
+1. The client discovers tools with `tools/list`.
+2. The client invokes a selected tool with `tools/call`.
+
+```text
+Client                         Server
+  |---- tools/list ------------->|
+  |<--- available tools ----------|
+  |---- tools/call + arguments -->|
+  |<--- tool result ---------------|
+```
+
+The server validates the arguments, checks authorization, performs the operation, and returns a result.
+
+## What defines a tool?
+
+A tool definition includes a programmatic name, a description, and a JSON Schema for its inputs. It can also include a display title, output schema, icons, and behavioral annotations.
+
+```json
+{
+  "name": "get_order",
+  "title": "Get order",
+  "description": "Retrieve the current status of an order by ID.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "order_id": {
+        "type": "string",
+        "description": "The order identifier, such as ORD-1042."
+      }
+    },
+    "required": ["order_id"]
+  },
+  "annotations": {
+    "readOnlyHint": true
+  }
+}
+```
+
+Clear names and descriptions help the model choose the correct tool. Precise schemas help it provide valid arguments.
+
+## Tool results
+
+A tool result can contain text, images, audio, resource links, embedded resources, or structured content supported by the negotiated protocol version.
+
+For predictable machine-readable output, a server can define an `outputSchema` and return matching `structuredContent`. It can also include text content for clients that display or process conversational results.
+
+Tool execution errors should be returned in the tool result when the model may be able to correct its input or recover. Protocol errors are for problems with the MCP request itself.
+
+## Tools are model-controlled
+
+“Model-controlled” describes the intended interaction pattern. It does not mean a model should have unrestricted authority.
+
+An MCP application should:
+
+- Show which tools are available to the model
+- Make tool calls visible to the user
+- Ask for confirmation before sensitive or destructive actions
+- Let the user deny a tool call
+- Display results and failures clearly
+
+The server must enforce permissions even if the client already asked for user approval.
+
+## Tools vs resources
+
+| Tools | Resources |
+| --- | --- |
+| Perform an operation | Provide context that can be read |
+| Usually selected by the model | Usually selected or managed by the application |
+| Accept structured arguments | Use resource URIs and optional templates |
+| Can create side effects | Reading a resource should not itself perform a business action |
+
+Use a [resource](/learn/core-concepts/resources) when the main purpose is to supply readable context. Use a tool when the model needs to perform an operation or request computed, parameterized work.
+
+## Examples of MCP tools
+
+| Tool | Input | Result |
+| --- | --- | --- |
+| `search_customers` | Search text and limit | Matching customer summaries |
+| `get_order` | Order ID | Current order details |
+| `create_ticket` | Subject, description, priority | New ticket ID |
+| `calculate_quote` | Product and quantity | Price breakdown |
+| `deploy_service` | Service and environment | Deployment status |
+
+Start with a small, focused tool set. Exposing every API endpoint can consume context and make correct tool selection harder.
+
+## Design tools that models can use reliably
+
+- Give each tool one clear purpose.
+- Use descriptive names and parameter labels.
+- Explain formats, units, limits, and required identifiers.
+- Define narrow input schemas.
+- Validate every argument on the server.
+- Return concise, actionable errors.
+- Return structured output when downstream processing needs stable fields.
+- Avoid placing secrets in descriptions or results.
+
+Tool annotations such as `readOnlyHint`, `destructiveHint`, `idempotentHint`, and `openWorldHint` can help clients present a tool appropriately. They are untrusted hints, not security controls.
+
+## Security responsibilities
+
+Before executing a tool, the server should:
+
+- Authenticate the caller when required
+- Authorize the exact operation and target
+- Validate and sanitize inputs
+- Apply rate and resource limits
+- Protect credentials and private data
+- Log security-relevant events without logging secrets
+
+Never rely on the model to enforce business rules.
+
+## Key takeaway
+
+**An MCP tool is a schema-defined function that a model can request through an MCP client, while the host, user, and server retain control over whether and how it runs.**

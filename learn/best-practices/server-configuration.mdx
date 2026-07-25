@@ -1,0 +1,187 @@
+---
+title: MCP server configuration best practices
+description: Configure MCP servers safely across development and production with validated settings, secret isolation, timeouts, limits, and version control.
+---
+
+Good [MCP server](https://modelcontextprotocol.io/) configuration is explicit, validated, environment-aware, and safe by default. It separates non-secret behavior from credentials and fails before accepting traffic when required values are invalid.
+
+## Separate configuration by responsibility
+
+| Area | Example settings |
+| --- | --- |
+| Identity | Server name, version, protocol compatibility |
+| Transport | `stdio` command or Streamable HTTP endpoint |
+| Capabilities | Enabled tools, resources, prompts, and notifications |
+| Authentication | Issuer, audience, scopes, and credential references |
+| Upstream API | Base URL, timeout, retry policy, and rate limit |
+| Safety | Allowed hosts, paths, operations, and result limits |
+| Observability | Log level, metrics exporter, and sampling |
+
+Do not use one unstructured configuration object for every concern.
+
+## Use a clear precedence order
+
+A predictable order might be:
+
+```text
+safe defaults < configuration file < environment-specific values < runtime flags
+```
+
+Document the order and show the resolved configuration without revealing secrets. Avoid hidden defaults for permissions, network access, and destructive tools.
+
+## Validate at startup
+
+Before the server accepts a request, validate:
+
+- Required values are present.
+- URLs use approved schemes and hosts.
+- Timeouts and limits are positive and bounded.
+- Tool names are unique.
+- Capability declarations match registered handlers.
+- Auth issuer, audience, and scopes are defined.
+- Local paths are absolute and within allowed roots.
+- Production mode does not use development credentials.
+
+Exit with a concise configuration error instead of failing later during a tool call.
+
+## Keep secrets out of configuration files
+
+Store secret values in a managed secret store, workload identity, or protected environment injection.
+
+Use references such as:
+
+```yaml
+upstream:
+  baseUrl: https://api.example.com
+  apiKeySecret: production/orders-api-key
+```
+
+Do not commit `.env` files, tokens, private keys, or complete client configurations containing credentials. Follow [API key management best practices](/learn/security/api-key-management).
+
+## Configure least privilege
+
+Enable only the capabilities and operations required for the deployment.
+
+```yaml
+capabilities:
+  tools:
+    - get_order
+    - list_orders
+  resources: []
+  prompts: []
+```
+
+Use separate credentials for read and write operations when possible. Restrict filesystem roots, outbound hosts, database roles, and OAuth scopes.
+
+Tool annotations can improve the client experience, but they do not enforce permissions.
+
+## Set timeouts and limits
+
+Configure:
+
+- Connection and upstream request timeouts
+- Maximum request and result sizes
+- Tool-specific execution deadlines
+- Rate and concurrency limits
+- Pagination limits
+- Retry count and backoff
+- Session and idle expiration
+
+Do not retry a write automatically unless it is idempotent or protected by an idempotency key.
+
+## Configure each transport safely
+
+For `stdio`:
+
+- Use an explicit executable path in managed environments.
+- Reserve `stdout` for protocol messages.
+- Send logs to `stderr`.
+- Pass only required environment variables.
+- Avoid an unnecessary shell wrapper.
+
+For Streamable HTTP:
+
+- Use HTTPS.
+- Validate `Origin`.
+- Configure authentication for protected servers.
+- Bind local-only services to loopback.
+- Set proxy and SSE timeouts deliberately.
+- Decide whether the server uses sessions and how they are stored.
+
+See [MCP transports](/learn/core-concepts/transports).
+
+## Separate environments
+
+Development, staging, and production should use different:
+
+- Credentials
+- Upstream accounts
+- Endpoints
+- data stores
+- log destinations
+- allowed origins
+- rate limits
+
+Keep the same configuration schema across environments. Change values, not application logic.
+
+## Version configuration
+
+Review configuration changes like code:
+
+1. Store non-secret configuration in version control.
+2. Validate it in CI.
+3. Record who approved a production change.
+4. Publish changes as an identifiable server version.
+5. Preserve the previous known-good version.
+6. Test rollback before you need it.
+
+For generated servers, pin or record the source OpenAPI, Swagger, direct REST, or GraphQL configuration used for each release.
+
+## Example production configuration
+
+```yaml
+server:
+  name: orders-mcp
+  version: 1.4.0
+
+transport:
+  type: streamable-http
+  endpoint: /mcp
+
+upstream:
+  baseUrl: https://api.example.com
+  timeoutMs: 5000
+  maxRetries: 1
+
+limits:
+  maxConcurrentCalls: 50
+  maxResultBytes: 1000000
+
+logging:
+  level: info
+  includeArguments: false
+```
+
+The exact fields depend on your implementation. The principles remain the same.
+
+## Configure a server in 0mcp
+
+With [0mcp](https://0mcp.io), you can configure and host MCP servers from OpenAPI 3.x, Swagger 2.0, direct REST API, and GraphQL sources.
+
+Review the generated tools, add resources and prompts, test in the [Playground](/guides/playground), and publish a version. Use [logs](/guides/logs), [analytics](/guides/analytics), and [versioning](/guides/versioning) to operate the server after release.
+
+## Production checklist
+
+- [ ] Configuration schema is validated at startup
+- [ ] Precedence and defaults are documented
+- [ ] Secrets are stored outside source control
+- [ ] Only required capabilities are enabled
+- [ ] Network, file, and identity permissions are restricted
+- [ ] Timeouts, limits, and retry rules are explicit
+- [ ] Development and production are isolated
+- [ ] Configuration changes are reviewed and auditable
+- [ ] Rollback has been tested
+
+## Key takeaway
+
+**Treat MCP configuration as a versioned security boundary: validate it early, expose only what is required, and keep secrets and environments isolated.**

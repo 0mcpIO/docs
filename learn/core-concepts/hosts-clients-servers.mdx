@@ -1,0 +1,124 @@
+---
+title: Hosts, clients, and servers in MCP
+description: Understand the roles of MCP hosts, clients, and servers, how they connect, and where control and security responsibilities belong.
+---
+
+The [Model Context Protocol](https://modelcontextprotocol.io/docs/learn/architecture) (MCP) uses three main participants: **hosts**, **clients**, and **servers**.
+
+A host is the AI application you use. It creates an MCP client for each server connection. An MCP server exposes selected capabilities from an external system.
+
+```text
+User
+  |
+MCP host
+  |
+  +-- MCP client A <--> MCP server A <--> External system A
+  |
+  +-- MCP client B <--> MCP server B <--> External system B
+```
+
+This separation lets one AI application connect to multiple systems while keeping each connection isolated.
+
+## The three participants at a glance
+
+| Participant | What it is | Main responsibility |
+| --- | --- | --- |
+| **Host** | The AI application the user interacts with | Coordinates the AI experience, permissions, and connected servers |
+| **Client** | A protocol component created by the host | Maintains one connection and exchanges MCP messages with one server |
+| **Server** | A program or service that implements MCP | Exposes tools, resources, prompts, or other supported capabilities |
+
+The API, database, file system, or SaaS product behind an MCP server is an **external system**. It does not need to support MCP when the server translates between MCP and the system's existing interface.
+
+## What is an MCP host?
+
+An **MCP host** is the application that brings the user, AI model, and MCP connections together.
+
+Examples include an AI assistant, coding environment, desktop application, or internal agent platform. A host commonly:
+
+- Creates and manages MCP clients
+- Decides which servers can connect
+- Controls what conversation context a server receives
+- Combines approved context from multiple servers
+- Presents consent and confirmation interfaces
+- Applies application-level security policies
+
+The host owns the overall user experience. Connecting a server should not automatically give that server access to the full conversation or to other connected servers.
+
+## What is an MCP client?
+
+An **MCP client** is the protocol component inside the host that communicates with one MCP server.
+
+The client:
+
+- Opens and maintains the connection
+- Negotiates the protocol version and capabilities
+- Sends requests and notifications
+- Receives responses and server notifications
+- Handles connection errors and shutdown
+
+One host can run many clients. Each client normally has a one-to-one relationship with a server.
+
+<Note>
+The host and client are different roles even when one application implements both. The host coordinates the complete AI experience; the client manages a specific MCP connection.
+</Note>
+
+## What is an MCP server?
+
+An **MCP server** is a program that makes selected data, actions, or workflows available through MCP.
+
+A server can expose:
+
+- [Tools](/learn/core-concepts/tools) that a model can call
+- [Resources](/learn/core-concepts/resources) that an application can read
+- [Prompts](/learn/core-concepts/prompts) that a user can select
+
+It can run as a local process or as a remote service. A server should expose a focused set of capabilities and enforce authorization when it accesses the underlying system.
+
+## How they work together
+
+A typical connection follows this sequence:
+
+1. The user enables or selects an MCP server in the host.
+2. The host creates an MCP client for that server.
+3. The client connects through an MCP [transport](/learn/core-concepts/transports).
+4. The client and server negotiate supported capabilities.
+5. The client discovers the server's available features.
+6. The host decides how those features appear to the user and model.
+7. The client and server exchange requests, results, and notifications.
+
+For example, a coding assistant may use one client to connect to a local file server and another to connect to a hosted issue-tracking server.
+
+## Where control belongs
+
+| Decision | Responsible participant |
+| --- | --- |
+| Which servers are connected | Host |
+| What context a server receives | Host |
+| How MCP messages are exchanged | Client and server |
+| Which capabilities are exposed | Server |
+| Whether an underlying operation is authorized | Server and external system |
+| Whether a sensitive operation proceeds | Host, user, and server policy |
+
+MCP standardizes communication. It does not replace authentication, authorization, validation, or user consent.
+
+## Common points of confusion
+
+### Is the host the AI model?
+
+No. The host is the application around the model. It manages the conversation, connections, permissions, and model access.
+
+### Is an MCP client a user-facing application?
+
+Not necessarily. The client is usually an internal component of the host.
+
+### Is every API an MCP server?
+
+No. An API becomes available through MCP only when an MCP server exposes selected API operations as MCP capabilities.
+
+### Can servers communicate with each other?
+
+MCP normally connects each server to its own client. The host may coordinate results across connections, but servers should not assume direct access to one another.
+
+## Key takeaway
+
+**The host manages the AI experience, a client manages one MCP connection, and a server provides focused capabilities from an external system.**

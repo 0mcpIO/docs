@@ -1,0 +1,160 @@
+---
+title: MCP architecture explained
+description: Understand MCP hosts, clients, servers, capability negotiation, security boundaries, and the flow of context and tool requests.
+---
+
+MCP uses a **[host-client-server architecture](https://modelcontextprotocol.io/docs/learn/architecture)**. The host runs the AI experience, each MCP client manages one server connection, and MCP servers provide focused capabilities such as tools, resources, and prompts.
+
+```text
+                     +-> MCP client <-> MCP server A
+User <-> MCP host ---|
+                     +-> MCP client <-> MCP server B
+```
+
+This structure keeps orchestration in the host and separates external integrations into independently managed servers.
+
+![MCP architecture diagram showing one host, multiple isolated clients, and multiple local or remote servers](https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/mcp%20architecture.webp)
+
+## The four architectural layers
+
+You can understand an MCP system as four layers:
+
+| Layer | Responsibility |
+| --- | --- |
+| Host | Runs the AI application and coordinates the user experience |
+| Client | Maintains one protocol session with one server |
+| Server | Exposes a focused set of context and capabilities |
+| External system | Performs the underlying work or stores the underlying data |
+
+The external system may be an API, database, SaaS platform, file system, or internal service. It is not itself required to implement MCP when an MCP server wraps it.
+
+## MCP host
+
+The host is the application the user interacts with.
+
+It may be an AI assistant, coding environment, desktop application, or internal agent platform. The host typically:
+
+- Creates and manages MCP clients
+- Controls which servers can connect
+- Coordinates model interactions
+- Presents permission and approval interfaces
+- Combines context from approved sources
+- Enforces application-level security policies
+
+The host owns the conversation. An MCP server should receive only the information needed for its operation.
+
+## MCP client
+
+An MCP client is the protocol component inside the host.
+
+Each client normally maintains a one-to-one connection with a server. It:
+
+- Initializes the session
+- Negotiates supported capabilities
+- Routes requests, responses, and notifications
+- Tracks the server connection
+- Preserves isolation from other server connections
+
+One host can run several clients at the same time. This allows an AI application to use multiple servers without giving those servers direct access to one another.
+
+## MCP server
+
+An MCP server provides context or actions to clients.
+
+A server may run as a local process or as a remote service. It can expose:
+
+- [Tools](/learn/core-concepts/tools) that the model can request
+- [Resources](/learn/core-concepts/resources) that the application can read
+- [Prompts](/learn/core-concepts/prompts) that users can select
+
+Servers should have focused responsibilities. A server that wraps a billing API, for example, should expose only the billing capabilities its users need.
+
+## Server and client features
+
+MCP supports features on both sides of the connection.
+
+Common server features include tools, resources, and prompts. Client features can include roots, sampling, and elicitation.
+
+These are not assumed. The client and server declare supported capabilities during initialization.
+
+## Capability negotiation
+
+Capability negotiation lets both sides agree on available protocol features.
+
+During initialization:
+
+1. The client declares the features it supports.
+2. The server declares the features it supports.
+3. Both sides use only the capabilities available for that session.
+
+This design allows implementations to add features progressively. A simple tool server does not need to implement every part of MCP.
+
+## Message layer
+
+MCP messages use JSON-RPC 2.0 structures:
+
+- **Requests** expect a response.
+- **Responses** contain a result or error.
+- **Notifications** do not expect a response.
+
+The message layer is separate from the transport. The same protocol behavior can run over `stdio` for local processes or Streamable HTTP for remote services.
+
+Read [The MCP specification](/learn/fundamentals/mcp-specification-explained) for the normative protocol requirements.
+
+## Transport layer
+
+The transport moves messages between the client and server.
+
+The standard transports are:
+
+- `stdio`
+- Streamable HTTP
+
+`stdio` commonly connects a host to a child process on the same machine. Streamable HTTP supports network-accessible servers and normal HTTP infrastructure.
+
+Transport choice affects deployment, authentication, latency, and operational responsibility. Compare these tradeoffs in [Local vs remote MCP](/learn/fundamentals/local-vs-remote-mcp).
+
+## Security boundaries
+
+The host-client-server design creates important boundaries:
+
+- Servers should not automatically receive the full conversation.
+- One server should not see another server's data.
+- The host should control user consent.
+- Tool descriptions and results should be treated as untrusted input.
+- Sensitive actions should require clear authorization.
+- Servers should apply least-privilege access to underlying systems.
+
+MCP defines communication behavior, but implementation security remains the responsibility of the host and server developers.
+
+## Example architecture for an API-backed server
+
+An API-backed MCP deployment may look like this:
+
+```text
+User
+  |
+AI host
+  |
+MCP client
+  |
+Hosted MCP server
+  |
+Existing REST API
+  |
+Database and business logic
+```
+
+The MCP server translates an MCP capability request into an API request. The API remains the authority for business logic and data access.
+
+[0mcp](https://0mcp.io) uses this pattern to turn an [OpenAPI specification](/api-sources/openapi) into a hosted MCP interface.
+
+## Architecture vs request lifecycle
+
+Architecture describes the components and their boundaries. The lifecycle describes the order of messages inside one connection.
+
+For the message sequence from initialization to results, read [How MCP works, step by step](/learn/fundamentals/how-mcp-works).
+
+## Key takeaway
+
+**MCP architecture separates the AI host, protocol connections, and external capabilities so each part can remain focused, composable, and governed.**

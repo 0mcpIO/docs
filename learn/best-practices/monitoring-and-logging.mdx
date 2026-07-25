@@ -1,0 +1,141 @@
+---
+title: Real-time monitoring and logging for MCP servers
+description: Learn which MCP server logs, metrics, traces, dashboards, and alerts you need to operate reliable and secure AI integrations.
+---
+
+**[MCP monitoring](https://modelcontextprotocol.io/docs/tools/debugging)** shows whether your server is available, fast, correct, and secure. **MCP logging** records the events that explain what happened during a request.
+
+A production MCP server needs both. Metrics reveal a problem. Structured logs and traces help you find its cause.
+
+## What should you monitor?
+
+Monitor the complete path from the MCP client to the upstream system:
+
+```text
+MCP client -> transport -> MCP method -> tool or resource -> upstream API
+```
+
+| Signal | What to measure | Why it matters |
+| --- | --- | --- |
+| Availability | Successful initialization and request rate | Detects outages and connection failures |
+| Traffic | Requests by method, tool, client, and version | Shows usage and capacity needs |
+| Latency | p50, p95, and p99 duration | Finds slow tools and upstream dependencies |
+| Errors | Protocol, tool, transport, auth, and upstream errors | Separates user errors from server failures |
+| Saturation | CPU, memory, queue depth, and open connections | Warns when capacity is running out |
+| Security | Denied calls, invalid tokens, and unusual tool use | Helps detect abuse and misconfiguration |
+
+Track results by tool name and server version. A healthy overall average can hide one slow or failing tool.
+
+## Use structured logs
+
+Write logs as structured fields instead of long free-form strings.
+
+```json
+{
+  "timestamp": "2026-07-25T10:42:13.421Z",
+  "level": "info",
+  "request_id": "req_8f31",
+  "method": "tools/call",
+  "tool": "get_order",
+  "server_version": "1.8.0",
+  "duration_ms": 184,
+  "outcome": "success"
+}
+```
+
+Useful fields include:
+
+- Timestamp and severity
+- Request, session, and trace identifiers
+- MCP method and capability name
+- Tool, resource, or prompt name
+- Authenticated principal or anonymized tenant identifier
+- Server and protocol version
+- Duration, result size, and outcome
+- Safe error category and upstream status
+
+Do not record access tokens, API keys, authorization headers, prompt contents, personal data, or complete tool arguments by default.
+
+## Follow MCP logging rules
+
+The MCP specification lets a server declare the `logging` capability and send structured `notifications/message` events. A client can request a minimum severity with `logging/setLevel`.
+
+For a local [`stdio` server](/learn/fundamentals/local-mcp-servers), reserve `stdout` for protocol messages. Send operational logs to `stderr`. Writing ordinary logs to `stdout` can corrupt the JSON-RPC stream.
+
+Protocol logs are useful to the connected client. They do not replace your server-side observability pipeline, audit log, or infrastructure metrics.
+
+## Add distributed tracing
+
+Create a trace at the MCP request boundary and a span for each important step:
+
+```text
+tools/call get_order
+├── validate input
+├── authorize customer
+├── call GET /orders/{id}
+└── normalize tool result
+```
+
+Propagate a correlation identifier to the upstream API when possible. This connects a failed tool call to the corresponding API, database, or queue event.
+
+Keep internal trace identifiers out of model-visible error messages unless they are safe support references.
+
+## Build useful dashboards
+
+Start with four dashboards:
+
+1. **Service health:** availability, request rate, latency, and error rate.
+2. **Tool usage:** calls, success rate, latency, and result size by tool.
+3. **Dependencies:** upstream API latency, status codes, retries, and rate limits.
+4. **Security:** authentication failures, denied operations, unusual call volume, and destructive actions.
+
+Use percentiles for latency. Averages can hide a poor experience for a smaller group of users.
+
+## Alert on user impact
+
+Good alerts describe an actionable failure:
+
+- Initialization failures exceed the normal baseline.
+- A tool's error rate remains above its threshold.
+- p95 latency breaches the service objective.
+- Upstream `429` or `5xx` responses rise sharply.
+- Authorization failures or destructive calls increase unexpectedly.
+- No requests or heartbeats arrive when traffic is expected.
+
+Add a runbook link, affected service, severity, and owner to every alert. Avoid paging on isolated errors that recover automatically.
+
+## Separate operational logs from audit logs
+
+Operational logs help you debug reliability. Audit logs answer who performed a sensitive action, what changed, and whether it was allowed.
+
+For a write or destructive tool, an audit event should include:
+
+- The authenticated actor
+- The tool and target object
+- The authorization decision
+- A timestamp and correlation ID
+- The outcome and safe change summary
+
+Protect audit logs from modification and restrict access to them.
+
+## Monitor a 0mcp server
+
+[0mcp](https://0mcp.io) provides activity logs and usage analytics for hosted MCP servers created from OpenAPI, Swagger, direct REST API, or GraphQL sources.
+
+Use [Analytics](/guides/analytics) to review usage patterns and [Logs](/guides/logs) to investigate individual calls. When you publish a new version, compare errors and latency with the previous version and use [rollback](/guides/versioning) if necessary.
+
+## Production checklist
+
+- [ ] Structured logs use stable field names
+- [ ] `stdout` is reserved for `stdio` protocol messages
+- [ ] Secrets and sensitive payloads are redacted
+- [ ] Metrics are segmented by tool and version
+- [ ] Traces cover upstream dependencies
+- [ ] Dashboards show availability, latency, errors, and saturation
+- [ ] Alerts have thresholds, owners, and runbooks
+- [ ] Sensitive actions create protected audit events
+- [ ] Retention and access policies match your compliance needs
+
+## Key takeaway
+
+**Monitor MCP as an end-to-end system: protocol health, capability usage, upstream dependencies, security decisions, and user-visible outcomes.**

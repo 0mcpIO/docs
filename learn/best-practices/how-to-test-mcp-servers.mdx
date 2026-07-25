@@ -1,0 +1,182 @@
+---
+title: How to test an MCP server
+description: Test MCP servers with unit, contract, protocol, integration, security, and performance checks before production.
+---
+
+You should test an MCP server at three boundaries: its business logic, its MCP contract, and its behavior with real clients and upstream systems.
+
+The fastest reliable workflow combines automated tests with the interactive [MCP Inspector](/learn/fundamentals/mcp-inspector-guide).
+
+## Use an MCP testing pyramid
+
+| Test layer | Verifies | Run frequency |
+| --- | --- | --- |
+| Unit | Validation, mapping, authorization, and result formatting | Every change |
+| Contract | Tool schemas and upstream API contracts | Every change |
+| Protocol | Initialization, discovery, calls, and errors | Every change |
+| Integration | Real client, auth provider, API, and database behavior | Before merge or release |
+| End-to-end | Complete user tasks | Before release |
+| Security and performance | Abuse resistance, latency, and capacity | Regularly and before major releases |
+
+Keep most tests at the lower layers. They are faster and make failures easier to diagnose.
+
+## 1. Test business logic
+
+Test handlers without starting a transport when possible.
+
+For each tool, resource, and prompt, cover:
+
+- Valid input
+- Missing required fields
+- Wrong types and invalid formats
+- Boundary values and oversized input
+- Authorized and unauthorized callers
+- Empty upstream results
+- Rate limits, timeouts, and upstream failures
+- Safe output filtering
+
+Mock external APIs for deterministic unit tests. Add separate integration tests against a sandbox or test account.
+
+## 2. Test the MCP contract
+
+Verify that the published interface matches the implementation:
+
+- Every capability is declared during initialization.
+- `tools/list`, `resources/list`, and `prompts/list` return valid metadata.
+- Input and output schemas are valid JSON Schema.
+- Tool names are unique and stable.
+- Required fields match the handler requirements.
+- Pagination and change notifications work when supported.
+- Tool results conform to their declared `outputSchema`.
+
+If your MCP server wraps an API, add contract tests that map each tool input to the correct REST or GraphQL request and map the response back to the declared result.
+
+## 3. Test with MCP Inspector
+
+Run the official [Inspector](https://modelcontextprotocol.io/docs/tools/inspector) against a local command:
+
+```bash
+npx @modelcontextprotocol/inspector node dist/server.js
+```
+
+Use the Inspector to:
+
+1. Confirm initialization and capability negotiation.
+2. Inspect tool, resource, and prompt metadata.
+3. Call every tool with valid and invalid arguments.
+4. Read resources and test subscriptions.
+5. Render prompts with different arguments.
+6. Watch log messages and notifications.
+7. Reconnect after restarting the server.
+
+The Inspector is ideal for exploration. It does not replace repeatable automated tests.
+
+## 4. Test transport behavior
+
+For `stdio`:
+
+- Confirm that only MCP messages appear on `stdout`.
+- Confirm that logs go to `stderr`.
+- Test startup with absolute executable and file paths.
+- Test shutdown and child-process cleanup.
+
+For Streamable HTTP:
+
+- Test POST requests and optional GET-based SSE streams.
+- Validate the `Origin` header.
+- Verify authentication and session handling.
+- Test disconnects, reconnection, and resumability when implemented.
+- Test concurrent requests, timeouts, and request-size limits.
+
+Read [MCP transports](/learn/core-concepts/transports) for the protocol differences.
+
+## 5. Test errors and recovery
+
+Create tests for both:
+
+- **Protocol errors:** malformed JSON-RPC, unknown methods, and invalid protocol parameters.
+- **Tool execution errors:** invalid business input, missing records, rate limits, and upstream failures.
+
+Confirm that errors are actionable for the client without exposing stack traces, credentials, or internal system details. See [error handling and debugging](/learn/best-practices/error-handling-and-debugging).
+
+## 6. Test model behavior
+
+Protocol correctness does not guarantee that an AI model will use your server correctly.
+
+Create a small evaluation set of realistic user requests. Measure whether the client:
+
+- Chooses the correct tool
+- Avoids irrelevant or overlapping tools
+- Supplies valid arguments
+- Interprets empty and partial results correctly
+- Requests confirmation before sensitive actions
+- Recovers from a correctable tool error
+
+Include requests that should not call a tool. This catches descriptions that are too broad.
+
+## 7. Test security
+
+Test the controls described in [MCP server security](/learn/security/mcp-server-security):
+
+- Authentication and token validation
+- Object-level authorization
+- Least-privilege scopes
+- Prompt injection in inputs and upstream content
+- Path, command, query, and URL injection
+- SSRF and redirect handling
+- Secret redaction
+- Rate and concurrency limits
+- Confirmation for destructive operations
+
+Treat tool annotations as hints, not authorization controls.
+
+## 8. Test performance
+
+Measure:
+
+- Initialization time
+- Tool discovery time
+- p50, p95, and p99 call latency
+- Maximum concurrent requests
+- Memory and CPU under load
+- Large result behavior
+- Upstream timeout and retry behavior
+
+Test the slowest tools separately. Set a performance budget based on the experience your AI client needs.
+
+## Add tests to CI
+
+A practical pipeline is:
+
+```text
+lint -> unit tests -> schema checks -> protocol tests
+     -> integration tests -> security checks -> release
+```
+
+Use fixed fixtures, isolated credentials, and disposable test data. Never run destructive tests against production.
+
+## Test a 0mcp server
+
+Use the [0mcp](https://0mcp.io) [Playground](/guides/playground) to inspect and call generated tools before publishing. Test servers created from OpenAPI, Swagger, direct REST API, and GraphQL sources with the same core checklist:
+
+- Review generated names, descriptions, and schemas.
+- Test valid, invalid, empty, and unauthorized requests.
+- Confirm upstream authentication behavior.
+- Check activity [logs](/guides/logs).
+- Publish a version only after the intended tools pass.
+
+## Release checklist
+
+- [ ] Initialization succeeds in supported clients
+- [ ] All published capabilities have tests
+- [ ] Schemas and results match
+- [ ] Auth and object-level permissions are covered
+- [ ] Error messages are safe and actionable
+- [ ] Model-behavior evaluations pass
+- [ ] Transport reconnect and shutdown behavior works
+- [ ] Performance meets the defined budget
+- [ ] A previous version is available for rollback
+
+## Key takeaway
+
+**Test the handler, protocol, client behavior, security boundary, and upstream integration separately so one passing layer cannot hide a failure in another.**

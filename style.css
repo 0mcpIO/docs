@@ -101,6 +101,27 @@ header#navbar {
   color: var(--docs-dashboard-text) !important;
 }
 
+#sidebar a[aria-current='page'],
+#sidebar li[data-active='true'] > a,
+#sidebar li[data-active-nav-item='true'] > a {
+  background: rgb(231 132 104 / 0.12) !important;
+  color: var(--docs-dashboard-accent) !important;
+  font-weight: 600 !important;
+}
+
+#sidebar a[aria-current='page'] span,
+#sidebar li[data-active='true'] > a span,
+#sidebar li[data-active-nav-item='true'] > a span {
+  color: inherit !important;
+}
+
+#sidebar a[aria-current='page'] svg,
+#sidebar li[data-active='true'] > a svg,
+#sidebar li[data-active-nav-item='true'] > a svg {
+  color: currentColor !important;
+  background-color: currentColor !important;
+}
+
 #sidebar :is(.nav-anchor, .nav-dropdown-trigger) svg,
 .nav-dropdown-content .nav-dropdown-item-icon {
   color: currentColor !important;

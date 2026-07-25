@@ -1,0 +1,209 @@
+---
+title: Turning OpenAPI specs into MCP servers
+description: Learn how to convert an OpenAPI specification into an MCP server, map API operations to tools, handle schemas and authentication, and test the result.
+---
+
+You can turn an existing REST API into an [MCP server](https://modelcontextprotocol.io/) by converting selected operations from its **OpenAPI specification** into MCP tools.
+
+The REST API remains the source of business logic and data. The MCP server becomes an AI-friendly adapter that describes approved operations, validates tool inputs, sends HTTP requests to the API, and returns the results to an MCP client.
+
+```text
+MCP client
+    |
+MCP tool call
+    |
+MCP server
+    |
+HTTP request
+    |
+Existing REST API
+```
+
+## OpenAPI and MCP serve different purposes
+
+OpenAPI and MCP both use machine-readable schemas, but they describe different interfaces.
+
+| OpenAPI | MCP |
+| --- | --- |
+| Describes HTTP endpoints | Describes capabilities for AI applications |
+| Organizes operations by paths and HTTP methods | Exposes model-readable tools, resources, and prompts |
+| Separates path, query, header, and body inputs | Gives each tool one input schema |
+| Documents HTTP responses and status codes | Returns MCP content or structured tool results |
+
+Conversion is not a file-format change. It is an interface-design process.
+
+## How an API operation becomes an MCP tool
+
+Consider this simplified OpenAPI operation:
+
+```yaml
+paths:
+  /orders/{order_id}:
+    get:
+      operationId: getOrder
+      summary: Get an order by ID
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+```
+
+An MCP server can expose it as a tool:
+
+```json
+{
+  "name": "get_order",
+  "description": "Retrieve the current details of an order by its ID.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "order_id": {
+        "type": "string",
+        "description": "The order identifier, such as ORD-1042."
+      }
+    },
+    "required": ["order_id"]
+  }
+}
+```
+
+When the client calls `get_order`, the MCP server inserts `order_id` into the path, adds approved authentication, calls the REST API, and converts the response into an MCP tool result.
+
+## Step-by-step conversion process
+
+### 1. Validate the OpenAPI document
+
+Start with an accurate API description in a version supported by your converter. 0mcp accepts OpenAPI 3.x or Swagger 2.0 documents in JSON or YAML.
+
+Check that it has:
+
+- A correct API base URL
+- Stable, unique `operationId` values
+- Clear operation and parameter descriptions
+- Accurate request and response schemas
+- Documented authentication schemes
+- No unresolved references or validation errors
+
+Read [OpenAPI specification requirements](/api-sources/openapi) for 0mcp import guidance.
+
+### 2. Select the operations to expose
+
+Do not automatically expose every endpoint.
+
+Choose operations that support clear user tasks. Review write, delete, payment, administrative, and bulk operations carefully.
+
+For a large API, begin with one focused domain such as:
+
+- Order lookup
+- Customer support
+- Inventory status
+- Project management
+- Reporting
+
+A smaller tool set consumes less model context and makes correct tool selection easier.
+
+### 3. Map inputs into one tool schema
+
+An OpenAPI operation can define inputs in several places:
+
+- Path parameters
+- Query parameters
+- Headers
+- Cookies
+- Request body
+
+An MCP tool normally presents these as one input object. The conversion must resolve name collisions and preserve required fields, types, descriptions, enums, formats, and validation rules.
+
+Keep generated schemas as simple as possible. Complex combinations such as deeply nested `oneOf`, `allOf`, or recursive references may behave differently across MCP clients.
+
+### 4. Resolve references safely
+
+OpenAPI documents often reuse schemas through `$ref`.
+
+A converter may dereference and inline these schemas. Recursive references require special handling, such as:
+
+- Limiting recursion depth
+- Replacing recursive branches with simpler shapes
+- Returning a smaller summary schema
+- Keeping complex transformation logic in the server
+
+Do not fetch untrusted external references without protections against server-side request forgery.
+
+### 5. Map authentication
+
+The MCP server must preserve the API's security boundary.
+
+Depending on the architecture, it may:
+
+- Forward a user-provided bearer token
+- Add a server-managed API credential
+- Complete an OAuth flow
+- Exchange one credential for another
+
+Your API should still authorize every request. Never assume that a successful MCP connection grants permission to every API operation.
+
+See [Authentication model](/concepts/authentication-model) for the patterns supported by 0mcp.
+
+### 6. Convert API responses
+
+The MCP result should give the model enough information to continue without flooding its context.
+
+Consider:
+
+- Returning only relevant fields
+- Providing structured content for predictable data
+- Preserving pagination information
+- Converting expected API failures into actionable tool errors
+- Removing internal headers, stack traces, and secrets
+
+The original API remains the authority for status, data, and business rules.
+
+### 7. Test the generated server
+
+Use [MCP Inspector](/learn/fundamentals/mcp-inspector-guide) to verify:
+
+- Initialization and capability negotiation
+- Tool names and descriptions
+- Required and optional inputs
+- Authentication and authorization failures
+- Read and write operations
+- Empty, paginated, and error responses
+- Timeouts and rate limits
+
+Then test with real MCP clients to evaluate tool selection and description quality.
+
+## Common conversion problems
+
+| Problem | Recommended response |
+| --- | --- |
+| Hundreds of operations become tools | Select a task-focused subset |
+| Duplicate parameter names | Rename fields predictably |
+| Recursive schemas | Simplify or limit dereferencing |
+| Weak descriptions | Rewrite them for model selection |
+| Large response bodies | Return focused structured results |
+| API errors confuse the model | Provide actionable tool errors |
+| Spec and server drift apart | Regenerate and test in CI/CD |
+
+## Convert an OpenAPI spec with 0mcp
+
+[0mcp](https://0mcp.io) provides a hosted conversion workflow:
+
+1. Create a server in the dashboard.
+2. Import the OpenAPI document from a file, public URL, or pasted text.
+3. Review the discovered operations.
+4. Select the operations that should become tools.
+5. Improve generated tool names and descriptions.
+6. Publish a version.
+7. Test it in the Playground and connect an MCP client.
+
+Your API stays unchanged while [0mcp](https://0mcp.io) hosts the MCP-compatible interface. Follow the [quick start](/get-started/quick-start) to create your first server.
+
+<Note>
+An OpenAPI document is one 0mcp source option. 0mcp can also convert a REST API directly without an OpenAPI document or convert a GraphQL API through the GraphQL source option. Each source uses the same hosted MCP features.
+</Note>
+
+## Key takeaway
+
+**Turning OpenAPI into MCP means designing a focused, secure tool interface over an existing API—not exposing every HTTP endpoint without review.**

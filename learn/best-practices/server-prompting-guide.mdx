@@ -1,0 +1,163 @@
+---
+title: MCP server prompting guide
+description: Design MCP prompts, server instructions, and tool descriptions that help AI clients choose capabilities accurately and safely.
+---
+
+**[MCP server prompting](https://modelcontextprotocol.io/specification/2025-11-25/server/prompts)** includes the words your server uses to explain its capabilities to an AI client. This can include tool descriptions, resource metadata, reusable prompts, and optional server instructions.
+
+These elements have different jobs. Keeping them separate makes model behavior easier to predict and test.
+
+## Choose the right mechanism
+
+| Mechanism | Purpose | Control |
+| --- | --- | --- |
+| Tool description | Helps a model decide whether and how to call a tool | Model-controlled |
+| Resource description | Explains addressable context | Application-controlled |
+| MCP prompt | Provides a reusable message template | User-controlled |
+| Server instructions | Gives broad usage guidance for the server | Host-dependent |
+
+Do not hide a required security rule only in prose. Authentication, authorization, validation, and confirmation must be enforced by code.
+
+## Write precise tool descriptions
+
+A strong tool description explains:
+
+- The exact task
+- When to use the tool
+- When not to use it
+- Important side effects
+- How it differs from similar tools
+
+Weak:
+
+> Manage customer orders.
+
+Better:
+
+> Retrieves one order by its exact `ord_` identifier. Use `search_orders` when the identifier is unknown. This tool does not modify the order.
+
+Use stable, action-oriented names such as `get_order`, `search_orders`, and `cancel_order`. Avoid multiple tools with nearly identical descriptions.
+
+## Make schemas do the hard work
+
+Descriptions guide selection. JSON Schema constrains input.
+
+For every argument:
+
+- Use the correct type.
+- State the format and units.
+- Add meaningful field descriptions.
+- Mark required values.
+- Use enums for small closed sets.
+- Add sensible length, range, and pattern limits.
+- Avoid accepting a single free-form object when fields are known.
+
+Return structured output with an `outputSchema` when the client needs reliable fields.
+
+## Design reusable MCP prompts
+
+MCP prompts are discoverable templates retrieved through `prompts/list` and `prompts/get`. They are intended to be user-controlled.
+
+A useful prompt has:
+
+- A stable name
+- A clear display title and description
+- A small set of named arguments
+- A focused result
+- No hidden side effect
+
+```json
+{
+  "name": "summarize_order",
+  "title": "Summarize an order",
+  "description": "Creates a support-ready summary for one order.",
+  "arguments": [
+    {
+      "name": "order_id",
+      "description": "Exact order ID beginning with ord_",
+      "required": true
+    }
+  ]
+}
+```
+
+Validate arguments before generating messages. Return a clear error for a missing or unknown argument.
+
+## Use embedded resources deliberately
+
+A prompt can include text, images, audio, or embedded resources supported by the protocol.
+
+Embed a resource when the workflow needs stable server-managed context, such as a support policy or code file. Keep the content relevant and bounded. Authorize the resource before including it.
+
+Treat embedded and retrieved content as untrusted. It may contain prompt injection.
+
+## Keep instructions short and scoped
+
+Server instructions should explain broad behavior that applies across the server:
+
+- The server's domain
+- Important tool-selection rules
+- Required confirmation patterns
+- Known limitations
+
+Do not repeat every tool schema. Long instructions consume context and can conflict with more precise metadata.
+
+## Design for safe model behavior
+
+- Label write and destructive actions clearly.
+- Require confirmation in the host or server for high-impact operations.
+- Use least privilege for upstream credentials.
+- Validate the final arguments independently of the conversation.
+- Treat tool descriptions and annotations from untrusted servers as untrusted.
+- Never include credentials in prompts, descriptions, or examples.
+- Do not let retrieved text override authorization policy.
+
+Read [MCP server security](/learn/security/mcp-server-security) for implementation controls.
+
+## Test prompting with evaluations
+
+Create a test set containing:
+
+- Clear requests for each tool
+- Ambiguous requests
+- Requests that should use a similar tool
+- Requests that should not call any tool
+- Missing or malformed arguments
+- Prompt-injection attempts
+- Read and write variants of the same task
+
+Measure selection accuracy, argument validity, unnecessary calls, safe refusals, and recovery from tool errors. Run the evaluation across the clients and models you support.
+
+## Improve descriptions systematically
+
+When a model chooses the wrong tool:
+
+1. Save the failing request as a test case.
+2. Identify the overlapping or missing wording.
+3. Change one name, description, or schema constraint.
+4. Rerun the full evaluation set.
+5. Publish the change as a reviewed version.
+
+Avoid tuning one example in a way that harms other tasks.
+
+## Create prompts in 0mcp
+
+[0mcp](https://0mcp.io) lets you add reusable prompts to hosted MCP servers created from OpenAPI, Swagger, direct REST API, or GraphQL sources.
+
+Use [Prompts](/learn/core-concepts/prompts) to define the template and inputs. Test prompt discovery and generated messages in the [Playground](/guides/playground) before publishing a new version.
+
+## Checklist
+
+- [ ] Each tool has one distinct purpose
+- [ ] Descriptions explain when to use and avoid a tool
+- [ ] Schemas constrain known inputs
+- [ ] Write and destructive effects are explicit
+- [ ] MCP prompts are user-controlled and argument-driven
+- [ ] Embedded resources are authorized and bounded
+- [ ] Security rules are enforced in code
+- [ ] Evaluation tests cover positive, negative, and adversarial cases
+- [ ] Prompt changes are versioned and reviewed
+
+## Key takeaway
+
+**Use descriptions to guide selection, schemas to constrain input, prompts to package user-selected workflows, and code to enforce every security rule.**

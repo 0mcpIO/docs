@@ -1,0 +1,178 @@
+---
+title: MCP server architecture for API providers
+description: Design an MCP adapter for an existing REST or GraphQL API with clear tool boundaries, authentication, deployment, observability, and versioning.
+---
+
+For most API providers, an [MCP server](https://modelcontextprotocol.io/docs/learn/architecture) should be an adapter in front of the existing API. Your API remains the source of truth for business logic, data, and resource-level authorization.
+
+```text
+AI host -> MCP client -> MCP server -> REST or GraphQL API -> services and data
+```
+
+This avoids building a second backend and lets traditional applications and AI clients use the same platform.
+
+## Separate the architecture into layers
+
+| Layer | Responsibility |
+| --- | --- |
+| Transport | `stdio` or Streamable HTTP connection |
+| Protocol | Initialization, capabilities, JSON-RPC, and lifecycle |
+| Interface | Tools, resources, prompts, and schemas |
+| Policy | Authentication, authorization, approval, and limits |
+| Adapter | Maps MCP operations to REST or GraphQL calls |
+| Platform | Hosting, secrets, logs, metrics, versions, and rollback |
+
+Keep business rules in the API unless the rule is specific to the MCP interaction boundary.
+
+## Design tools around user tasks
+
+Do not expose every endpoint or GraphQL field automatically.
+
+Start with the tasks an AI application should complete:
+
+- `get_order`
+- `search_orders`
+- `track_shipment`
+
+One task-level tool may call several API operations. One broad endpoint may need multiple safer tools with different permissions.
+
+Use [resources](/learn/core-concepts/resources) for addressable context and [prompts](/learn/core-concepts/prompts) for reusable user-selected workflows.
+
+## Choose an API source path
+
+| Source | Best when | Design focus |
+| --- | --- | --- |
+| OpenAPI 3.x or Swagger 2.0 | A maintained API contract already exists | Select operations and improve generated descriptions |
+| Direct REST API | The API exists without a usable specification | Define endpoints, inputs, auth, and response mappings |
+| GraphQL | The API exposes a schema and query language | Select safe queries and mutations; bound query cost |
+
+All three paths can produce a strong MCP server. Source quality affects the generated interface, but it should not determine the operational feature set.
+
+## Keep authentication boundaries clear
+
+For a protected remote MCP server:
+
+1. Authenticate the MCP caller.
+2. Validate that the access token is intended for the MCP server.
+3. Authorize the requested capability and target object.
+4. Obtain a separate upstream credential with the correct audience.
+5. Call the API with least privilege.
+
+Do not pass an MCP access token unchanged to the upstream API. If the API needs user delegation, use an audience-appropriate credential or a secure token-exchange design.
+
+## Preserve API authorization
+
+The MCP server should enforce coarse capability policy, such as whether a caller can use `cancel_order`. The upstream API should continue enforcing object-level and business authorization.
+
+This defense in depth matters because model-selected tools and arguments are untrusted input.
+
+## Normalize schemas and results
+
+API contracts are designed for software clients. MCP interfaces must also be easy for models to understand.
+
+- Rename ambiguous operations.
+- Remove unused inputs.
+- Make formats and enums explicit.
+- Define output schemas for stable structured results.
+- Filter internal fields.
+- Paginate large collections.
+- Return concise results with stable identifiers.
+- Translate API failures into actionable tool errors.
+
+Avoid placing a complete API response into model context when only a few fields are needed.
+
+## Decide between hosted and self-hosted
+
+| Option | Benefits | Responsibilities |
+| --- | --- | --- |
+| Hosted platform | Faster setup, managed endpoint, built-in operations | Provider trust, platform limits, configuration review |
+| Self-hosted | Maximum runtime and network control | Deployment, scaling, security, observability, and upgrades |
+| Local server | Simple developer setup and local access | Package trust, per-user configuration, OS-level permissions |
+
+Choose based on data residency, network access, identity integration, scale, and operational capacity.
+
+## Build for reliability
+
+Add:
+
+- Timeouts and bounded retries
+- Idempotency for supported writes
+- Rate and concurrency limits
+- Circuit breaking for unhealthy dependencies
+- Structured logs and distributed traces
+- Health and readiness checks
+- Versioned configuration
+- A tested rollback path
+
+Read [monitoring and logging](/learn/best-practices/monitoring-and-logging) and [server configuration](/learn/best-practices/server-configuration).
+
+## Version the MCP interface independently
+
+An API change does not always require an MCP change. An MCP tool rename or required-field change can affect clients even when the underlying endpoint remains compatible.
+
+For each release:
+
+1. Record the source API contract or configuration.
+2. Compare exposed names and schemas.
+3. Run unit, contract, protocol, and model-behavior tests.
+4. Publish a new server version.
+5. Monitor errors and tool-selection changes.
+6. Preserve a rollback option.
+
+## Architecture with 0mcp
+
+[0mcp](https://0mcp.io) can create a hosted MCP layer from:
+
+- OpenAPI 3.x
+- Swagger 2.0
+- A direct REST API configuration
+- GraphQL
+
+Each source option supports the same 0mcp platform capabilities:
+
+- Generated and configurable tools
+- Resources and prompts
+- A hosted MCP endpoint
+- Playground testing
+- Published versions and rollback
+- Usage analytics and activity logs
+- Setup guidance for supported MCP clients
+
+Your existing API continues to own its data and business logic. 0mcp handles the MCP-facing interface and hosted operational layer.
+
+## Reference architecture
+
+```text
+                         +--------------------+
+AI clients --HTTPS----> | MCP gateway/server |
+                         +---------+----------+
+                                   |
+                    auth, policy, validation
+                                   |
+                         +---------v----------+
+                         | API adapter layer   |
+                         +----+-----------+----+
+                              |           |
+                         REST API     GraphQL API
+                              |           |
+                         existing services and data
+```
+
+Keep secrets in the platform or server boundary. Keep authorization in both the MCP policy layer and upstream API.
+
+## Architecture checklist
+
+- [ ] MCP is an adapter, not a duplicate backend
+- [ ] Tools represent user tasks
+- [ ] API source and mappings are versioned
+- [ ] MCP and upstream credentials have correct audiences
+- [ ] Authorization is enforced at both layers
+- [ ] Inputs, outputs, pagination, and errors are normalized
+- [ ] Result size and GraphQL query cost are bounded
+- [ ] Logs, metrics, traces, and audit events are available
+- [ ] Contract and model-behavior tests run before release
+- [ ] Rollback is documented and tested
+
+## Key takeaway
+
+**A strong API-provider architecture keeps the API as the source of truth and adds a focused, secure, observable MCP adapter for AI clients.**

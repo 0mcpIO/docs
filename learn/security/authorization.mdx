@@ -1,0 +1,200 @@
+---
+title: MCP authorization
+description: Learn how MCP authorization protects remote servers with OAuth, resource metadata, access tokens, audience validation, scopes, and least privilege.
+---
+
+**[MCP authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization)** controls whether a client may access a protected MCP server and which capabilities it may use.
+
+For HTTP-based transports, the MCP authorization specification uses established OAuth standards. The MCP server acts as a resource server, the MCP client acts as an OAuth client, and an authorization server issues access tokens.
+
+```text
+Resource owner
+      |
+Authorization server -> access token -> MCP client
+                                         |
+                                         v
+                              Protected MCP server
+```
+
+Authorization is optional at the protocol level, but it is strongly recommended when a remote server accesses private data, performs user-specific actions, or needs per-user audit records.
+
+## MCP authorization roles
+
+| Role | What it does |
+| --- | --- |
+| Resource owner | Grants permission to access protected capabilities |
+| MCP client | Requests permission and sends the access token |
+| Authorization server | Authenticates the user, collects consent, and issues tokens |
+| MCP server | Validates tokens and enforces access as an OAuth resource server |
+
+The authorization server and MCP server can be separate services.
+
+## When to use authorization
+
+Use authorization when the server:
+
+- Reads user-specific or confidential information
+- Creates, updates, or deletes data
+- Exposes administrative or financial operations
+- Needs per-user scopes, rate limits, or audit records
+- Serves multiple organizations or tenants
+- Is available through a remote HTTP endpoint
+
+A public, read-only server may not need user authorization, but it still needs abuse prevention and secure implementation.
+
+## The authorization flow
+
+### 1. The client contacts the MCP server
+
+If the request has no valid token, the protected server responds with `401 Unauthorized` and identifies its protected resource metadata.
+
+### 2. The client discovers protected resource metadata
+
+The metadata describes the MCP resource and the authorization servers that can issue tokens for it.
+
+### 3. The client discovers authorization server metadata
+
+The client retrieves the authorization endpoint, token endpoint, supported registration methods, PKCE methods, and other capabilities from trusted metadata.
+
+### 4. The client is registered
+
+Depending on the authorization server, the client can use:
+
+- A Client ID Metadata Document
+- Pre-registration
+- Dynamic Client Registration
+
+The client must follow the method supported by that authorization server.
+
+### 5. The user grants access
+
+The client opens the authorization endpoint. The authorization server authenticates the user and asks for consent.
+
+The authorization request includes the MCP server's canonical resource URI. The client uses PKCE to bind the authorization response to the original request.
+
+### 6. The client obtains an access token
+
+The client exchanges the authorization code for a token intended for the MCP server.
+
+### 7. The client calls the MCP server
+
+```http
+Authorization: Bearer ACCESS_TOKEN
+```
+
+The server validates the token and applies its authorization policy before handling the MCP request.
+
+## Token validation requirements
+
+A protected MCP server should validate:
+
+- Signature or token introspection
+- Issuer
+- Audience or resource indicator
+- Expiration and activation time
+- Required scopes
+- Token type
+- Revocation or status when supported
+
+The server must reject tokens that were issued for another resource.
+
+## Token passthrough is prohibited
+
+An MCP server must not accept a token intended for itself and pass that same token to an upstream API.
+
+Token passthrough can:
+
+- Bypass audience validation
+- Give the upstream API a token not intended for it
+- Hide which service is using the token
+- Break least privilege
+- Create confused-deputy vulnerabilities
+
+Use a separate upstream credential, OAuth delegation, or token exchange that produces a token for the upstream resource.
+
+## Design scopes around capabilities
+
+Scopes should express the minimum access required.
+
+```text
+orders:read
+orders:write
+customers:read
+support-tickets:create
+```
+
+Avoid one broad scope such as `all` or `admin` for normal use.
+
+Map scopes to server-side policy:
+
+| Capability | Minimum scope |
+| --- | --- |
+| `get_order` | `orders:read` |
+| `update_order` | `orders:write` |
+| `get_customer` | `customers:read` |
+| `create_support_ticket` | `support-tickets:create` |
+
+Scopes are not a replacement for object-level authorization. A user with `orders:read` should still see only orders they are permitted to access.
+
+## Incremental and step-up authorization
+
+Request the smallest initial scope set.
+
+If a later operation needs more permission, the server can return an insufficient-scope challenge. The client can then ask the user to grant the additional scope.
+
+High-risk operations may also require fresh authentication, stronger authentication, or an explicit confirmation even when the token has the required scope.
+
+## Authorization at every layer
+
+Authorization may be required at several boundaries:
+
+1. The MCP server verifies access to the capability.
+2. The tool handler verifies the requested object and action.
+3. The upstream API enforces its own policy.
+4. The host asks the user to confirm sensitive side effects.
+
+Do not rely on the model, tool description, or client UI as the only control.
+
+## Multi-tenant authorization
+
+For multi-tenant servers:
+
+- Derive tenant identity from validated claims, not model arguments.
+- Bind every query and mutation to the tenant.
+- Prevent users from selecting another tenant through a tool parameter.
+- Use tenant-specific rate limits and audit records.
+- Test for cross-tenant access.
+
+An object ID alone is not proof that the caller may access that object.
+
+## Common authorization mistakes
+
+- Accepting a token without validating its audience
+- Forwarding the MCP token to an upstream API
+- Requesting every scope at initial login
+- Treating tool annotations as permissions
+- Trusting tenant or user IDs supplied by the model
+- Checking access only during `[tools](/learn/core-concepts/tools)/list`
+- Using one administrator credential for every caller
+- Returning sensitive authorization details in errors
+- Treating `401` and `403` as interchangeable
+
+## Authorization response guide
+
+| Situation | Response |
+| --- | --- |
+| Missing or invalid credential | `401 Unauthorized` |
+| Valid identity lacks permission | `403 Forbidden` |
+| More scope can be requested | Insufficient-scope challenge |
+| Target object does not belong to caller | Deny without leaking private existence |
+| Sensitive action needs confirmation | Pause and request explicit approval |
+
+## Local `stdio` servers
+
+The MCP OAuth flow is intended for HTTP-based transports. Local `stdio` implementations should use secure environment or local credential mechanisms appropriate to the application.
+
+Local does not mean trusted. The server still needs authorization for files, operating-system actions, and upstream APIs.
+
+## Key takeaway
+
+**MCP authorization uses OAuth resource-server patterns to give remote clients limited, audience-bound access while the MCP server and upstream systems enforce least privilege for every operation.**

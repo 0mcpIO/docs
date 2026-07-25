@@ -1,0 +1,213 @@
+---
+title: MCP Server Security
+description: Protect an MCP server from prompt injection, token theft, SSRF, command injection, session hijacking, excessive permissions, and supply-chain attacks.
+---
+
+**[MCP server security](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)** is the set of controls that protects an MCP server, its users, connected systems, and credentials from unauthorized access or misuse.
+
+An MCP server sits between an AI application and external capabilities. It must handle traditional API risks plus AI-specific risks such as prompt injection, unsafe tool selection, and untrusted model output.
+
+```text
+User -> AI host -> MCP client -> MCP server -> External API or system
+          |                         |
+       untrusted                 security
+       content                  boundary
+```
+
+Security must be enforced by code and policy. A model's decision to call a tool is never proof that the operation is safe or authorized.
+
+## Start with a threat model
+
+Identify:
+
+- Who can connect to the server
+- Which tools, resources, and prompts are exposed
+- Which data crosses each trust boundary
+- Which credentials the server can access
+- Which operations create side effects
+- Which systems the server can reach over the network
+- What happens if the client, server, model, or upstream system is compromised
+
+Classify each capability by impact:
+
+| Risk level | Example | Expected controls |
+| --- | --- | --- |
+| Low | Read public documentation | Input limits and safe output handling |
+| Medium | Read a user's private records | Authentication, authorization, audit logging |
+| High | Send messages or change records | Least privilege, confirmation, idempotency controls |
+| Critical | Payments, deletion, admin access | Strong approval, step-up authorization, strict policy, detailed audit |
+
+## Main MCP security risks
+
+### Prompt injection
+
+Instructions hidden in user input, documents, web pages, or tool results can manipulate the model into calling a tool or disclosing data.
+
+Treat all external content as untrusted. Do not let retrieved text override authorization policy. Require user confirmation for sensitive actions and validate the final tool arguments independently of the conversation.
+
+### Tool poisoning
+
+A malicious or compromised server can publish deceptive tool names or descriptions. A trusted server can also change behavior after a user approves it.
+
+Show users which server provides each tool. Review tool changes, pin trusted versions where possible, and monitor unexpected changes to names, schemas, or descriptions.
+
+### Command and query injection
+
+Model-provided arguments can reach shells, SQL queries, file paths, templates, or downstream APIs.
+
+- Avoid shell execution when a library API exists.
+- Use parameterized database queries.
+- Resolve and restrict file paths.
+- Allowlist hosts, operations, and values.
+- Apply length, type, range, and format limits.
+
+Never place untrusted text directly into a command string.
+
+### Excessive permissions
+
+A read-only tool does not need an administrator token. Broad credentials increase the impact of prompt injection, implementation bugs, and credential theft.
+
+Use separate identities and scopes for separate functions. Enforce permissions at the MCP server and again at the upstream system.
+
+### Token theft and token passthrough
+
+Access tokens are bearer credentials. Anyone who obtains one may be able to use it until it expires or is revoked.
+
+The official MCP security guidance prohibits accepting an MCP access token and forwarding it unchanged to an upstream API. The MCP server must validate that tokens are intended for itself. If it needs to access another protected service, it should use a separate, audience-appropriate credential or a secure token-exchange design.
+
+<Warning>
+An upstream API credential explicitly provided for that API is not the same as an MCP access token. Keep the two credential purposes and audiences separate.
+</Warning>
+
+### Server-side request forgery
+
+Tools that fetch user-provided URLs can be abused to reach internal services, cloud metadata endpoints, or unauthorized hosts.
+
+Use strict URL parsing, allowlisted schemes and domains, DNS and IP checks, redirect validation, egress filtering, timeouts, and response-size limits.
+
+### Session hijacking
+
+If a remote server uses sessions, an attacker who steals or predicts a session identifier may impersonate another connection or inject messages.
+
+Use cryptographically secure identifiers, bind session state to the authenticated identity, never use sessions as authentication, rotate or terminate them appropriately, and protect all traffic with TLS.
+
+### Local server compromise
+
+A local `stdio` server runs with the user's operating-system permissions. A malicious package or server command may read files, environment variables, browser data, or developer credentials.
+
+Install local servers only from trusted sources. Pin dependencies, inspect startup commands, minimize environment variables, sandbox processes, and restrict filesystem and network access.
+
+## Secure authentication and authorization
+
+For a protected remote server:
+
+- Use HTTPS.
+- Follow the MCP OAuth-based [authorization specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization).
+- Validate token issuer, audience, expiry, signature, and required scopes.
+- Use protected resource metadata for authorization-server discovery.
+- Use PKCE for authorization code flows.
+- Reject tokens not issued for the MCP server.
+- Apply least privilege and incremental scope requests.
+
+Read [MCP authentication](/learn/security/authentication) and [MCP authorization](/learn/security/authorization) for the distinction.
+
+## Secure tools
+
+Every tool handler should:
+
+1. Authenticate the caller when required.
+2. Authorize the tool and target object.
+3. Validate the complete input schema.
+4. Apply business rules and state checks.
+5. Request confirmation for sensitive side effects.
+6. Call the upstream system with minimum privilege.
+7. Filter the result before returning it.
+8. Record a safe audit event.
+
+Tool annotations such as `readOnlyHint` and `destructiveHint` are display hints. They are not enforceable security controls.
+
+## Secure resources and prompts
+
+For [resources](/learn/core-concepts/resources):
+
+- Authorize each URI, not only `resources/list`.
+- Prevent path traversal.
+- Avoid exposing sensitive metadata in list responses.
+- Limit resource size.
+- Treat returned content as untrusted.
+
+For [prompts](/learn/core-concepts/prompts):
+
+- Validate all arguments.
+- Make generated messages visible when appropriate.
+- Do not embed credentials.
+- Prevent prompt templates from silently expanding access.
+- Treat server-provided instructions as untrusted input to the host.
+
+## Protect secrets
+
+- Prefer a managed secret store or workload identity in production.
+- Never commit secrets to source control.
+- Do not place secrets in tool descriptions, arguments, URLs, or results.
+- Redact authorization headers and API keys from logs.
+- Rotate credentials after suspected exposure.
+- Separate development, staging, and production credentials.
+
+Read [API key management](/learn/security/api-key-management) for rotation and storage guidance.
+
+## Network and transport controls
+
+For Streamable HTTP:
+
+- Validate the `Origin` header.
+- Use TLS and secure HTTP defaults.
+- Bind local-only services to loopback.
+- Limit request body and response sizes.
+- Set connection and upstream timeouts.
+- Apply rate and concurrency limits.
+- Restrict outbound network access.
+
+For `stdio`:
+
+- Reserve `stdout` for MCP messages.
+- Send logs to `stderr`.
+- Pass only required environment variables.
+- Use an explicit executable path.
+- Avoid starting commands through an unnecessary shell.
+
+See [MCP transports](/learn/core-concepts/transports).
+
+## Logging and incident response
+
+Log:
+
+- Authenticated actor or service identity
+- Tool or resource name
+- Authorization decision
+- Timestamp and request correlation ID
+- Outcome, latency, and safe error category
+- Administrative configuration changes
+
+Do not log tokens, API keys, full authorization headers, or sensitive payloads.
+
+Prepare an incident process for revoking credentials, disabling tools, pausing the server, preserving audit data, notifying affected users, and restoring a reviewed version.
+
+## Production security checklist
+
+- [ ] Threat model completed
+- [ ] Only required capabilities exposed
+- [ ] Authentication and authorization tested
+- [ ] Token audiences and scopes validated
+- [ ] Input and output limits enforced
+- [ ] Sensitive actions require confirmation
+- [ ] SSRF and injection protections applied
+- [ ] Secrets stored and rotated safely
+- [ ] Dependencies scanned and pinned
+- [ ] Logs exclude credentials and payload secrets
+- [ ] Rate limits and timeouts configured
+- [ ] Incident and rollback procedures tested
+- [ ] Server tested with multiple MCP clients
+
+## Key takeaway
+
+**A secure MCP server treats the model, client input, server metadata, retrieved content, and upstream responses as untrusted while enforcing identity, permission, validation, and least privilege at every boundary.**

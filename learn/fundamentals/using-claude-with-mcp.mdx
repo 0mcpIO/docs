@@ -1,0 +1,190 @@
+---
+title: How to use Claude with MCP
+description: Connect Claude to local and remote MCP servers through connectors, desktop extensions, Claude Desktop configuration, or Claude Code.
+---
+
+Claude can use [MCP](https://modelcontextprotocol.io/) servers through several surfaces. The right setup depends on whether the server is remote or local and whether you use Claude on the web, Claude Desktop, or Claude Code.
+
+| Claude surface | Remote MCP | Local MCP |
+| --- | --- | --- |
+| Claude web and mobile | Custom connector | Not available directly |
+| Claude Desktop | Custom connector | Desktop extension or local configuration |
+| Claude Code | HTTP server | `stdio` server |
+
+Availability and organization controls can vary by plan. Check the current [Anthropic MCP documentation](https://docs.anthropic.com/en/docs/mcp) before a production rollout.
+
+> [Image placeholder: Screenshot showing where MCP connectors appear in Claude's Customize and Connectors settings]
+
+## Before connecting a server
+
+Confirm:
+
+- The server comes from a trusted provider
+- You understand its tools and data access
+- The URL or startup command is correct
+- Authentication uses appropriate scopes
+- Destructive actions require clear review
+
+Connecting an MCP server can allow Claude to read or change data through your account.
+
+## Connect a remote MCP server to Claude
+
+Remote MCP servers appear as custom connectors in Claude.
+
+For an individual account:
+
+1. Open **Customize**.
+2. Select **Connectors**.
+3. Click the add button.
+4. Select **Add custom connector**.
+5. Enter the connector name and remote MCP URL.
+6. Add OAuth client settings if the provider requires them.
+7. Complete authentication.
+
+Enable the connector for a conversation from the connector controls in the chat interface.
+
+For Team or Enterprise accounts, an owner may need to add the connector at the organization level before members can authenticate.
+
+<Info>
+  Claude reaches a remote custom connector from Anthropic's cloud infrastructure. The server must meet Anthropic's current network requirements.
+</Info>
+
+## Connect a local server with a desktop extension
+
+Claude Desktop supports installable local extensions.
+
+To install one from the directory:
+
+1. Open **Settings** in Claude Desktop.
+2. Select **Extensions**.
+3. Browse available extensions.
+4. Review the requested capabilities.
+5. Click **Install**.
+6. Configure required credentials or paths.
+
+Organizations can control which extensions members may install.
+
+> [Image placeholder: Screenshot of Claude Desktop Settings showing the Extensions directory and an MCP extension installation]
+
+## Connect a local developer server manually
+
+Developers may use Claude Desktop's local MCP configuration for a server process.
+
+The traditional configuration file is named `claude_desktop_config.json`. Common locations are:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+A conceptual local configuration looks like this:
+
+```json
+{
+  "mcpServers": {
+    "example": {
+      "command": "node",
+      "args": ["C:/path/to/server.js"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop after changing the file. Use the developer settings and logs to check the connection.
+
+Do not paste secrets directly into a file that may be shared or committed.
+
+## Connect Claude Code to a remote server
+
+Use the Claude Code CLI:
+
+```bash
+claude mcp add --transport http example https://mcp.example.com/mcp
+```
+
+Then verify the configuration:
+
+```bash
+claude mcp list
+claude mcp get example
+```
+
+Inside Claude Code, open the MCP panel:
+
+```text
+/mcp
+```
+
+If the server uses OAuth, the panel can guide you through authentication.
+
+## Connect Claude Code to a local server
+
+Use `stdio` and place options before the server name:
+
+```bash
+claude mcp add --transport stdio example -- node path/to/server.js
+```
+
+You can pass required environment variables with `--env`, but avoid placing long-lived secrets in shell history.
+
+For team-shared configuration, Claude Code supports project-scoped MCP settings. Review and approve project-provided servers before running them.
+
+## Test the connection
+
+After connecting:
+
+1. Confirm the server reports as connected.
+2. Review the available tools.
+3. Start with a read-only request.
+4. Check whether Claude selects the correct tool.
+5. Review the input before approving an action.
+6. Confirm the result against the source system.
+
+Example:
+
+> List the available projects, but do not modify anything.
+
+This tests discovery and read access without starting with a destructive operation.
+
+## Troubleshoot common problems
+
+### The server does not connect
+
+- Verify the URL or command
+- Confirm the server is running
+- Check runtime dependencies
+- Review Claude's MCP logs
+- Confirm the selected transport
+
+### Authentication fails
+
+- Reconnect the connector
+- Check token scopes
+- Confirm OAuth metadata
+- Verify organization policies
+- Make sure the remote server is reachable from Anthropic's infrastructure
+
+### Tools do not appear
+
+- Confirm initialization succeeds
+- Check that the server declares tool support
+- Inspect the tool list with [MCP Inspector](/learn/fundamentals/mcp-inspector-guide)
+- Restart the local client after configuration changes
+
+### Claude chooses the wrong tool
+
+Improve tool names, descriptions, and input schemas. Keep capabilities focused and avoid exposing duplicate operations with ambiguous descriptions.
+
+## Connect Claude to a 0mcp server
+
+[0mcp](https://0mcp.io) provides a hosted MCP URL for an API. Add that URL as a remote connector or HTTP server, then authenticate according to the API's configuration.
+
+Start by importing your [OpenAPI specification](/api-sources/openapi), or follow the [quick start](/get-started/quick-start).
+
+## Security checklist
+
+- Connect only to trusted servers
+- Review requested permissions
+- Prefer read-only scopes at first
+- Keep tokens out of source control
+- Revoke unused connectors
+- Require confirmation for writes
+- Audit sensitive tool calls

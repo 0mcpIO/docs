@@ -3,6 +3,11 @@
   "theme": "mint",
   "name": "0mcp",
   "description": "Learn how to turn an API into a hosted MCP server with 0mcp.",
+  "seo": {
+    "metatags": {
+      "canonical": "https://docs.0mcp.io"
+    }
+  },
   "colors": { "primary": "#E78468", "light": "#E78468", "dark": "#E78468" },
   "favicon": {
     "light": "/favicon-light.svg",
@@ -13,14 +18,94 @@
   "appearance": { "default": "dark", "strict": true },
   "contextual": { "options": ["copy", "view", "assistant", "mcp", "add-mcp"] },
   "navigation": {
-    "groups": [
-      { "group": "Get started", "icon": "rocket", "expanded": true, "pages": ["get-started/introduction", "get-started/why-0mcp", "get-started/quick-start"] },
-      { "group": "Concepts", "icon": "book-open", "pages": ["concepts/what-is-mcp", "concepts/how-0mcp-works", "concepts/authentication-model"] },
-      { "group": "Capabilities", "icon": "blocks", "pages": ["capabilities/tools", "capabilities/resources", "capabilities/prompts"] },
-      { "group": "API sources", "icon": "file-code", "pages": ["api-sources/openapi", "api-sources/rest-api", "api-sources/graphql", "api-sources/postman"] },
-      { "group": "Guides", "icon": "map", "pages": ["guides/playground", "guides/custom-domain", "guides/analytics", "guides/logs", "guides/versioning", "guides/setup", { "group": "Setup", "pages": ["guides/setup/claude-code", "guides/setup/cursor", "guides/setup/codex", "guides/setup/vscode", "guides/setup/windsurf"] }] },
-      { "group": "Troubleshooting", "icon": "wrench", "pages": ["troubleshooting/authentication-errors", "troubleshooting/invalid-openapi", "troubleshooting/mcp-connection-issues", "troubleshooting/tool-discovery-problems"] },
-      { "group": "Resources", "icon": "library", "pages": ["resources/faq", "resources/tutorials", "resources/blog"] }
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "pages": [
+          "index",
+          { "group": "Get started", "icon": "rocket", "expanded": true, "pages": ["get-started/introduction", "get-started/why-0mcp", "get-started/quick-start"] },
+          { "group": "Concepts", "icon": "book-open", "pages": ["concepts/how-0mcp-works", "concepts/authentication-model"] },
+          { "group": "API sources", "icon": "file-code", "pages": ["api-sources/openapi", "api-sources/rest-api", "api-sources/graphql", "api-sources/postman"] },
+          { "group": "Guides", "icon": "map", "pages": ["guides/playground", "guides/custom-domain", "guides/analytics", "guides/logs", "guides/versioning", "guides/setup", { "group": "Setup", "pages": ["guides/setup/claude-code", "guides/setup/cursor", "guides/setup/codex", "guides/setup/vscode", "guides/setup/windsurf"] }] },
+          { "group": "Troubleshooting", "icon": "wrench", "pages": ["troubleshooting/authentication-errors", "troubleshooting/invalid-openapi", "troubleshooting/mcp-connection-issues", "troubleshooting/tool-discovery-problems"] },
+          { "group": "Resources", "icon": "library", "pages": ["resources/faq", "resources/tutorials", "resources/blog"] }
+        ]
+      },
+      {
+        "tab": "Learn MCP",
+        "pages": [
+          {
+            "group": "Fundamentals",
+            "icon": "book-open",
+            "pages": [
+              "learn/fundamentals/what-is-mcp",
+              "learn/fundamentals/why-mcp-matters",
+              "learn/fundamentals/how-mcp-works",
+              "learn/fundamentals/mcp-architecture-explained",
+              "learn/fundamentals/remote-mcp-servers",
+              "learn/fundamentals/local-mcp-servers",
+              "learn/fundamentals/local-vs-remote-mcp",
+              "learn/fundamentals/mcp-specification-explained",
+              "learn/fundamentals/custom-mcp-transport",
+              "learn/fundamentals/mcp-server-on-kubernetes",
+              "learn/fundamentals/using-claude-with-mcp",
+              "learn/fundamentals/mcp-vs-traditional-sdks",
+              "learn/fundamentals/mcp-sdk-comparison",
+              "learn/fundamentals/mcp-inspector-guide",
+              "learn/fundamentals/rag-vs-mcp"
+            ]
+          },
+          {
+            "group": "MCP Core Concepts",
+            "icon": "blocks",
+            "pages": [
+              "learn/core-concepts/hosts-clients-servers",
+              "learn/core-concepts/tools",
+              "learn/core-concepts/resources",
+              "learn/core-concepts/prompts",
+              "learn/core-concepts/sampling",
+              "learn/core-concepts/transports"
+            ]
+          },
+          {
+            "group": "Build MCP Server",
+            "icon": "hammer",
+            "pages": [
+              "learn/build/openapi-to-mcp-server",
+              "learn/build/rest-api-to-mcp-server",
+              "learn/build/mcp-server-generators",
+              "learn/build/typescript-sdk",
+              "learn/build/python-sdk",
+              "learn/build/mcp-ecosystem-evolution"
+            ]
+          },
+          {
+            "group": "MCP Security",
+            "icon": "shield-check",
+            "pages": [
+              "learn/security/mcp-server-security",
+              "learn/security/authentication",
+              "learn/security/authorization",
+              "learn/security/api-key-management"
+            ]
+          },
+          {
+            "group": "MCP Best Practices",
+            "icon": "list-checks",
+            "pages": [
+              "learn/best-practices/monitoring-and-logging",
+              "learn/best-practices/how-to-test-mcp-servers",
+              "learn/best-practices/error-handling-and-debugging",
+              "learn/best-practices/api-documentation-guide",
+              "learn/best-practices/server-configuration",
+              "learn/best-practices/server-prompting-guide",
+              "learn/best-practices/best-mcp-servers",
+              "learn/best-practices/streaming-performance-tradeoffs",
+              "learn/best-practices/architecture-for-api-providers"
+            ]
+          }
+        ]
+      }
     ]
   },
   "logo": { "light": "/logo/light.svg", "dark": "/logo/dark.svg" },

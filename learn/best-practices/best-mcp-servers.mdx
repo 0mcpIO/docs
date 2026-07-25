@@ -1,0 +1,117 @@
+---
+title: 10 useful MCP servers for developers
+description: Compare ten maintained MCP servers for source control, browser automation, payments, docs, observability, databases, cloud, and local development.
+---
+
+The best [MCP server](https://modelcontextprotocol.io/) is the one that supports your task with the narrowest permissions, a trusted maintainer, clear documentation, and an active release process.
+
+This list highlights ten useful starting points. It is not a universal ranking. Server features and availability change, so verify the linked primary documentation before production use.
+
+## Quick comparison
+
+| MCP server | Best for | Delivery |
+| --- | --- | --- |
+| GitHub | Repositories, issues, and pull requests | Local and remote options |
+| Playwright | Browser automation and web testing | Local |
+| Stripe | Payments and Stripe documentation | Remote and local options |
+| Notion | Workspace search and page workflows | Hosted remote |
+| Sentry | Issue and application diagnostics | Remote and local options |
+| Cloudflare | Cloudflare configuration and operations | Managed remote |
+| Atlassian Rovo | Jira and Confluence workflows | Hosted remote |
+| Google BigQuery | Governed analytics and SQL tasks | Managed remote |
+| Filesystem | Controlled local file operations | Local reference server |
+| Fetch | Web content retrieval | Local reference server |
+
+## 1. GitHub MCP Server
+
+[GitHub's official MCP server](https://github.com/github/github-mcp-server) connects AI applications to repositories, issues, pull requests, code, and other GitHub workflows.
+
+Use it when an agent needs structured GitHub context or approved repository actions. Restrict available toolsets and token permissions to the required repositories and operations.
+
+## 2. Playwright MCP
+
+[Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) provides browser automation through structured page information and browser actions.
+
+It is useful for exploratory automation, web testing, and workflows that need persistent browser state. Treat browser access as sensitive because pages can contain untrusted content and authenticated sessions.
+
+## 3. Stripe MCP Server
+
+[Stripe's MCP server](https://docs.stripe.com/mcp) provides tools for selected Stripe API operations and documentation search.
+
+Use test mode during development. Apply narrow credentials, human confirmation, and audit logging before allowing financial or customer-data changes.
+
+## 4. Notion MCP
+
+[Notion MCP](https://developers.notion.com/guides/mcp/overview) is a hosted server that gives supported AI clients access to authorized Notion workspace content and actions.
+
+It fits research, documentation, and workspace workflows. Review the pages and data sources available to the connected identity.
+
+## 5. Sentry MCP
+
+[Sentry MCP](https://github.com/getsentry/sentry-mcp) helps developers investigate issues, events, projects, and application diagnostics.
+
+It is useful in incident triage and debugging. Limit access to the required organizations and projects, and treat stack traces and event data as potentially sensitive.
+
+## 6. Cloudflare MCP servers
+
+[Cloudflare's managed MCP servers](https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/) expose Cloudflare account and product workflows through remote MCP endpoints.
+
+They can support configuration review and operational automation. Separate read-only investigation from actions that change production infrastructure.
+
+## 7. Atlassian Rovo MCP Server
+
+[Atlassian Rovo MCP](https://support.atlassian.com/atlassian-rovo-mcp-server/docs/getting-started-with-the-atlassian-remote-mcp-server/) connects supported clients to Jira, Confluence, Jira Service Management, Bitbucket, and related Atlassian context.
+
+It suits project tracking, documentation search, and work-item updates. Access follows the connected user's permissions, but you should still confirm sensitive write operations.
+
+## 8. Google BigQuery MCP server
+
+[Google's BigQuery remote MCP server](https://docs.cloud.google.com/bigquery/docs/use-bigquery-mcp) supports metadata discovery, resource listing, and governed query workflows.
+
+Use it for analytical agents that need current warehouse data without copying entire datasets into model context. Control project, dataset, table, and job permissions through Google Cloud IAM.
+
+## 9. Filesystem reference server
+
+The [Filesystem server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) demonstrates secure local file operations within configured directories.
+
+It is useful for development and learning. Allow only the smallest required roots, inspect the package source, and remember that a local server runs with the user's operating-system permissions.
+
+## 10. Fetch reference server
+
+The [Fetch server](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch) retrieves web content in a format suitable for language models.
+
+It is useful for learning and controlled retrieval workflows. Apply URL allowlists, redirect checks, private-network blocking, timeouts, and response-size limits to reduce SSRF and data-exfiltration risks.
+
+<Warning>
+The MCP project's reference servers are educational examples, not a promise of production readiness. Evaluate each server against your own threat model.
+</Warning>
+
+## How to evaluate any MCP server
+
+Before installation, check:
+
+1. **Publisher:** Is the package or endpoint controlled by the expected organization?
+2. **Source:** Can you review the code, license, releases, and security policy?
+3. **Permissions:** Can you limit [tools](/learn/core-concepts/tools), accounts, scopes, hosts, and file paths?
+4. **Transport:** Is the local command or remote endpoint documented and secure?
+5. **Maintenance:** Are releases, dependencies, and vulnerability reports handled?
+6. **Data handling:** What reaches the server, model provider, logs, and upstream service?
+7. **Change control:** Can you pin, test, approve, and roll back updates?
+
+Use the [official MCP Registry](https://registry.modelcontextprotocol.io/) for discovery, then confirm ownership on the publisher's official website or repository.
+
+## When to build your own server
+
+Build or generate a dedicated server when:
+
+- No trusted server supports your API.
+- You need task-specific tools rather than a broad integration.
+- Data residency or self-hosting is required.
+- You need custom authorization, approval, or audit rules.
+- You want to expose only selected API operations.
+
+[0mcp](https://0mcp.io) can create a hosted MCP server from OpenAPI 3.x, Swagger 2.0, a direct REST API configuration, or GraphQL. Each source type supports tools, resources, prompts, Playground testing, versioning and rollback, analytics, logs, and client setup guidance.
+
+## Key takeaway
+
+**Choose MCP servers by task fit, publisher trust, permissions, security controls, and maintenance—not by the size of a public list.**

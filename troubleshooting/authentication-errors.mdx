@@ -5,6 +5,8 @@ description: Troubleshoot 401, 403, and missing credential errors.
 
 Authentication errors usually happen when your upstream API doesn't receive the credentials it expects, or when the provided credentials don't have permission to access the requested operation.
 
+For protected remote MCP servers, the official [MCP authorization specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) defines the protocol-level authentication and token requirements.
+
 ## Common error types
 
 ### 401 Unauthorized
@@ -84,7 +86,7 @@ Some clients cache configuration until restarted.
 
 If your API expects authentication as a query parameter:
 
-- Use the gateway header provided by 0mcp
+- Use the gateway header provided by [0mcp](https://0mcp.io)
 - Do not place secrets directly in the MCP endpoint URL
 
 0mcp automatically converts the secure header into the required query parameter before forwarding the request upstream.

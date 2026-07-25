@@ -1,0 +1,233 @@
+---
+title: API key management best practices for MCP servers
+description: Store, scope, rotate, monitor, and revoke API keys safely without exposing credentials to models, logs, source code, or client configuration.
+---
+
+**API key management** covers the complete lifecycle of an API key: creation, storage, distribution, use, monitoring, rotation, revocation, and deletion.
+
+An MCP server may use API keys to authenticate to an upstream service or, in some private deployments, to identify callers. Because API keys are bearer secrets, anyone who obtains a valid key can usually use it. Apply the official [MCP security best practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices) at every credential boundary.
+
+<Warning>
+Do not rely only on static API keys to protect sensitive, critical, or high-value public capabilities. Prefer short-lived, scoped OAuth access tokens or workload identity when available.
+</Warning>
+
+## Identify what each key protects
+
+Do not treat every secret as the same credential.
+
+| Credential | Intended recipient | Purpose |
+| --- | --- | --- |
+| MCP access token | MCP server | Authorize access to the protected MCP resource |
+| Upstream API key | External API | Authenticate requests made to that API |
+| AI provider key | Model provider | Pay for and authorize model requests |
+| Service credential | Infrastructure service | Authenticate the server workload |
+
+Never forward a credential to a service for which it was not issued.
+
+## Prefer stronger credential options
+
+Choose the strongest option the upstream system supports:
+
+1. Workload identity or managed service identity
+2. Short-lived, scoped OAuth token
+3. Short-lived generated credential
+4. Rotatable static API key
+
+Static keys are sometimes unavoidable. Limit their scope and lifetime as much as the provider allows.
+
+## Generate strong keys
+
+If you issue API keys:
+
+- Use a cryptographically secure random generator.
+- Generate enough entropy to resist guessing.
+- Add a non-secret prefix that identifies the environment or key type.
+- Show the full secret only once.
+- Store only a secure hash when the server needs to verify, but not reuse, the key.
+- Give each key a unique identifier for rotation and audit.
+
+Do not build keys from usernames, timestamps, sequential IDs, or other predictable values.
+
+## Store keys safely
+
+### Production
+
+Prefer:
+
+- A cloud secret manager
+- A dedicated vault
+- A hardware-backed key service
+- Workload identity that avoids stored keys
+
+Grant the server permission to retrieve only the secrets it needs.
+
+### Local development
+
+Environment variables or a client credential store can be acceptable when access is restricted.
+
+Do not commit `.env` files. Keep them out of logs, crash reports, shell history, and shared screenshots.
+
+### Avoid
+
+- Source code
+- Git history
+- Container images
+- Public client configuration
+- Database rows in plaintext
+- Tool descriptions or prompt templates
+- Command-line arguments visible to other processes
+- URLs and query strings
+
+## Scope keys narrowly
+
+Use a separate key for each:
+
+- Environment
+- Application or MCP server
+- External provider
+- Team or workload when practical
+- Permission level
+
+Do not reuse a production key in development or staging.
+
+If the provider supports restrictions, limit:
+
+- Allowed operations
+- Resources or accounts
+- Source networks
+- Domains or applications
+- Usage volume
+- Expiration date
+
+## Keep keys away from the model
+
+The model should not need to see an API key.
+
+The MCP server or host should attach credentials after the model creates a structured tool request.
+
+```text
+Model creates tool arguments
+          |
+          v
+Server validates request
+          |
+Server adds API key internally
+          |
+          v
+Upstream API
+```
+
+Never return a key in tool output, resource content, an error message, or a sampling request.
+
+## Rotate API keys safely
+
+A safe rotation avoids downtime:
+
+1. Create a new key.
+2. Store it in the secret manager.
+3. Allow the application to accept or use both keys temporarily.
+4. Deploy the new configuration.
+5. Verify successful traffic with the new key.
+6. Revoke the old key.
+7. Remove the old value from all stores.
+8. Record the rotation event.
+
+Rotate immediately after suspected exposure, employee or vendor access changes, or a compromise of the system that stored the key.
+
+Scheduled rotation can reduce long-lived exposure, but automation and tested revocation matter more than changing a secret without verifying the rollout.
+
+## Monitor key usage
+
+Track:
+
+- Key identifier, never the full key
+- Timestamp
+- Calling service
+- Target API or operation
+- Success or failure
+- Source network when appropriate
+- Rate and volume anomalies
+
+Alert on:
+
+- Use from an unexpected environment
+- Sudden traffic spikes
+- Repeated authorization failures
+- Access to unusual endpoints
+- Use of a retired key
+- Changes to secret-manager permissions
+
+Make logs useful for investigation without recording the credential.
+
+## Redact secrets from logs
+
+Redact:
+
+- `Authorization` headers
+- API-key headers
+- Cookies
+- Query parameters that may contain credentials
+- Environment dumps
+- Request and response payload fields marked as secrets
+
+Use allowlisted logging fields instead of recording complete headers or objects and trying to remove secrets afterward.
+
+0mcp activity logs are designed not to store authorization headers, bearer tokens, API keys, request bodies, or response bodies. Read [Logs](/guides/logs) for details.
+
+## Respond to a leaked key
+
+If a key may be exposed:
+
+1. Revoke or disable it immediately.
+2. Issue a replacement with minimum scope.
+3. Search source control, CI logs, chat, tickets, and telemetry for exposure.
+4. Review usage records for unauthorized activity.
+5. Rotate related credentials if the affected system was compromised.
+6. Remove cached copies and update deployments.
+7. Document the incident and preventive changes.
+
+Do not wait for proof of misuse before revoking a leaked key.
+
+## Incoming API keys
+
+If your MCP server accepts API keys from callers:
+
+- Transmit them only over HTTPS.
+- Require a header, not a query parameter.
+- Store a keyed hash rather than plaintext when possible.
+- Compare values using constant-time logic.
+- Associate each key with an owner and policy.
+- Support expiration and revocation.
+- Apply per-key rate limits.
+- Avoid exposing whether a specific key identifier exists.
+
+For public remote MCP servers, use the standard [MCP authorization](/learn/security/authorization) flow when possible.
+
+## Upstream API keys in 0mcp
+
+[0mcp](https://0mcp.io) can forward an API key that the MCP client provides for your upstream API. The key is placed according to the authentication configuration for the selected source:
+
+- An OpenAPI 3.x or Swagger 2.0 security scheme
+- A directly configured REST API
+- A GraphQL API
+
+Use the secure gateway header when an upstream API requires a query key. Do not place the key directly in the MCP endpoint URL.
+
+Read the [0mcp authentication model](/concepts/authentication-model) and [authentication troubleshooting](/troubleshooting/authentication-errors).
+
+## API key checklist
+
+- [ ] Every key has one documented purpose
+- [ ] Production keys use a secret manager or workload identity
+- [ ] Keys are separate by environment and service
+- [ ] Permissions follow least privilege
+- [ ] Keys never enter model context
+- [ ] Logs redact credentials
+- [ ] Rotation is automated and tested
+- [ ] Revocation is immediate and documented
+- [ ] Usage is monitored by key identifier
+- [ ] Leak response has been rehearsed
+
+## Key takeaway
+
+**A well-managed API key is narrowly scoped, securely stored, invisible to the model, monitored by identifier, easy to rotate, and immediately revocable.**

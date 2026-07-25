@@ -1,10 +1,34 @@
 ---
 title: GraphQL
-description: GraphQL import is coming soon.
+description: Convert GraphQL queries and mutations into a hosted MCP server with 0mcp.
 ---
 
-<Info>GraphQL schema import is planned and is not available yet.</Info>
+**[GraphQL](https://graphql.org/learn/)-to-MCP conversion** lets you expose selected GraphQL operations as capabilities for MCP-compatible AI clients.
 
-0mcp does not currently turn GraphQL queries and mutations into MCP tools. If your service also provides REST endpoints, describe those endpoints with OpenAPI and import them today.
+In [0mcp](https://0mcp.io), connect your GraphQL API, review its schema, and choose the queries and mutations that should become [MCP tools](/learn/core-concepts/tools).
 
-Do not upload a GraphQL schema in the OpenAPI importer. It will fail validation because the formats are different.
+## Queries and mutations
+
+Use queries for read operations such as retrieving records, searching data, or checking status.
+
+Treat mutations as write operations. Review their permissions, side effects, required confirmation, and audit behavior before publishing them.
+
+## What 0mcp provides
+
+The GraphQL workflow includes:
+
+- A hosted MCP endpoint
+- Tools created from selected queries and mutations
+- Resources and reusable prompts
+- Playground testing
+- Published versions and rollback
+- Usage analytics and activity logs
+- Setup guidance for supported MCP clients
+
+Your GraphQL API continues to enforce its schema, business logic, authentication, and authorization.
+
+<Note>
+Configure GraphQL through the GraphQL source option. Do not upload a GraphQL schema to the [OpenAPI importer](/api-sources/openapi), because the formats and operation models are different.
+</Note>
+
+Test generated tools in the [Playground](/guides/playground) and review [logs](/guides/logs) before publishing.

@@ -1,0 +1,203 @@
+---
+title: "RAG vs MCP: Differences and when to combine them"
+description: Compare retrieval-augmented generation with the Model Context Protocol and learn when an AI system needs RAG, MCP, or both.
+---
+
+**Retrieval-augmented generation (RAG)** is a pattern for finding relevant information and adding it to a model's context. **[MCP](https://modelcontextprotocol.io/)** is a protocol for connecting AI applications to external capabilities.
+
+They are not competing versions of the same technology.
+
+- RAG answers: “Which information should the model receive?”
+- MCP answers: “How can the AI application connect to this external capability?”
+
+An MCP server can expose a RAG retriever as a tool or resource. It can also expose actions that have nothing to do with RAG.
+
+![Diagram showing RAG retrieving knowledge, MCP connecting tools and resources, and an AI application using both](https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/AI%20Rag%20And%20MCP.jpeg)
+
+## RAG vs MCP at a glance
+
+| Factor | RAG | MCP |
+| --- | --- | --- |
+| Type | AI application pattern | Communication protocol |
+| Primary purpose | Retrieve relevant knowledge for generation | Connect AI applications to external capabilities |
+| Typical data | Documents, chunks, embeddings, search results | Tools, resources, prompts, and protocol messages |
+| Common backend | Search index or vector database | API, service, database, file system, or workflow |
+| Can perform writes | Not usually part of retrieval itself | Tools can expose read or write operations |
+| Requires MCP | No | No |
+| Can work together | Yes | Yes |
+
+## What RAG does
+
+A RAG pipeline usually:
+
+1. Receives a user question.
+2. Converts the question into a search query or embedding.
+3. Retrieves relevant passages.
+4. Adds those passages to the model context.
+5. Generates an answer grounded in the retrieved information.
+
+RAG is useful for:
+
+- Documentation search
+- Knowledge assistants
+- Policy questions
+- Support content
+- Research over private documents
+- Information that changes after model training
+
+The retrieval system must still manage relevance, freshness, permissions, and citations.
+
+## What MCP does
+
+MCP standardizes communication between an AI host and external servers.
+
+An MCP server can expose:
+
+- [Tools](/learn/core-concepts/tools)
+- [Resources](/learn/core-concepts/resources)
+- [Prompts](/learn/core-concepts/prompts)
+
+MCP is useful for:
+
+- Calling live APIs
+- Reading structured data
+- Triggering workflows
+- Updating external systems
+- Connecting reusable capabilities to compatible clients
+
+MCP does not define how to create embeddings, rank documents, or generate an answer.
+
+## The most important difference
+
+RAG is a retrieval design. MCP is an integration interface.
+
+A system can implement RAG without MCP:
+
+```text
+User question -> Application retriever -> Vector database -> Model
+```
+
+A system can use MCP without RAG:
+
+```text
+User request -> MCP tool -> Billing API -> Result
+```
+
+A system can also expose its RAG pipeline through MCP:
+
+```text
+AI host -> MCP search tool -> RAG service -> Relevant passages
+```
+
+## When to use RAG alone
+
+Use RAG without MCP when:
+
+- One application owns the entire retrieval pipeline
+- The main task is answering questions from documents
+- You do not need to share the retriever across MCP clients
+- The application does not need external actions
+
+Example: an internal support bot that searches a fixed knowledge base and returns cited answers.
+
+## When to use MCP alone
+
+Use MCP without RAG when:
+
+- The AI application needs structured API data
+- The main task is taking actions
+- The source system already supports precise queries
+- Document similarity search adds no value
+
+Example: an assistant that checks an order through an API and requests a delivery-address update.
+
+## When to combine RAG and MCP
+
+Use both when the AI application needs retrieved knowledge and external actions.
+
+### Pattern 1: Expose retrieval through MCP
+
+Create an MCP tool such as `search_knowledge_base`.
+
+The tool accepts a query and returns relevant passages with source metadata. Any compatible client can use the same retrieval service.
+
+### Pattern 2: Retrieve, then act
+
+The application retrieves policies or instructions before calling an action tool.
+
+```text
+Question
+  -> Retrieve refund policy
+  -> Determine allowed action
+  -> Call refund tool
+  -> Return result with evidence
+```
+
+Do not rely on model reasoning alone for hard business rules. The underlying API must still validate the action.
+
+### Pattern 3: Act, then retrieve context
+
+The application may first fetch a structured record, then retrieve related documents.
+
+Example:
+
+1. Use an MCP tool to retrieve a support case.
+2. Use RAG to find relevant troubleshooting articles.
+3. Draft a response grounded in both sources.
+
+### Pattern 4: Use MCP resources for curated context
+
+An MCP server can expose reference content as resources. This may be sufficient for small, known documents.
+
+For large corpora requiring semantic search and ranking, a dedicated RAG pipeline is usually more appropriate.
+
+![Retrieve-then-act workflow showing a policy RAG system providing context before an MCP tool performs an action](https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/Rag%20vs%20MCP.webp)
+
+## Security and permissions
+
+Both systems need access control.
+
+For RAG:
+
+- Filter retrieval by user permissions
+- Prevent cross-tenant search results
+- Preserve source metadata
+- Remove sensitive content from logs
+
+For MCP:
+
+- Authenticate clients and users
+- Scope tools and data
+- Require approval for sensitive actions
+- Validate every operation in the source system
+
+Combining them must not weaken either boundary. Retrieved text should be treated as untrusted input because it may contain prompt-injection instructions.
+
+## Avoid common design mistakes
+
+### Treating MCP as a vector database
+
+MCP can connect to a vector database, but it is not one.
+
+### Treating RAG as an action framework
+
+Retrieval supplies information. It does not define safe execution of external actions.
+
+### Exposing raw retrieval without sources
+
+Return document identifiers, URLs, timestamps, or other provenance when possible.
+
+### Letting retrieved text authorize actions
+
+Authorization must come from trusted application policy and source-system permissions, not retrieved instructions.
+
+## Decision guide
+
+- Need answers from a document collection? Use RAG.
+- Need a reusable connection to external capabilities? Use MCP.
+- Need live actions based on retrieved knowledge? Use both.
+- Need simple curated context? Consider MCP resources before building a full RAG pipeline.
+
+## Key takeaway
+
+**RAG retrieves relevant knowledge. MCP connects AI applications to external capabilities. Combine them when an assistant must understand information and then use real systems safely.**

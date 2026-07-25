@@ -1,0 +1,172 @@
+---
+title: Custom MCP transport implementation
+description: Learn when a custom MCP transport is justified and how to preserve message framing, lifecycle, sessions, security, and interoperability.
+---
+
+A **custom [MCP transport](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)** changes how MCP messages move between a client and server while preserving the protocol's JSON-RPC messages and lifecycle.
+
+Use a custom transport only when `stdio` and Streamable HTTP cannot meet a real infrastructure requirement. Both the client and server must support the custom mechanism, so it usually reduces interoperability with standard MCP clients.
+
+<Warning>
+  A custom transport is an advanced extension point. Prefer a standard transport whenever possible.
+</Warning>
+
+## Standard MCP transports
+
+The MCP specification defines two standard transports:
+
+- `stdio` for a client communicating with a local server process
+- Streamable HTTP for a client communicating with a network service
+
+These cover most local and remote deployments. Standard transports also receive the broadest SDK, client, Inspector, and documentation support.
+
+## When a custom transport may make sense
+
+A custom transport may be justified when you must:
+
+- Use an existing enterprise message bus
+- Cross a specialized network boundary
+- Integrate with a proprietary application runtime
+- Meet a hard real-time or low-latency constraint
+- Use a communication channel unavailable through HTTP or `stdio`
+- Apply organization-specific framing or routing
+
+Convenience alone is rarely enough. First consider adapting the existing infrastructure to Streamable HTTP.
+
+## Interoperability tradeoff
+
+MCP compatibility has two layers:
+
+1. Protocol compatibility: correct MCP and JSON-RPC behavior
+2. Transport compatibility: a shared way to exchange those messages
+
+A custom transport can preserve protocol semantics, but an ordinary client cannot connect unless it also implements that transport.
+
+Document the requirement clearly and provide a standard transport option when broad client support matters.
+
+## Core implementation requirements
+
+### Preserve JSON-RPC messages
+
+Requests, responses, and notifications must remain valid JSON-RPC 2.0 messages.
+
+Your transport must not change request IDs, method names, parameter shapes, result structures, or error semantics.
+
+### Define message framing
+
+The receiver must know where one message ends and another begins.
+
+Possible framing strategies include:
+
+- Length-prefixed frames
+- One message per queue record
+- One message per WebSocket frame
+- Delimiter-based messages with strict escaping
+
+Do not assume that one network read equals one complete message.
+
+### Preserve ordering rules
+
+Initialization must complete before normal protocol operations. If the underlying channel can reorder messages, your transport needs a strategy to restore the required order.
+
+### Correlate requests and responses
+
+JSON-RPC IDs associate responses with requests. The transport must preserve them across concurrency, retries, reconnections, and routing layers.
+
+### Handle notifications
+
+Notifications do not receive responses. Your implementation must deliver them without waiting for a reply or generating a synthetic one.
+
+### Define connection and session behavior
+
+Specify:
+
+- How a client connects
+- How authentication occurs
+- When a session begins
+- How session identity is represented
+- How reconnection works
+- When resources are released
+- What happens after partial failure
+
+Unclear session behavior creates subtle protocol bugs.
+
+## Conceptual transport interface
+
+The exact SDK interface varies, but a transport generally needs operations like:
+
+```text
+connect()
+send(message)
+receive(message)
+close()
+onError(error)
+```
+
+The transport should pass decoded MCP messages to the protocol layer and keep routing details out of tool implementations.
+
+## Reliability design
+
+Plan for:
+
+- Timeouts
+- Backpressure
+- Bounded queues
+- Duplicate delivery
+- Lost connections
+- Retry rules
+- Cancellation
+- Graceful shutdown
+- Maximum message size
+
+Automatic retries are dangerous for write operations. Use idempotency controls when the underlying operation can change state.
+
+## Security design
+
+A custom transport creates a new attack surface.
+
+Define:
+
+- Peer authentication
+- Message confidentiality
+- Message integrity
+- Authorization boundaries
+- Replay protection
+- Secret storage
+- Audit logging
+- Resource limits
+
+Do not invent cryptography. Use established secure channels and identity systems.
+
+## Test the custom transport
+
+Test at several levels:
+
+1. Unit-test framing and parsing.
+2. Test fragmented and combined messages.
+3. Test concurrent requests with different IDs.
+4. Test notifications.
+5. Test invalid JSON-RPC messages.
+6. Test initialization failures.
+7. Test disconnects and reconnection.
+8. Test cancellation and timeouts.
+9. Test authentication failures.
+10. Run compatibility tests against every supported client and server.
+
+The standard [MCP Inspector](/learn/fundamentals/mcp-inspector-guide) will not automatically understand a proprietary transport. Build an adapter or a dedicated test client.
+
+## When to stop and use Streamable HTTP
+
+Prefer Streamable HTTP when:
+
+- Existing clients must connect without modification
+- The server is reachable over ordinary web infrastructure
+- Standard authentication and proxies are sufficient
+- You want Inspector support
+- Your team does not want to maintain client-side transport code
+
+Custom transport maintenance continues for the lifetime of every supported client.
+
+## Key takeaway
+
+**A custom transport can carry MCP over specialized infrastructure, but both endpoints must support it and preserve the complete MCP lifecycle and JSON-RPC semantics.**

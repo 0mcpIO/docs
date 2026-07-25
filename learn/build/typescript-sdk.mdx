@@ -1,0 +1,202 @@
+---
+title: "The MCP TypeScript SDK: Building clients and servers"
+description: Build MCP servers and clients with the official TypeScript SDK, register tools, choose a transport, connect a client, and prepare for production.
+---
+
+The official **[MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)** provides libraries for building MCP servers and clients in TypeScript.
+
+Use it when you need custom tools, resources, prompts, transport behavior, authentication, or application logic that a generator cannot provide.
+
+<Warning>
+The TypeScript SDK has multiple major API generations. The examples below use the stable v1 package, `@modelcontextprotocol/sdk`. Check the official SDK documentation for the package and imports that match the version installed in your project.
+</Warning>
+
+## What the TypeScript SDK provides
+
+You can use the SDK to:
+
+- Create MCP servers
+- Register [tools](/learn/core-concepts/tools), [resources](/learn/core-concepts/resources), and [prompts](/learn/core-concepts/prompts)
+- Build MCP clients
+- Connect through `stdio` or Streamable HTTP
+- Handle protocol initialization and capabilities
+- Send notifications and progress updates
+- Add OAuth and other production controls
+
+## Install the stable v1 SDK
+
+Create a TypeScript project and install the SDK with Zod:
+
+```bash
+npm install @modelcontextprotocol/sdk zod
+npm install --save-dev typescript tsx @types/node
+```
+
+Use Node.js and module settings supported by the SDK version you install.
+
+## Build a minimal MCP server
+
+Create `src/server.ts`:
+
+```ts
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+
+const server = new McpServer({
+  name: "calculator-server",
+  version: "1.0.0",
+});
+
+server.registerTool(
+  "add",
+  {
+    title: "Add numbers",
+    description: "Add two numbers and return the total.",
+    inputSchema: {
+      a: z.number().describe("The first number."),
+      b: z.number().describe("The second number."),
+    },
+  },
+  async ({ a, b }) => ({
+    content: [
+      {
+        type: "text",
+        text: String(a + b),
+      },
+    ],
+  }),
+);
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+This server exposes one tool and communicates through standard input and output.
+
+<Note>
+Do not write ordinary logs to `stdout` when using `stdio`. Use `stderr` so logs do not corrupt MCP messages.
+</Note>
+
+## What the server code does
+
+1. `McpServer` creates the high-level server.
+2. `registerTool` defines the tool's name, metadata, input schema, and handler.
+3. Zod validates tool arguments at runtime.
+4. The handler returns MCP content.
+5. `StdioServerTransport` carries messages between the client and process.
+6. `server.connect` starts protocol communication.
+
+## Add resources and prompts
+
+The high-level server API can also register:
+
+- Static or templated resources
+- Parameterized prompts
+- Structured tool output
+- Notifications when available items change
+
+Keep MCP registration separate from business logic. A production project might use:
+
+```text
+src/
+  server.ts
+  tools/
+    orders.ts
+    customers.ts
+  resources/
+    policies.ts
+  prompts/
+    support.ts
+  services/
+    api-client.ts
+```
+
+This structure makes handlers easier to test without starting an MCP transport.
+
+## Build a minimal MCP client
+
+Create `src/client.ts`:
+
+```ts
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+
+const client = new Client({
+  name: "calculator-client",
+  version: "1.0.0",
+});
+
+const transport = new StdioClientTransport({
+  command: "npx",
+  args: ["tsx", "src/server.ts"],
+});
+
+await client.connect(transport);
+
+const tools = await client.listTools();
+console.log(tools.tools.map((tool) => tool.name));
+
+const result = await client.callTool({
+  name: "add",
+  arguments: { a: 2, b: 3 },
+});
+
+console.log(result);
+await client.close();
+```
+
+The client launches the local server, completes initialization, lists its tools, and calls `add`.
+
+## Choose a transport
+
+| Transport | Use it for |
+| --- | --- |
+| `stdio` | Local integrations where the client launches the server |
+| Streamable HTTP | Remote servers accessed over a network |
+
+For remote production servers, use the transport and HTTP adapter recommended by your installed SDK version. Add TLS, origin validation, authentication, authorization, rate limits, and request-size limits.
+
+Read [MCP transports](/learn/core-concepts/transports) before choosing.
+
+## Validate and handle errors
+
+Tool handlers should:
+
+- Validate all model-provided input
+- Authorize the exact operation
+- Set timeouts for upstream requests
+- Convert expected failures into actionable tool results
+- Avoid exposing stack traces or credentials
+- Support cancellation where applicable
+- Return structured output for stable machine-readable data
+
+Treat tool descriptions, arguments, and upstream responses as untrusted.
+
+## Test the server
+
+Run the server through [MCP Inspector](/learn/fundamentals/mcp-inspector-guide):
+
+```bash
+npx @modelcontextprotocol/inspector npx tsx src/server.ts
+```
+
+Test initialization, valid and invalid input, upstream errors, timeouts, and every sensitive operation.
+
+Also add:
+
+- Unit tests for handlers
+- Contract tests for API calls
+- Integration tests for the transport
+- Client compatibility tests
+- Dependency and secret scanning
+
+## When to generate instead
+
+If most tools map directly to an existing API, a generator can remove repetitive schema and integration work. [0mcp](https://0mcp.io) supports OpenAPI 3.x, Swagger 2.0, direct REST API conversion, and GraphQL-to-MCP conversion.
+
+Compare options in [MCP server generators](/learn/build/mcp-server-generators) or use [0mcp's hosted API-to-MCP workflow](/get-started/quick-start).
+
+## Key takeaway
+
+**The TypeScript SDK gives you direct control over MCP clients, servers, capabilities, and transports, while your application code remains responsible for security and business behavior.**

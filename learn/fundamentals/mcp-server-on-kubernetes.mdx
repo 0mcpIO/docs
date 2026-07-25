@@ -1,0 +1,233 @@
+---
+title: Deploying an MCP server on Kubernetes
+description: Deploy a remote MCP server on Kubernetes with containers, Services, Ingress, secrets, health checks, scaling, observability, and least-privilege security.
+---
+
+You can deploy a remote [MCP server](https://modelcontextprotocol.io/) on Kubernetes when you need repeatable releases, horizontal scaling, service discovery, centralized secrets, and production observability.
+
+A typical deployment places a Streamable HTTP MCP server behind a Kubernetes Service and an HTTPS ingress or gateway.
+
+```text
+MCP client -> HTTPS ingress -> Service -> MCP server Pods -> API
+```
+
+## Before you deploy
+
+Prepare:
+
+- A container image for the MCP server
+- A Streamable HTTP endpoint
+- A Kubernetes cluster
+- A container registry the cluster can access
+- A DNS name and TLS certificate
+- Authentication for MCP clients
+- Credentials for upstream systems
+- Health endpoints
+
+Test the server locally with [MCP Inspector](/learn/fundamentals/mcp-inspector-guide) before deploying it.
+
+## Containerize the server
+
+The container should:
+
+- Start one server process
+- Listen on a configurable address and port
+- Write logs to standard output and error
+- Stop gracefully on `SIGTERM`
+- Avoid running as root
+- Include only runtime dependencies
+- Expose health endpoints that do not require MCP authentication
+
+Do not bake secrets into the image.
+
+## Create a Deployment
+
+The following example is a starting point. Replace the image, port, command, and health paths with values from your server.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mcp-server
+  template:
+    metadata:
+      labels:
+        app: mcp-server
+    spec:
+      containers:
+        - name: mcp-server
+          image: registry.example.com/mcp-server:1.0.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: UPSTREAM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-server-secrets
+                  key: upstream-api-key
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+```
+
+Pin versioned image tags or digests. Avoid `latest` in production.
+
+## Expose the Pods with a Service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-server
+spec:
+  selector:
+    app: mcp-server
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+```
+
+The Service gives the Pods a stable internal address.
+
+## Add HTTPS ingress
+
+Use your cluster's Ingress or Gateway implementation to expose the MCP endpoint.
+
+Configure:
+
+- TLS
+- The public hostname
+- The MCP path, such as `/mcp`
+- Request and streaming timeouts
+- Maximum body size
+- Forwarded headers
+- Authentication integration where appropriate
+
+Confirm that the proxy supports the streaming behavior your server uses.
+
+## Store secrets safely
+
+Kubernetes Secrets are configuration objects, not a complete secret-management strategy.
+
+For production:
+
+- Enable encryption at rest
+- Restrict Secret access with RBAC
+- Use a cloud secret manager or external secrets operator when appropriate
+- Rotate credentials
+- Avoid exposing secrets in logs
+- Give the server only the credentials it needs
+
+If the upstream API supports per-user authorization, avoid replacing it with one unrestricted shared credential.
+
+## Handle MCP sessions across replicas
+
+Multiple replicas create a state-management decision.
+
+If your server keeps session state:
+
+- Store state in a shared system, or
+- Configure session affinity, and
+- Plan for Pod termination and reconnection
+
+Stateless tool execution is easier to scale, but not every MCP feature or application workflow is stateless.
+
+## Configure health checks correctly
+
+Use:
+
+- A startup probe for slow initialization
+- A readiness probe to control traffic
+- A liveness probe only for unrecoverable process failure
+
+Do not make a liveness probe depend on every upstream API. A dependency outage should not cause Kubernetes to restart all healthy server processes repeatedly.
+
+## Scale safely
+
+Add a HorizontalPodAutoscaler only after measuring useful signals.
+
+CPU may not represent load for I/O-heavy tool calls. Consider:
+
+- Concurrent MCP sessions
+- Active requests
+- Request latency
+- Queue depth
+- Upstream API limits
+
+Scaling the MCP layer cannot remove a rate limit imposed by the upstream system.
+
+## Apply least privilege
+
+Most API-backed MCP servers do not need access to the Kubernetes API. Disable automatic service-account token mounting when it is unnecessary.
+
+If the server does manage cluster resources:
+
+- Create a dedicated service account
+- Prefer namespace-scoped Roles
+- Grant only required verbs and resources
+- Avoid wildcards
+- Avoid `cluster-admin`
+- Audit every tool that changes cluster state
+
+<Warning>
+  An AI application can request any Kubernetes action allowed by the server's identity. Start with read-only tools and narrow RBAC permissions.
+</Warning>
+
+## Add observability
+
+Capture:
+
+- Request count and latency
+- Tool name
+- Result status
+- Authentication failures
+- Upstream API errors
+- Timeouts and cancellations
+- Pod restarts
+- Saturation and queue depth
+
+Do not log access tokens, full secrets, or sensitive tool inputs.
+
+## Production checklist
+
+- [ ] Versioned container image
+- [ ] Non-root security context
+- [ ] Resource requests and limits
+- [ ] Readiness and liveness probes
+- [ ] TLS
+- [ ] Authentication and authorization
+- [ ] Secret rotation
+- [ ] NetworkPolicy
+- [ ] Pod disruption strategy
+- [ ] Session-state plan
+- [ ] Monitoring and alerts
+- [ ] Tested rollback
+
+For simpler API-backed deployments, [0mcp](https://0mcp.io) provides a hosted [remote MCP server](/learn/fundamentals/remote-mcp-servers) without requiring you to operate Kubernetes.

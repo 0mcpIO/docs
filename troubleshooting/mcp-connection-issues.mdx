@@ -3,7 +3,7 @@ title: MCP connection issues
 description: Troubleshoot clients that can't connect to your MCP server.
 ---
 
-If your client can't establish a connection, work through the checks below in order.
+If your client can't establish a connection, work through the checks below in order. The official [MCP debugging guide](https://modelcontextprotocol.io/docs/tools/debugging) can help you inspect client, server, and transport behavior.
 
 ## 1. Verify your server is published
 
@@ -29,7 +29,7 @@ Small differences in the URL, such as an incorrect hostname or path, can prevent
 
 ## 4. Verify the transport
 
-0mcp uses **Streamable HTTP**.
+[0mcp](https://0mcp.io) uses **Streamable HTTP**.
 
 Make sure your MCP client is configured to use the hosted HTTP endpoint instead of a local command or an unsupported transport.
 

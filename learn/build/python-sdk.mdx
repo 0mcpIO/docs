@@ -1,0 +1,240 @@
+---
+title: "The MCP Python SDK: Building clients and servers"
+description: Build MCP servers and clients with the official Python SDK and FastMCP, define typed tools, connect through stdio, and prepare for production.
+---
+
+The official **[MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)** provides high-level and low-level APIs for building MCP servers and clients in Python.
+
+Its `FastMCP` API can turn typed Python functions into tools, resources, and prompts with generated schemas.
+
+<Warning>
+The Python SDK has multiple major API generations. The examples below use the stable v1 interface from the `mcp` package. Check the official repository and migration guide for the version you install.
+</Warning>
+
+## What the Python SDK provides
+
+You can use it to:
+
+- Create MCP servers with `FastMCP`
+- Build lower-level servers for custom protocol behavior
+- Define typed tools, resources, and prompts
+- Build MCP clients with `ClientSession`
+- Use `stdio` and Streamable HTTP
+- Access logging, progress, sampling, and elicitation through request context
+- Implement authentication for remote servers
+
+## Install the SDK
+
+The official repository recommends `uv` for project management:
+
+```bash
+uv init mcp-python-demo
+cd mcp-python-demo
+uv add "mcp[cli]"
+```
+
+With `pip`:
+
+```bash
+pip install "mcp[cli]"
+```
+
+Pin a compatible major version in production so an SDK upgrade does not unexpectedly change your API.
+
+## Build a minimal MCP server
+
+Create `server.py`:
+
+```python
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("calculator-server")
+
+
+@mcp.tool()
+def add(a: float, b: float) -> float:
+    """Add two numbers and return the total."""
+    return a + b
+
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")
+```
+
+Python type hints define the input and output types. The docstring helps the model understand when to call the tool.
+
+Run it with:
+
+```bash
+uv run python server.py
+```
+
+## Add a resource
+
+FastMCP uses URI templates for dynamic resources:
+
+```python
+@mcp.resource("greeting://{name}")
+def greeting(name: str) -> str:
+    """Return a personalized greeting."""
+    return f"Hello, {name}!"
+```
+
+The client can read `greeting://Ada` to receive `Hello, Ada!`.
+
+## Add a prompt
+
+```python
+@mcp.prompt()
+def review_code(code: str) -> str:
+    """Prepare a focused code-review request."""
+    return (
+        "Review this code for correctness, security, and maintainability:\n\n"
+        f"{code}"
+    )
+```
+
+Prompts are intended for explicit user selection. Keep their arguments and expected output clear.
+
+## Build a minimal MCP client
+
+Create `client.py`:
+
+```python
+import asyncio
+
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+
+async def main() -> None:
+    server = StdioServerParameters(
+        command="uv",
+        args=["run", "python", "server.py"],
+    )
+
+    async with stdio_client(server) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            tools = await session.list_tools()
+            print([tool.name for tool in tools.tools])
+
+            result = await session.call_tool(
+                "add",
+                arguments={"a": 2, "b": 3},
+            )
+            print(result)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+The client starts the server, initializes the session, discovers tools, and calls `add`.
+
+## Use context in a tool
+
+A handler can request a FastMCP context object to access request-scoped features.
+
+```python
+from mcp.server.fastmcp import Context
+
+
+@mcp.tool()
+async def process_report(report_id: str, ctx: Context) -> str:
+    """Process a report and send progress updates."""
+    await ctx.info(f"Starting report {report_id}")
+    await ctx.report_progress(progress=0.5, total=1.0)
+
+    result = await process_report_in_backend(report_id)
+
+    await ctx.report_progress(progress=1.0, total=1.0)
+    return result
+```
+
+Keep model-visible progress and logs free of secrets.
+
+## Organize a production server
+
+A maintainable project can separate MCP definitions from business services:
+
+```text
+app/
+  server.py
+  tools/
+    orders.py
+    customers.py
+  resources/
+    policies.py
+  prompts/
+    support.py
+  services/
+    api_client.py
+tests/
+```
+
+Handlers should be thin adapters. Put API calls, database access, and business rules in testable service modules.
+
+## Choose a transport
+
+| Transport | Use it for |
+| --- | --- |
+| `stdio` | A local process launched by an MCP client |
+| Streamable HTTP | A remote, independently deployed server |
+
+For a remote server, follow the SDK version's current Streamable HTTP and authentication guidance. Do not use legacy SSE for a new deployment unless compatibility requires it.
+
+Read [MCP transports](/learn/core-concepts/transports) and [Remote MCP servers](/learn/fundamentals/remote-mcp-servers).
+
+## Production safeguards
+
+- Validate model-provided and client-provided input.
+- Authenticate and authorize each protected operation.
+- Use timeouts for HTTP and database calls.
+- Apply concurrency and rate limits.
+- Avoid blocking the event loop in async handlers.
+- Return safe, actionable errors.
+- Keep credentials out of prompts, results, and logs.
+- Add health checks, metrics, tracing, and audit events.
+- Pin and regularly update dependencies.
+
+## Test with MCP Inspector
+
+Run:
+
+```bash
+npx @modelcontextprotocol/inspector uv run python server.py
+```
+
+Test tool discovery, invalid input, errors, resources, prompts, cancellations, and the chosen transport.
+
+## When to use 0mcp instead
+
+If your server primarily exposes an existing API, [0mcp](https://0mcp.io) can remove the need to write and operate the MCP translation layer yourself.
+
+0mcp supports:
+
+- OpenAPI 3.x and Swagger 2.0 import
+- Direct REST API-to-MCP conversion without an OpenAPI document
+- GraphQL API-to-MCP conversion
+- Hosted MCP endpoints, tools, resources, and prompts
+- Playground testing, versioning, rollback, analytics, and logs
+
+Use the Python SDK when you need custom Python workflows or protocol behavior. Use 0mcp when your main goal is to expose an existing API through a managed MCP server.
+
+## When to use Python
+
+Python is a strong choice when the server needs:
+
+- Data processing
+- Machine-learning libraries
+- Existing Python business logic
+- Rapid service development
+- Async HTTP or database integrations
+
+Compare language tradeoffs in [MCP SDK comparison](/learn/fundamentals/mcp-sdk-comparison).
+
+## Key takeaway
+
+**The Python SDK and FastMCP make it concise to define MCP capabilities, but production reliability still depends on validation, authorization, testing, and operational design.**

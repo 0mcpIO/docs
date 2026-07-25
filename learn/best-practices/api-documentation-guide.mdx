@@ -1,0 +1,179 @@
+---
+title: MCP API documentation guide
+description: Document MCP servers, tools, resources, prompts, authentication, errors, examples, versions, and operational limits for people and AI clients.
+---
+
+**[MCP](https://modelcontextprotocol.io/) API documentation** explains how an MCP client connects to your server, which capabilities it can discover, what each capability does, and how to use it safely.
+
+The protocol makes capabilities machine-discoverable. Human documentation still matters because schemas cannot explain business intent, permissions, side effects, or complete workflows.
+
+## Document two audiences
+
+| Audience | What it needs |
+| --- | --- |
+| MCP client and model | Precise names, descriptions, schemas, annotations, and structured results |
+| Developer or operator | Setup, auth, examples, limits, security, troubleshooting, and version policy |
+
+Keep both layers consistent. A tool description in the server must not contradict its documentation page.
+
+## Start with a server overview
+
+The first section should answer:
+
+- What does the server connect to?
+- Who should use it?
+- Is it local or remote?
+- Which MCP protocol version and transports does it support?
+- Does it expose tools, resources, prompts, or other capabilities?
+- Which operations can change data?
+- Where can users get support?
+
+Include the server name and version returned during initialization.
+
+## Document connection and authentication
+
+Provide a copyable configuration for each supported client or explain the remote connection URL.
+
+Document:
+
+- Transport and endpoint
+- Required runtime for a local server
+- Environment variables
+- OAuth flow, scopes, and redirect requirements
+- API key placement when applicable
+- Network and organization prerequisites
+- Safe credential storage
+
+Never place a real credential in an example.
+
+## Document every tool
+
+For each [tool](/learn/core-concepts/tools), include:
+
+| Field | What to explain |
+| --- | --- |
+| Name | Stable machine identifier |
+| Purpose | The user task it completes |
+| When to use | Clear selection criteria |
+| When not to use | Overlap, risk, or unsupported cases |
+| Inputs | Type, format, constraints, and examples |
+| Output | Shape, content types, and empty-result behavior |
+| Side effects | Records or systems that may change |
+| Permissions | Required role, scope, or object access |
+| Errors | Correctable conditions and recovery |
+| Limits | Rate, size, pagination, and timeout behavior |
+
+A useful description is specific:
+
+> Retrieves one order by its exact `ord_` identifier. Use `search_orders` when the identifier is unknown. This tool does not modify the order.
+
+Avoid descriptions such as “manages orders.” They make tool selection unpredictable.
+
+## Document resources and prompts
+
+For a [resource](/learn/core-concepts/resources), document its URI pattern, MIME type, parameters, access rules, pagination or subscription behavior, and expected size.
+
+For a [prompt](/learn/core-concepts/prompts), document its purpose, arguments, generated message structure, embedded resources, user-control expectations, and security considerations.
+
+## Explain errors by category
+
+Document protocol errors separately from tool execution errors.
+
+Provide a table with:
+
+- Stable error category
+- Meaning
+- Whether retrying is safe
+- Corrective action
+- Support reference behavior
+
+Do not promise that every client will display errors in the same way.
+
+## Add task-level examples
+
+Examples should show complete user goals, not only isolated JSON.
+
+For each important workflow:
+
+1. Show a realistic user request.
+2. Identify the likely tool or prompt.
+3. Show representative arguments.
+4. Show a shortened successful result.
+5. Show one common failure and recovery.
+
+Use synthetic data and mark shortened output clearly.
+
+## Document generated MCP servers
+
+If the MCP server is generated from an API, explain its source:
+
+- OpenAPI 3.x or Swagger 2.0 document
+- Direct REST API configuration
+- GraphQL schema and selected operations
+
+Document how API operations map to MCP tools and which behavior remains owned by the upstream API.
+
+[0mcp](https://0mcp.io) supports all three source paths and gives them the same hosted platform capabilities: tools, resources, prompts, a hosted endpoint, Playground testing, versions and rollback, analytics, logs, and client setup guidance.
+
+## Publish version and change information
+
+Document:
+
+- Server version
+- Supported protocol version
+- Added, changed, deprecated, and removed capabilities
+- Schema changes
+- Authentication or permission changes
+- Migration steps
+- Support window and rollback policy
+
+Treat renamed tools and changed required fields as compatibility changes. Publish a migration path before removal.
+
+## Make documentation easy to find and cite
+
+Use:
+
+- One clear question or topic per page
+- A direct answer near the top
+- Descriptive sentence-case headings
+- Stable URLs
+- Descriptive internal link text
+- Short tables for exact mappings
+- Working examples with explicit assumptions
+- Links to primary sources and the MCP specification
+
+Avoid repeating the same generic definition on every page. Link to [What is MCP?](/learn/fundamentals/what-is-mcp) when readers need the foundation.
+
+## Documentation template
+
+```md
+# Tool or capability name
+
+One-sentence purpose.
+
+## When to use it
+## Inputs
+## Output
+## Permissions and side effects
+## Example
+## Errors and recovery
+## Limits
+## Version history
+```
+
+## Documentation checklist
+
+- [ ] Overview identifies the server and intended users
+- [ ] Connection examples are tested
+- [ ] Authentication and scopes are explicit
+- [ ] Every exposed capability is documented
+- [ ] Tool descriptions distinguish similar operations
+- [ ] Inputs, outputs, limits, and errors have examples
+- [ ] Write and destructive operations are labeled
+- [ ] Source API mappings are explained
+- [ ] Changelog and deprecation policy are linked
+- [ ] Secrets and real customer data are absent
+
+## Key takeaway
+
+**The best MCP documentation combines machine-readable schemas with human explanations of intent, permissions, side effects, limits, and recovery.**

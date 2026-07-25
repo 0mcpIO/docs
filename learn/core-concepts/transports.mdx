@@ -1,0 +1,123 @@
+---
+title: Transports
+description: Understand how MCP transports carry JSON-RPC messages over stdio or Streamable HTTP and how to choose between local and remote connections.
+---
+
+**MCP transports** carry protocol messages between an MCP client and server.
+
+MCP uses JSON-RPC 2.0 message structures. The transport determines how those messages are framed, delivered, and connected. The current stable MCP specification defines two standard transports:
+
+- `stdio`
+- [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
+
+## Protocol messages vs transport
+
+The message layer and transport layer solve different problems.
+
+| Layer | Responsibility |
+| --- | --- |
+| MCP data layer | Defines requests, responses, notifications, lifecycle, and capabilities |
+| Transport layer | Moves encoded messages between the client and server |
+
+The same tool call follows MCP's JSON-RPC rules whether it travels through a local process stream or an HTTP endpoint.
+
+## `stdio`
+
+The `stdio` transport uses a process's standard input and standard output.
+
+The client launches the MCP server as a child process. It writes MCP messages to the server's `stdin` and reads MCP messages from the server's `stdout`.
+
+```text
+MCP client
+  | writes JSON-RPC to stdin
+  | reads JSON-RPC from stdout
+MCP server process
+```
+
+Use `stdio` when:
+
+- The server runs on the same machine as the client
+- The client can launch and manage the server process
+- You want simple one-client-to-one-server process communication
+- The server needs approved access to local files or developer tools
+
+The server may write logs to `stderr`. It must not write ordinary log text to `stdout`, because `stdout` is reserved for valid MCP messages.
+
+## Streamable HTTP
+
+Streamable HTTP connects a client to an independent MCP server over HTTP.
+
+The server exposes one MCP endpoint that supports HTTP `POST` and, when streaming is offered, `GET`. Server-Sent Events can carry multiple server messages over a stream.
+
+```text
+MCP client <--- HTTPS ---> https://api.example.com/mcp
+                              |
+                         MCP server
+```
+
+Use Streamable HTTP when:
+
+- The server is hosted remotely
+- Multiple users or clients need network access
+- You need standard HTTP authentication and infrastructure
+- The server must be deployed, monitored, and scaled independently
+
+Streamable HTTP replaced the older HTTP+SSE transport introduced in the `2024-11-05` protocol version. Legacy compatibility may still be required for older clients or servers.
+
+## Comparison
+
+| Consideration | `stdio` | Streamable HTTP |
+| --- | --- | --- |
+| Typical location | Same machine | Remote or network-accessible |
+| Server lifecycle | Client launches the process | Independently deployed service |
+| Connection shape | One client process to one server process | Can serve many client connections |
+| Authentication | Often process and operating-system boundaries | HTTP authorization and server policy |
+| Infrastructure | Minimal | TLS, routing, hosting, monitoring, and scaling |
+| Common use | Local files and developer tools | SaaS APIs and shared services |
+
+Read [Local vs remote MCP](/learn/fundamentals/local-vs-remote-mcp) for the broader deployment tradeoffs.
+
+## Transport lifecycle
+
+After the transport connects, the client and server complete MCP initialization:
+
+1. The client sends an `initialize` request.
+2. Both sides negotiate the protocol version and capabilities.
+3. The client sends an initialized notification.
+4. Normal requests and notifications begin.
+5. The connection eventually closes or shuts down.
+
+A working network connection does not guarantee a valid MCP session. The messages must still follow the negotiated protocol.
+
+## Streamable HTTP security
+
+A remote MCP endpoint should:
+
+- Use HTTPS
+- Validate the `Origin` header to prevent DNS rebinding attacks
+- Authenticate requests when the server is not public
+- Authorize every requested capability
+- Validate the negotiated protocol version
+- Restrict redirects and protect credentials
+- Apply rate limits and request-size limits
+- Avoid returning sensitive information in errors
+
+When running a local HTTP server, bind to the loopback interface instead of all network interfaces unless remote access is intentional.
+
+## Custom transports
+
+MCP implementations can support custom transports when both sides agree on message framing and delivery.
+
+A custom transport does not change MCP's JSON-RPC message semantics, initialization, capability negotiation, or security responsibilities. It can reduce interoperability, so use a standard transport unless the environment has a clear requirement.
+
+See [Custom MCP transport implementation](/learn/fundamentals/custom-mcp-transport) for design considerations.
+
+## How to choose
+
+Choose `stdio` for a local server that the host launches and controls. Choose Streamable HTTP for a hosted server that clients reach over a network.
+
+Transport choice affects deployment and connectivity. It does not determine whether a server exposes [tools](/learn/core-concepts/tools), [resources](/learn/core-concepts/resources), or [prompts](/learn/core-concepts/prompts).
+
+## Key takeaway
+
+**MCP transports move the same JSON-RPC protocol messages through either local process streams or a network-accessible HTTP endpoint.**

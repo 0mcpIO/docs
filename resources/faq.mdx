@@ -11,7 +11,7 @@ description: Answers about 0mcp, security, clients, usage, and plans.
 
 ### What is MCP?
 
-Model Context Protocol is a shared way for AI apps to discover and use outside capabilities. Read [What is MCP?](/concepts/what-is-mcp) for a plain explanation of clients, servers, tools, resources, and prompts.
+Model Context Protocol is a shared way for AI apps to discover and use outside capabilities. Read [What is MCP?](/learn/fundamentals/what-is-mcp) for a plain explanation of clients, servers, tools, resources, and prompts.
 
 ### Do I need to change my existing API?
 
@@ -19,11 +19,11 @@ No. Your API and its business rules stay in place. Import its [OpenAPI specifica
 
 ### Which API formats work today?
 
-0mcp accepts OpenAPI 3.x and Swagger 2.0 in JSON or YAML. You can upload a file, paste the document, or provide a public URL. Direct REST API, GraphQL, and Postman Collection imports are planned.
+0mcp accepts OpenAPI 3.x and Swagger 2.0 in JSON or YAML. You can upload a file, paste the document, or provide a public URL. You can also convert a [direct REST API](/api-sources/rest-api) or [GraphQL API](/api-sources/graphql) into an MCP server. Postman Collection import is planned.
 
 ### Can I expose only selected endpoints?
 
-Yes. You choose exactly which operations become [tools](/capabilities/tools). Leave internal, administrative, payment, or sensitive operations out unless clients truly need them.
+Yes. You choose exactly which operations become [tools](/learn/core-concepts/tools). Leave internal, administrative, payment, or sensitive operations out unless clients truly need them.
 
 ### Can I create more than one MCP server?
 
@@ -53,7 +53,7 @@ Upstream credentials are provided by the caller for each request. 0mcp passes th
 
 ### Can I keep my existing authentication and permissions?
 
-Yes. Your upstream API still decides what a Bearer token or API key can do. A valid 0mcp account does not give a caller extra access to your API.
+Yes. Your upstream API still decides what a Bearer token or API key can do. A valid [0mcp](https://0mcp.io) account does not give a caller extra access to your API.
 
 ### Can I stop calls without deleting a server?
 

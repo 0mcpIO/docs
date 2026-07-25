@@ -1,0 +1,215 @@
+---
+title: "MCP Inspector: A guide to testing and debugging"
+description: Use MCP Inspector to connect to local and remote servers, inspect capabilities, call tools, test resources and prompts, and diagnose protocol errors.
+---
+
+**[MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)** is an interactive developer tool for testing and debugging MCP servers without relying on a full AI application.
+
+It can connect to a server, display negotiated capabilities, list tools, inspect resources, preview prompts, execute requests, and show protocol messages.
+
+![MCP Inspector interface with the connection panel, Tools tab, request inputs, result output, and notification log](https://pub-159346699ebd427981f411393ae156ee.r2.dev/Docs/Screenshot%202026-07-25%20143055.png)
+
+## When to use MCP Inspector
+
+Use Inspector when you need to:
+
+- Verify that a server starts
+- Test initialization
+- Check the selected transport
+- Review tool names and schemas
+- Call a tool with controlled input
+- Inspect resource contents
+- Preview prompt templates
+- View notifications and logs
+- Diagnose protocol errors
+- Test changes before opening an AI client
+
+Inspector verifies protocol behavior. It does not fully reproduce how a particular model chooses tools.
+
+## Requirements
+
+You need:
+
+- Node.js and `npx`
+- A local server startup command or remote MCP URL
+- Any required environment variables or authentication credentials
+
+Run Inspector only in a trusted development environment.
+
+## Start MCP Inspector
+
+Run:
+
+```bash
+npx @modelcontextprotocol/inspector
+```
+
+This starts the Inspector interface and its local proxy.
+
+To start Inspector with a local TypeScript server:
+
+```bash
+npx @modelcontextprotocol/inspector node path/to/server/index.js
+```
+
+For a Python package run through `uv`:
+
+```bash
+npx @modelcontextprotocol/inspector uv --directory path/to/server run package-name
+```
+
+Follow the server's own README for the correct startup command.
+
+## Connect to a local server
+
+For a [local MCP server](/learn/fundamentals/local-mcp-servers):
+
+1. Select the `STDIO` transport.
+2. Enter the executable command.
+3. Add command arguments.
+4. Add required environment variables.
+5. Click **Connect**.
+
+Inspector launches the process and exchanges messages through standard input and output.
+
+If the server disconnects immediately, run the command directly in a terminal and inspect its error output.
+
+## Connect to a remote server
+
+For a [remote MCP server](/learn/fundamentals/remote-mcp-servers):
+
+1. Select Streamable HTTP.
+2. Enter the full MCP endpoint URL.
+3. Configure authentication if required.
+4. Click **Connect**.
+
+Avoid testing destructive tools against production. Use a test account and a staging server.
+
+## Inspect tools
+
+Open the **Tools** tab to:
+
+- List available tools
+- Read their descriptions
+- Inspect input schemas
+- Enter arguments
+- Execute a tool
+- Review the raw result
+
+Test:
+
+- Valid input
+- Missing required input
+- Invalid types
+- Boundary values
+- Empty results
+- Upstream failures
+- Authorization failures
+- Timeouts
+
+Good tool errors should help the client understand what failed without revealing secrets.
+
+## Inspect resources
+
+Open the **Resources** tab to:
+
+- List resources
+- Review names, URIs, descriptions, and MIME types
+- Read resource contents
+- Test resource templates
+- Test subscriptions when supported
+
+Confirm that the server exposes only intended information.
+
+## Inspect prompts
+
+Open the **Prompts** tab to:
+
+- List prompt templates
+- Review arguments
+- Supply test values
+- Preview generated messages
+
+Check that prompt names and descriptions help a user understand when to choose them.
+
+## Read the notification and log panes
+
+Inspector displays protocol events and server logs.
+
+Use them to confirm:
+
+- Initialization completes
+- The expected protocol version is selected
+- Capabilities are declared
+- Request IDs match responses
+- Progress notifications are valid
+- Errors use the expected structure
+
+Never write ordinary logs to `stdout` in a `stdio` server. Use `stderr` so log text does not corrupt MCP messages.
+
+## Debug common failures
+
+### Connection refused
+
+- Confirm the remote URL and port
+- Verify the server is running
+- Check firewall and proxy rules
+- Confirm TLS configuration
+
+### Local process exits
+
+- Run the command directly
+- Check file paths and dependencies
+- Verify environment variables
+- Inspect `stderr`
+
+### Transport mismatch
+
+Use `STDIO` for a process command and Streamable HTTP for a modern remote endpoint. Legacy servers may still use the older SSE transport.
+
+### Initialization fails
+
+- Compare supported protocol versions
+- Validate the initialize response
+- Check capability shapes
+- Confirm the initialized notification
+
+### Tool validation fails
+
+- Review the input schema
+- Test required properties
+- Remove ambiguous or unsupported schema constructs
+- Confirm argument names match the implementation
+
+### Authentication fails
+
+- Check token validity and scope
+- Confirm required headers
+- Verify the OAuth flow
+- Avoid logging the credential
+
+## A practical testing workflow
+
+1. Start with successful initialization.
+2. Confirm the capability lists.
+3. Test one read-only tool.
+4. Test invalid inputs.
+5. Test upstream errors.
+6. Test write operations in a safe environment.
+7. Test cancellation and timeouts.
+8. Connect a real AI client for end-to-end behavior.
+9. Add regression tests to CI.
+
+Use Inspector together with [logs](/guides/logs) and [analytics](/guides/analytics) when testing a [0mcp](https://0mcp.io) server.
+
+## What Inspector cannot prove
+
+Inspector cannot prove that:
+
+- Every AI client supports the same features
+- A model will select the correct tool
+- Tool descriptions are understandable in every context
+- Production authorization is correct
+- The underlying API is reliable
+
+Test the protocol, the real client, and the upstream system separately.

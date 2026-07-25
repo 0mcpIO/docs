@@ -1,9 +1,11 @@
 ---
 title: Codex
-description: Connect your published 0mcp server to Codex.
+description: Connect a published 0mcp server to Codex with the generated CLI command or TOML configuration while keeping credentials in environment variables.
 ---
 
-Publish a version, open **Setup**, and select **Codex**. 0mcp provides both a CLI command and TOML configuration.
+Publish a version, open **Setup**, and select **Codex**. [0mcp](https://0mcp.io) provides both a CLI command and TOML configuration.
+
+See [Client setup](/guides/setup) for the shared connection and credential workflow.
 
 <Steps>
   <Step title="Choose a method">Use the generated CLI command for the quickest setup, or copy the TOML block for manual setup.</Step>
@@ -15,5 +17,5 @@ Publish a version, open **Setup**, and select **Codex**. 0mcp provides both a CL
 Keep any existing TOML entries when adding the new server block. If the file already has a block with the same name, update it instead of creating a duplicate.
 
 <Warning>
-  Do not replace your full Codex configuration with the generated block. Merge it with your existing settings.
+  Do not replace your full [Codex](https://learn.chatgpt.com/docs/extend/mcp) configuration with the generated block. Merge it with your existing settings.
 </Warning>

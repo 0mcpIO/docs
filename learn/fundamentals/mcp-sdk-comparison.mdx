@@ -1,0 +1,171 @@
+---
+title: "Comparing MCP SDKs: Python vs TypeScript vs Go"
+description: Compare official MCP SDKs for Python, TypeScript, and Go by ecosystem, type system, deployment, concurrency, and team fit.
+---
+
+Choose an [MCP SDK](https://modelcontextprotocol.io/docs/sdk) based on your team's language, existing systems, deployment target, and operational requirements.
+
+The official MCP project currently classifies **TypeScript, Python, and Go as Tier 1 SDKs**. All three can implement MCP clients and servers. Their main differences come from their language ecosystems and runtime models.
+
+<Info>
+  SDK APIs and feature maturity change. Check the official SDK documentation and release notes before implementation.
+</Info>
+
+## Quick comparison
+
+| Factor | Python | TypeScript | Go |
+| --- | --- | --- | --- |
+| Strong fit | AI, data, scripting, backend services | Web, Node.js, full-stack products | Infrastructure, services, compiled tools |
+| Type model | Dynamic with type hints and validation models | Static structural typing | Static nominal typing with structs |
+| Concurrency | `asyncio` and processes | Node.js event loop and workers | Goroutines and channels |
+| Packaging | Python package and environment | npm package and Node.js runtime | Compiled binary |
+| Startup | Runtime-dependent | Runtime-dependent | Fast compiled executable |
+| Ecosystem | AI and data libraries | Web and JavaScript ecosystem | Cloud and infrastructure tooling |
+
+## Python MCP SDK
+
+Python is a natural choice for teams already building AI, data, automation, or scientific systems.
+
+### Strengths
+
+- Familiar to many AI engineers
+- Strong data and machine-learning ecosystem
+- Concise server implementations
+- Mature validation and serialization tools
+- Good fit for scripts and internal services
+- Async support for I/O-heavy operations
+
+### Considerations
+
+- Environment and dependency management need discipline
+- CPU-heavy work may need processes or external workers
+- Runtime type checking depends on the libraries and patterns you choose
+
+### Choose Python when
+
+- The MCP server wraps a Python AI or data workflow
+- Your team already uses FastAPI, Pydantic, or `asyncio`
+- You need rapid experimentation
+- The server calls Python-native libraries
+
+## TypeScript MCP SDK
+
+TypeScript is a strong choice for Node.js services, web product teams, and developers who want rich editor feedback.
+
+### Strengths
+
+- Strong type inference and editor tooling
+- Large npm ecosystem
+- Natural fit for web protocols and JSON
+- Shared types across frontend and backend projects
+- Event-driven model for I/O-heavy services
+- Broad examples and community adoption
+
+### Considerations
+
+- Requires a Node.js runtime unless bundled into another target
+- CPU-heavy work may require workers or separate services
+- Package supply-chain controls are important in large npm dependency trees
+
+### Choose TypeScript when
+
+- Your product already runs on Node.js
+- Your team builds web APIs and SaaS applications
+- You want strong tool-schema types and editor completion
+- You need to share code with a TypeScript SDK or application
+
+## Go MCP SDK
+
+Go is well suited to infrastructure services, compiled command-line tools, and highly concurrent network workloads.
+
+### Strengths
+
+- Single compiled binaries
+- Fast startup
+- Predictable deployment
+- Built-in concurrency primitives
+- Strong standard library for network services
+- Good fit for containers and infrastructure tooling
+
+### Considerations
+
+- More explicit code can slow early prototyping
+- The AI and data ecosystem is smaller than Python's
+- Generic JSON and schema handling may require more structure
+
+### Choose Go when
+
+- You want a self-contained binary
+- The server belongs to an infrastructure platform
+- Concurrency and resource predictability matter
+- Your organization already operates Go services
+
+## Compare server deployment
+
+### Python
+
+Deploy with a Python runtime, isolated environment, and locked dependencies. Containers make environments more repeatable.
+
+### TypeScript
+
+Deploy with Node.js and a lockfile. Build TypeScript before runtime or use a supported execution strategy.
+
+### Go
+
+Compile the server and deploy the binary. Multi-stage container builds can produce small runtime images.
+
+All three can run as [local MCP servers](/learn/fundamentals/local-mcp-servers) or [remote MCP servers](/learn/fundamentals/remote-mcp-servers), subject to the transports implemented by the SDK version.
+
+## Compare performance carefully
+
+Language benchmarks rarely predict full MCP performance.
+
+Most MCP tools spend time waiting for:
+
+- Model decisions
+- Network requests
+- Databases
+- External APIs
+- File systems
+
+Measure the actual workload. Schema quality, response size, upstream latency, and retry behavior can matter more than language runtime speed.
+
+## Compare maintainability
+
+The best SDK is usually the one your team can operate confidently.
+
+Evaluate:
+
+- Existing expertise
+- Testing conventions
+- Dependency policy
+- Observability tooling
+- Deployment platform
+- Security review process
+- Long-term ownership
+
+Introducing another language for a small theoretical gain can increase operational cost.
+
+## Can clients and servers use different languages?
+
+Yes.
+
+MCP is a protocol, so a Python client can connect to a TypeScript server, and a Go client can connect to a Python server, as long as both implement compatible protocol versions and transports.
+
+```text
+Go client -> MCP -> TypeScript server
+Python client -> MCP -> Go server
+```
+
+Language choice does not need to be the same on both sides.
+
+## Decision guide
+
+- Choose **Python** for AI, data, and rapid backend development.
+- Choose **TypeScript** for Node.js, SaaS, and web-focused teams.
+- Choose **Go** for infrastructure, compiled distribution, and concurrent services.
+- Keep your existing language when it already meets the requirements.
+
+## Key takeaway
+
+**Python, TypeScript, and Go are all strong official MCP SDK choices. Team fit and deployment context matter more than a universal ranking.**

@@ -1,0 +1,142 @@
+---
+title: "Local vs remote MCP: Which should you choose?"
+description: Compare local and remote MCP servers across privacy, access, performance, maintenance, authentication, scaling, and production readiness.
+---
+
+Choose a **local [MCP server](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)** when the capability depends on one device or private local resources. Choose a **remote MCP server** when multiple users need a shared, centrally operated service.
+
+Many teams use both: local servers for development and device access, and remote servers for shared production integrations.
+
+## Local vs remote MCP at a glance
+
+| Factor | Local MCP server | Remote MCP server |
+| --- | --- | --- |
+| Runs on | User device or private environment | Hosted network infrastructure |
+| Common transport | `stdio` | Streamable HTTP |
+| Typical users | One user or one machine | Multiple authorized users |
+| Best access | Local files, apps, and developer tools | SaaS APIs and shared services |
+| Installation | Required on each device | Central deployment |
+| Updates | Per device | Update once on the server |
+| Network dependency | Often low | Requires network access |
+| Authentication | Local configuration or credentials | Web authentication and authorization |
+| Scaling | Limited by the device | Can scale across infrastructure |
+| Operations | User-managed | Service-owner managed |
+
+## Choose local MCP for device-specific access
+
+A [local MCP server](/learn/fundamentals/local-mcp-servers) is usually the better choice when the server must interact with:
+
+- Files on the user's machine
+- A local source repository
+- Installed command-line tools
+- Desktop applications
+- Local development databases
+- Hardware attached to the device
+- Internal resources reachable only from the local network
+
+Local deployment keeps the server close to those resources and avoids exposing them through a public service.
+
+## Choose remote MCP for shared services
+
+A [remote MCP server](/learn/fundamentals/remote-mcp-servers) is usually the better choice when:
+
+- A team needs one consistent integration
+- Customers need to connect to a SaaS product
+- The source system is already an API
+- Central authentication is required
+- You need monitoring, rate limits, and audit logs
+- Updates should reach every client immediately
+- The workload needs high availability or horizontal scaling
+
+Remote deployment works like operating another production web service.
+
+## Compare security and privacy
+
+Local and remote servers have different security risks.
+
+### Local security
+
+A local server often inherits the user's operating-system permissions. It may be able to access sensitive files, credentials, processes, and local network services.
+
+Use restricted paths, narrow tools, isolated credentials, and explicit approval for sensitive actions.
+
+### Remote security
+
+A remote server receives traffic over a network and may serve many tenants. It needs HTTPS, caller authentication, authorization, tenant isolation, rate limiting, monitoring, and secure secret storage.
+
+Remote does not automatically mean less private. Local does not automatically mean more private. Evaluate the complete data path, including what the AI host and model provider receive.
+
+## Compare performance
+
+Local servers avoid internet round trips when accessing local resources. This can help with large files, repository searches, and repeated device operations.
+
+Remote servers add network latency, but they may run closer to the upstream API and use more powerful infrastructure. They can also cache shared data and scale independently.
+
+Measure the full workflow. The slowest part may be the model, upstream API, or external service rather than the MCP transport.
+
+## Compare maintenance
+
+Local distribution creates per-device work:
+
+- Installation
+- Runtime dependencies
+- Configuration
+- Credential setup
+- Updates
+- Operating-system differences
+- User troubleshooting
+
+Remote distribution creates service operations work:
+
+- Deployment pipelines
+- Availability
+- Capacity planning
+- Authentication
+- Incident response
+- Observability
+- Backward compatibility
+
+Choose the maintenance model your team can support.
+
+## Compare credential handling
+
+Local servers often receive credentials through environment variables, operating-system keychains, or host-managed extension settings.
+
+Remote servers commonly use delegated authorization, scoped access tokens, or service credentials stored in a secret manager.
+
+Never place production secrets directly in source code or shared configuration.
+
+## Use a hybrid approach
+
+You do not have to choose one model for every capability.
+
+A hybrid architecture might use:
+
+- A local server for files and terminal tools
+- A remote server for CRM and billing APIs
+- Local development before remote production deployment
+- A local bridge for private-network access and a remote public service for general tools
+
+The MCP host can maintain separate clients for these servers while preserving connection boundaries.
+
+> [Image placeholder: Hybrid MCP architecture with local file tools and a remote SaaS API server connected to one AI host]
+
+## Decision checklist
+
+Answer these questions:
+
+1. Does the capability need direct access to a user's device?
+2. Will more than one person use it?
+3. Can the data cross a network boundary?
+4. Does the integration require centralized policy and auditing?
+5. Who will install and update the server?
+6. Does it need production availability?
+7. Can your team operate secure remote infrastructure?
+
+If device access dominates, start local. If shared access and centralized operations dominate, start remote.
+
+For API-backed products, a hosted MCP server is usually the natural fit. [0mcp](https://0mcp.io) can publish an [OpenAPI-defined API](/api-sources/openapi) as a remote MCP endpoint.
+
+## Key takeaway
+
+**Use local MCP for device-bound capabilities and individual control. Use remote MCP for shared, centrally managed, production capabilities. Use both when the system needs both kinds of access.**

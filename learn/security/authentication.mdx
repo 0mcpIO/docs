@@ -1,0 +1,179 @@
+---
+title: MCP authentication
+description: Understand identity and credential verification in MCP, including remote OAuth access, local server credentials, and upstream API authentication.
+---
+
+**Authentication** verifies the identity associated with a request. In an MCP system, identity may need to be verified at more than one boundary.
+
+```text
+User or client -> MCP server -> Upstream API
+     identity       access       separate credential
+```
+
+Authentication answers **“Who is making this request?”** Authorization answers **“What may that identity do?”**
+
+## Authentication and authorization are different
+
+| Authentication | Authorization |
+| --- | --- |
+| Establishes identity | Grants or denies permission |
+| May involve login, certificates, or signed credentials | Uses scopes, roles, ownership, and policy |
+| Usually occurs before protected access | Must be checked for every protected operation |
+| A valid credential can succeed | A valid credential can still receive `403 Forbidden` |
+
+MCP's standard for protected HTTP servers is formally an **[authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization)** specification built on OAuth conventions. User authentication usually happens at the authorization server and may use passwords, passkeys, enterprise identity, or OpenID Connect.
+
+## Three credential boundaries
+
+### User to authorization server
+
+The authorization server authenticates the user and obtains consent. The exact login method is outside the MCP specification.
+
+### MCP client to MCP server
+
+For a protected remote server, the client sends an access token:
+
+```http
+Authorization: Bearer ACCESS_TOKEN
+```
+
+The MCP server validates the token before serving protected requests.
+
+### MCP server to upstream API
+
+An MCP server may need a separate credential for the external API it wraps.
+
+That credential may be:
+
+- A user-specific OAuth token
+- A service-account token
+- An API key
+- A credential obtained through token exchange
+
+The upstream credential must be intended for the upstream system. Do not forward an MCP access token to another API unchanged.
+
+## Remote MCP server authentication
+
+For HTTP-based transports, the current MCP specification defines an OAuth-based access flow.
+
+The main roles are:
+
+| Role | Responsibility |
+| --- | --- |
+| Resource owner | Grants access, often the user |
+| MCP client | Requests authorization and calls the server |
+| Authorization server | Authenticates the user and issues access tokens |
+| MCP server | Acts as the protected resource server |
+
+The authorization server can be operated by the same organization as the MCP server or by a separate identity provider.
+
+## What the MCP server validates
+
+For each protected request, validate:
+
+- The token signature or introspection result
+- The trusted issuer
+- The intended audience or resource
+- Expiration and not-before times
+- Required scopes or claims
+- Revocation status when supported
+- The token type and allowed algorithm
+
+Reject a token issued for another service, even if its signature is valid.
+
+<Warning>
+Decoding a JWT is not validation. Verify its signature, issuer, audience, time claims, and authorization data with trusted configuration.
+</Warning>
+
+## Local MCP server credentials
+
+The MCP OAuth authorization flow is intended for HTTP-based transports. A local `stdio` server normally obtains credentials through its environment or a secure local credential mechanism.
+
+For local servers:
+
+- Pass only required environment variables.
+- Use the client's secure credential store when available.
+- Keep secrets out of shared configuration files.
+- Restrict configuration file permissions.
+- Do not print credentials to `stdout` or `stderr`.
+- Treat the local server package as code running with the user's privileges.
+
+## Authentication for API-backed MCP servers
+
+An API-backed server needs a deliberate upstream credential model.
+
+### User credential forwarding
+
+The client supplies a credential issued for the upstream API. The MCP layer forwards it to that API.
+
+This preserves upstream identity and permissions, but the credential must remain confidential and must not appear in model-visible content or logs.
+
+### Service credential
+
+The MCP server uses its own service identity.
+
+This simplifies upstream access but requires the MCP server to enforce user-level authorization. Every action may otherwise appear to originate from one highly privileged account.
+
+### OAuth delegation or token exchange
+
+The system obtains an upstream token with a specific audience and limited scope.
+
+This is appropriate when the MCP server must act on behalf of a user without reusing the MCP token.
+
+## How 0mcp handles upstream credentials
+
+[0mcp](https://0mcp.io) uses a pass-through model for credentials explicitly provided for your upstream API.
+
+It can forward bearer tokens or API keys according to your configured API source:
+
+- The published security scheme for OpenAPI 3.x or Swagger 2.0
+- The authentication configuration for a directly connected REST API
+- The authentication configuration for a GraphQL API
+
+All three source types use the same credential-forwarding model. Your API remains responsible for validating the credential and authorizing the request.
+
+This upstream credential is conceptually separate from any access token used to protect the MCP endpoint itself.
+
+Read the [0mcp authentication model](/concepts/authentication-model) for supported forwarding patterns.
+
+## Common authentication failures
+
+| Result | Typical cause |
+| --- | --- |
+| `401 Unauthorized` | Missing, malformed, expired, invalid, or wrong-audience credential |
+| `403 Forbidden` | Credential is accepted but lacks permission |
+| Repeated browser login | Redirect URI, client registration, cookies, or token storage issue |
+| Token works at API but not MCP server | Token was issued for the upstream API, not the MCP resource |
+| MCP call works but upstream returns `401` | Missing or invalid upstream credential |
+
+See [Authentication errors](/troubleshooting/authentication-errors) for 0mcp troubleshooting.
+
+## Authentication best practices
+
+- Use HTTPS for remote MCP traffic.
+- Prefer short-lived, audience-restricted tokens.
+- Use PKCE in authorization code flows.
+- Never put credentials in URLs.
+- Store refresh tokens and long-lived credentials securely.
+- Redact credentials from logs and telemetry.
+- Rotate credentials after suspected compromise.
+- Rate-limit authentication failures.
+- Keep MCP and upstream API credentials separate.
+- Use multi-factor authentication at the identity provider for sensitive access.
+
+## What authentication does not solve
+
+Authentication does not:
+
+- Decide which tools a user may call
+- Limit which records a user may access
+- Prevent prompt injection
+- Make tool arguments safe
+- Replace user confirmation
+- Protect a server that ignores token scopes
+
+Apply [MCP authorization](/learn/security/authorization), input validation, and least privilege after identity is established.
+
+## Key takeaway
+
+**MCP authentication establishes the identities and credentials at each boundary, while authorization and server policy decide what those identities can do.**

@@ -1,10 +1,37 @@
 ---
 title: REST API
-description: Direct REST API import is coming soon.
+description: Convert an existing REST API directly into a hosted MCP server with 0mcp.
 ---
 
-<Info>Direct REST API import is planned and is not available yet.</Info>
+**Direct REST API conversion** lets you create a hosted MCP server without first writing an OpenAPI document.
 
-Today, describe your REST API with an OpenAPI 3.x or Swagger 2.0 document, then use [OpenAPI import](/api-sources/openapi).
+In [0mcp](https://0mcp.io), provide your REST API details, configure the endpoints and authentication, and choose which operations should become [MCP tools](/learn/core-concepts/tools).
 
-If your API has no document, start with its most useful read-only endpoints. Define their paths, methods, inputs, responses, server URL, and authentication in a small OpenAPI document. You can add more operations later by importing a new version.
+## What you configure
+
+For each operation, define:
+
+- HTTP method and path
+- Purpose and tool description
+- Path, query, header, and body inputs
+- Expected response
+- Upstream authentication requirements
+- Whether the operation is read-only or changes data
+
+Start with a small set of useful read-only operations. Add write operations after you have tested authentication, authorization, logging, and user confirmation.
+
+## What 0mcp provides
+
+The direct REST workflow includes:
+
+- A hosted MCP endpoint
+- Tools created from selected REST operations
+- Resources and reusable prompts
+- Playground testing
+- Published versions and rollback
+- Usage analytics and activity logs
+- Setup guidance for supported MCP clients
+
+Your REST API remains the source of truth for data, business logic, authentication, and authorization. 0mcp provides the MCP-facing adapter.
+
+If your API already has an OpenAPI 3.x or Swagger 2.0 document, you can use the [OpenAPI source](/api-sources/openapi) instead. For a detailed migration process, read [From REST API to MCP server](/learn/build/rest-api-to-mcp-server).
