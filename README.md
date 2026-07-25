@@ -10,7 +10,8 @@
   <h3>Turn your API into a hosted MCP server</h3>
 
   <p>
-    Import an OpenAPI document, choose what AI clients can access,<br>
+    Connect an OpenAPI document, REST API, or GraphQL API,<br>
+    choose what AI clients can access,
     and publish a managed MCP endpoint in minutes.
   </p>
 
@@ -33,7 +34,7 @@
 
 ## What is 0mcp?
 
-[0mcp](https://0mcp.io) turns an existing REST API into a hosted [Model Context Protocol](concepts/what-is-mcp.mdx) server. You provide an OpenAPI 3.x or Swagger 2.0 document, select the operations you want to expose, and 0mcp converts them into tools that compatible AI clients can discover and call.
+[0mcp](https://0mcp.io) turns an existing API into a hosted [Model Context Protocol](learn/fundamentals/what-is-mcp.mdx) server. Start with an OpenAPI 3.x or Swagger 2.0 document, configure REST operations directly, or connect a GraphQL API. Select the operations you want to expose, and 0mcp converts them into tools that compatible AI clients can discover and call.
 
 You do not need to change your API or maintain a separate MCP service. Your API remains responsible for its data, business logic, authentication, and authorization.
 
@@ -52,7 +53,7 @@ flowchart LR
 | Step | What you do |
 | ---: | --- |
 | **1. Create** | Sign in to the [0mcp dashboard](https://0mcp.io/dashboard) and create a server. |
-| **2. Import** | Upload, paste, or link to an OpenAPI 3.x or Swagger 2.0 document in JSON or YAML. |
+| **2. Connect** | Import an OpenAPI or Swagger document, configure REST operations directly, or connect a GraphQL API. |
 | **3. Choose** | Select the operations that should become MCP tools. Rename them or improve their descriptions when needed. |
 | **4. Publish** | Publish a version to make the server available at its hosted endpoint. |
 | **5. Test** | Use the Playground to test read-only tools and verify authentication before allowing write operations. |
@@ -67,7 +68,7 @@ For the complete walkthrough, follow the [quick start](get-started/quick-start.m
 
 Each selected API operation becomes an MCP tool with a name, description, inputs, request schema, response schema, and authentication requirements. You can disable sensitive operations, set timeouts and response-size limits, and control redirects without changing the upstream API.
 
-[Learn about tools](capabilities/tools.mdx)
+[Learn about tools](learn/core-concepts/tools.mdx)
 
 </details>
 
@@ -76,7 +77,7 @@ Each selected API operation becomes an MCP tool with a name, description, inputs
 
 Share documentation, policies, FAQs, pricing information, or other reference content through stable resource URIs. Resources can contain text, Markdown, JSON, YAML, or base64-encoded file data.
 
-[Learn about resources](capabilities/resources.mdx)
+[Learn about resources](learn/core-concepts/resources.mdx)
 
 </details>
 
@@ -85,7 +86,7 @@ Share documentation, policies, FAQs, pricing information, or other reference con
 
 Create prompt templates for repeatable workflows such as summarizing support cases, drafting replies, reviewing logs, or generating release notes. Arguments let clients reuse one prompt with different values.
 
-[Learn about prompts](capabilities/prompts.mdx)
+[Learn about prompts](learn/core-concepts/prompts.mdx)
 
 </details>
 
@@ -144,8 +145,8 @@ Operational records contain only the details needed to understand usage and fail
 | --- | --- | --- |
 | OpenAPI 3.x | Available | [Prepare an OpenAPI document](api-sources/openapi.mdx) |
 | Swagger 2.0 | Available | [Review import requirements](api-sources/openapi.mdx) |
-| Direct REST API import | Planned | [Use OpenAPI today](api-sources/rest-api.mdx) |
-| GraphQL schema import | Planned | [Review current options](api-sources/graphql.mdx) |
+| Direct REST API conversion | Available | [Configure REST operations](api-sources/rest-api.mdx) |
+| GraphQL-to-MCP conversion | Available | [Connect a GraphQL API](api-sources/graphql.mdx) |
 | Postman Collection import | Planned | [Convert to OpenAPI first](api-sources/postman.mdx) |
 
 ## Find your path
@@ -153,7 +154,7 @@ Operational records contain only the details needed to understand usage and fail
 <details>
 <summary><strong>I am new to MCP</strong></summary>
 
-1. Read [What is MCP?](concepts/what-is-mcp.mdx).
+1. Read [What is MCP?](learn/fundamentals/what-is-mcp.mdx).
 2. See [how 0mcp connects a client to your API](concepts/how-0mcp-works.mdx).
 3. Follow the [quick start](get-started/quick-start.mdx) with one or two read-only operations.
 
