@@ -4,6 +4,7 @@
   "name": "0mcp",
   "description": "Learn how to turn an API into a hosted MCP server with 0mcp.",
   "seo": {
+    "indexing": "all",
     "metatags": {
       "canonical": "https://docs.0mcp.io"
     }
