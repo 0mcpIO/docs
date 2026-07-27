@@ -111,6 +111,7 @@
   "logo": { "light": "/logo/light.svg", "dark": "/logo/dark.svg" },
   "navbar": {
     "links": [
+      { "label": "Website", "href": "https://0mcp.io" },
       { "label": "Support", "href": "mailto:hello@0mcp.io" }
     ],
     "primary": { "type": "button", "label": "Dashboard", "href": "https://0mcp.io/dashboard" }
