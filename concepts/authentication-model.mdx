@@ -31,7 +31,7 @@ Your API
 
 ## Supported authentication methods
 
-0mcp supports the authentication methods commonly defined in [OpenAPI specifications](/api-sources/openapi).
+0mcp supports the authentication methods commonly defined in [OpenAPI specifications](/api-sources/openapi), [REST API definitions](/api-sources/rest-api), and [Postman collections](/api-sources/postman).
 
 ### Bearer tokens
 
@@ -63,9 +63,21 @@ To avoid exposing secrets in client configurations, 0mcp provides a secure gatew
   Do not add an API key directly to your MCP endpoint URL. Use the gateway header generated on the **Setup** page.
 </Warning>
 
+### OAuth 2.0
+
+OAuth-protected tools use Bearer access tokens when calling your upstream API.
+
+For MCP clients that need protocol-level OAuth metadata, 0mcp can expose the MCP resource URL and protected resource metadata URLs from the **Setup** page.
+
+If OAuth issuer configuration is required, add the issuer URL and optional JWKS URL from server **Settings** before connecting clients.
+
+<Note>
+  0mcp does not become your OAuth provider. It publishes the MCP metadata needed by compatible clients and forwards valid caller credentials to your upstream API.
+</Note>
+
 ## Authentication scope
 
-Authentication requirements are determined from your published OpenAPI specification.
+Authentication requirements are determined from your published API source.
 
 Credentials can be required:
 

@@ -39,18 +39,34 @@ Before importing, 0mcp analyzes your specification and displays a preview showin
 - OpenAPI version
 - Server URL
 - Available API operations
+- Authentication details
+- Validation findings
 
 From there, you can:
 
 - Choose which operations become [MCP tools](/learn/core-concepts/tools)
 - Review generated tool names
 - Improve tool descriptions before creating your server
+- Review input descriptions and request body details
+- Fix blocking findings before import
 
 This gives you full control over what AI clients can access.
 
 <Warning>
   Review write, delete, administrative, and payment operations carefully before selecting them as tools.
 </Warning>
+
+## Import readiness checks
+
+The preview highlights issues that can affect the MCP server:
+
+- Duplicate tool names
+- Duplicate method and path pairs
+- Missing operation or input descriptions
+- Missing or insecure upstream base URLs
+- Unsupported authentication schemes
+
+Blocking findings prevent import until they are fixed. Warnings do not block import, but improving them usually produces better tools.
 
 ## Writing a high-quality OpenAPI specification
 

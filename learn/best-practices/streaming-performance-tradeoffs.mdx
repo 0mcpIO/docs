@@ -5,7 +5,7 @@ description: Understand MCP Streamable HTTP, SSE, stdio, progress updates, resum
 
 MCP does not define a general-purpose token streaming API. It defines transports and message patterns that can support incremental server-to-client communication, progress updates, and long-running work.
 
-For current remote servers, the standard transport is **[Streamable HTTP](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)**. Local process integrations commonly use **stdio**.
+For current remote servers, the standard transport is **[Streamable HTTP](https://modelcontextprotocol.io/specification)**. Local process integrations commonly use **stdio**.
 
 ## Compare the transports
 
@@ -58,7 +58,7 @@ Progress does not replace a timeout, cancellation policy, or durable job model.
 
 ## Consider tasks for durable work
 
-The MCP `2025-11-25` specification introduced tasks as an experimental feature for tracking deferred results through polling.
+The MCP `2025-11-25` specification introduced tasks as an experimental feature for tracking deferred results through polling. In the MCP 2026-07-28 era, tasks moved out of the base protocol into an extension.
 
 Use tasks only when both sides support the feature and the operation benefits from durable state. Keep a fallback design for clients that do not support experimental tasks.
 

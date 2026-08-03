@@ -3,7 +3,7 @@ title: The MCP specification explained
 description: Learn how the Model Context Protocol specification defines messages, lifecycle, transports, features, versioning, and security requirements.
 ---
 
-The **[MCP specification](https://modelcontextprotocol.io/specification/2025-11-25)** is the authoritative technical definition of the Model Context Protocol. It tells client and server developers which messages exist, how sessions behave, how capabilities are negotiated, and what compliant implementations must do.
+The **[MCP specification](https://modelcontextprotocol.io/specification)** is the authoritative technical definition of the Model Context Protocol. It tells client and server developers which messages exist, how protocol behavior is negotiated, how capabilities are discovered, and what compliant implementations must do.
 
 Use the specification when implementation behavior must be exact. Use explanatory documentation when you first need a conceptual overview.
 
@@ -33,7 +33,7 @@ It uses JSON-RPC 2.0 and includes:
 - Requests
 - Responses
 - Notifications
-- Initialization
+- Initialization or discovery, depending on the negotiated protocol era
 - Capability negotiation
 - Progress
 - Cancellation
@@ -44,9 +44,11 @@ Every feature builds on this common message behavior.
 
 ## Lifecycle and initialization
 
-An MCP session begins with initialization.
+MCP lifecycle behavior depends on the negotiated protocol era.
 
-The client proposes a protocol version and declares its capabilities. The server selects a compatible version and declares its own capabilities. Normal requests begin only after initialization completes.
+Older clients begin with initialization. The client proposes a protocol version and declares its capabilities. The server selects a compatible version and declares its own capabilities. Normal requests begin only after initialization completes.
+
+Modern MCP 2026-07-28 clients use discovery and request-contained metadata instead of the older session-oriented flow.
 
 This exchange lets implementations evolve without assuming feature support.
 
@@ -85,15 +87,15 @@ A server must not use a client feature unless the client declared support for it
 
 ## Utilities
 
-The specification includes shared utilities that make sessions more usable:
+The specification includes shared utilities that make protocol exchanges more usable:
 
 - Progress notifications
 - Request cancellation
-- Ping
-- Logging
 - Completion suggestions
 
 These utilities support reliability and user experience but do not replace application-specific observability.
+
+Some utilities differ by protocol version. See [MCP 2026-07-28 compatibility](/guides/mcp-2026-07-28) for the current 0mcp guidance.
 
 ## Protocol versions
 

@@ -5,7 +5,9 @@ description: Troubleshoot 401, 403, and missing credential errors.
 
 Authentication errors usually happen when your upstream API doesn't receive the credentials it expects, or when the provided credentials don't have permission to access the requested operation.
 
-For protected remote MCP servers, the official [MCP authorization specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) defines the protocol-level authentication and token requirements.
+For protected remote MCP servers, the official [MCP authorization specification](https://modelcontextprotocol.io/specification) defines the protocol-level authentication and token requirements.
+
+0mcp uses pass-through authentication for upstream API credentials. For OAuth-protected MCP tools, the server **Setup** page may also require issuer configuration before client setup is usable.
 
 ## Common error types
 
@@ -104,5 +106,6 @@ To continue debugging:
 1. Review the failed request in [**Logs**](/guides/logs).
 2. Compare the timestamp with your upstream API logs.
 3. Confirm your [OpenAPI security scheme](/api-sources/openapi) matches your actual API authentication requirements.
+4. If Setup reports an OAuth configuration issue, add the issuer and JWKS settings from server **Settings**.
 
 Your upstream API logs are the best source for diagnosing detailed authentication failures.

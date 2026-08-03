@@ -7,6 +7,10 @@ After publishing your MCP server, you can connect it to any supported MCP client
 
 The **Setup** page provides everything you need, including your MCP endpoint, client-specific configuration, and any required authentication details.
 
+<Info>
+  Setup configuration is generated from the currently published version. Publish a version before connecting an MCP client.
+</Info>
+
 ## Supported clients
 
 0mcp provides setup guides for:
@@ -31,6 +35,7 @@ Before configuring a client, make sure you have:
 - [Published](/guides/versioning) your MCP server
 - Reviewed any required [authentication credentials](/concepts/authentication-model)
 - Stored secrets in environment variables or your client's secure credential store
+- Resolved any configuration issue shown on the **Setup** page
 
 <Warning>
   Avoid placing API keys or access tokens directly in shared configuration files.
@@ -46,6 +51,22 @@ Before configuring a client, make sure you have:
 6. Restart or reconnect your client.
 
 Once connected, your client will discover the published [tools](/learn/core-concepts/tools), [resources](/learn/core-concepts/resources), and [prompts](/learn/core-concepts/prompts) available on your MCP server.
+
+## OAuth-protected servers
+
+If your published tools require MCP OAuth metadata, Setup shows the OAuth resource URL and any missing configuration.
+
+Configure the OAuth issuer and JWKS URL from server **Settings** before copying client configuration.
+
+If Setup reports that configuration is unavailable, fix the listed OAuth issue and reload the page.
+
+## Protocol compatibility
+
+0mcp serves hosted MCP endpoints over **Streamable HTTP**.
+
+Modern MCP clients may negotiate the MCP 2026-07-28 protocol era automatically. Older clients may use legacy behavior.
+
+See [MCP 2026-07-28 compatibility](/guides/mcp-2026-07-28) for details about version negotiation, browser headers, and rollout behavior.
 
 ## Troubleshooting
 

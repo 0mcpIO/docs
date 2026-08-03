@@ -7,7 +7,7 @@ description: Answers about 0mcp, security, clients, usage, and plans.
 
 ### What is 0mcp?
 
-0mcp is a managed platform that turns an existing OpenAPI document into a hosted MCP server. It handles conversion, hosting, monitoring, and [versioning](/guides/versioning), so you do not need to build that server yourself.
+0mcp is a managed platform that turns an existing API source into a hosted MCP server. It handles conversion, hosting, monitoring, and [versioning](/guides/versioning), so you do not need to build that server yourself.
 
 ### What is MCP?
 
@@ -15,11 +15,11 @@ Model Context Protocol is a shared way for AI apps to discover and use outside c
 
 ### Do I need to change my existing API?
 
-No. Your API and its business rules stay in place. Import its [OpenAPI specification](/api-sources/openapi), choose the operations to expose, and publish them as MCP tools.
+No. Your API and its business rules stay in place. Import an [OpenAPI specification](/api-sources/openapi), configure [REST endpoints](/api-sources/rest-api), or import a [Postman collection](/api-sources/postman). Then choose the operations to expose and publish them as MCP tools.
 
 ### Which API formats work today?
 
-0mcp accepts OpenAPI 3.x and Swagger 2.0 in JSON or YAML. You can upload a file, paste the document, or provide a public URL. You can also convert a [direct REST API](/api-sources/rest-api) or [GraphQL API](/api-sources/graphql) into an MCP server. Postman Collection import is planned.
+0mcp accepts OpenAPI 3.x and Swagger 2.0 in JSON or YAML. You can upload a file, paste the document, or provide a public URL. You can also configure a [direct REST API](/api-sources/rest-api) or import a [Postman Collection v2](/api-sources/postman). [GraphQL import](/api-sources/graphql) is coming soon.
 
 ### Can I expose only selected endpoints?
 
@@ -35,7 +35,7 @@ Yes. 0mcp hosts the Streamable HTTP endpoint shown on the server Setup page. You
 
 ### Which MCP clients can connect?
 
-0mcp provides setup for Claude Code, Claude Desktop, Cursor, Codex, and VS Code. Other clients can connect when they support remote Streamable HTTP servers and the required headers. Start with [Client setup](/guides/setup), then choose your app from the Setup group in the sidebar.
+0mcp provides setup for Claude Code, Claude Desktop, Cursor, Codex, and VS Code. Other clients can connect when they support remote Streamable HTTP servers and the required headers. Start with [Client setup](/guides/setup), then choose your app from the Setup group in the sidebar. For modern protocol behavior, see [MCP 2026-07-28 compatibility](/guides/mcp-2026-07-28).
 
 ### How quickly can I get started?
 

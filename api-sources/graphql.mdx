@@ -1,34 +1,35 @@
 ---
 title: GraphQL
-description: Convert GraphQL queries and mutations into a hosted MCP server with 0mcp.
+description: Learn the current status of GraphQL support in 0mcp.
 ---
 
-**[GraphQL](https://graphql.org/learn/)-to-MCP conversion** lets you expose selected GraphQL operations as capabilities for MCP-compatible AI clients.
+<Info>GraphQL import is coming soon and is not available in the current import workspace.</Info>
 
-In [0mcp](https://0mcp.io), connect your GraphQL API, review its schema, and choose the queries and mutations that should become [MCP tools](/learn/core-concepts/tools).
+[GraphQL](https://graphql.org/learn/) APIs use a different operation model from OpenAPI, REST endpoint definitions, and Postman collections.
 
-## Queries and mutations
+0mcp plans to support GraphQL-to-MCP conversion as a dedicated API source. Until then, use one of the currently available sources:
 
-Use queries for read operations such as retrieving records, searching data, or checking status.
+- [OpenAPI specification](/api-sources/openapi)
+- [REST API](/api-sources/rest-api)
+- [Postman collection](/api-sources/postman)
 
-Treat mutations as write operations. Review their permissions, side effects, required confirmation, and audit behavior before publishing them.
+## Do not upload GraphQL schemas to the OpenAPI importer
 
-## What 0mcp provides
+The OpenAPI source expects an OpenAPI 3.x or Swagger 2.0 document.
 
-The GraphQL workflow includes:
+A GraphQL schema or introspection result does not have the same structure, server model, or operation metadata as an OpenAPI document.
 
-- A hosted MCP endpoint
-- Tools created from selected queries and mutations
-- Resources and reusable prompts
-- Playground testing
-- Published versions and rollback
-- Usage analytics and activity logs
-- Setup guidance for supported MCP clients
+<Warning>
+  Do not upload a GraphQL schema through the OpenAPI source. Use the GraphQL source when it becomes available.
+</Warning>
 
-Your GraphQL API continues to enforce its schema, business logic, authentication, and authorization.
+## Preparing for GraphQL support
 
-<Note>
-Configure GraphQL through the GraphQL source option. Do not upload a GraphQL schema to the [OpenAPI importer](/api-sources/openapi), because the formats and operation models are different.
-</Note>
+When GraphQL support is available, plan to review:
 
-Test generated tools in the [Playground](/guides/playground) and review [logs](/guides/logs) before publishing.
+- Which queries should become read-only tools.
+- Which mutations are safe to expose.
+- How authentication is forwarded to your GraphQL endpoint.
+- Whether generated tool names and descriptions are clear enough for AI clients.
+
+Until then, expose GraphQL-backed functionality through a REST or OpenAPI layer if you need to publish it as an MCP server today.

@@ -3,7 +3,7 @@ title: Custom MCP transport implementation
 description: Learn when a custom MCP transport is justified and how to preserve message framing, lifecycle, sessions, security, and interoperability.
 ---
 
-A **custom [MCP transport](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)** changes how MCP messages move between a client and server while preserving the protocol's JSON-RPC messages and lifecycle.
+A **custom [MCP transport](https://modelcontextprotocol.io/specification)** changes how MCP messages move between a client and server while preserving the protocol's JSON-RPC messages and lifecycle.
 
 Use a custom transport only when `stdio` and Streamable HTTP cannot meet a real infrastructure requirement. Both the client and server must support the custom mechanism, so it usually reduces interoperability with standard MCP clients.
 

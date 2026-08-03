@@ -72,7 +72,7 @@ Read the [TypeScript SDK](/learn/build/typescript-sdk), [Python SDK](/learn/buil
 
 ## MCP server generation is expanding
 
-API teams can increasingly generate MCP tools from OpenAPI documents, direct REST API configurations, and GraphQL schemas instead of writing every schema and handler manually.
+API teams can increasingly generate MCP tools from OpenAPI documents, direct REST API configurations, Postman collections, and GraphQL schemas instead of writing every schema and handler manually.
 
 Generation is moving MCP closer to existing API lifecycles:
 
@@ -106,7 +106,9 @@ The `2025-11-25` specification added or expanded features for production and age
 - Icons for implementations and capabilities
 - Experimental durable tasks
 
-Tasks allow long-running requests to expose state and deferred results, but they remain experimental in that specification. Builders should negotiate capabilities and avoid assuming every client implements new features.
+Tasks allow long-running requests to expose state and deferred results, but they remain experimental in that specification. In the MCP 2026-07-28 era, tasks moved out of the base protocol into an extension. Builders should negotiate capabilities and avoid assuming every client implements new features.
+
+For hosted 0mcp servers, see [MCP 2026-07-28 compatibility](/guides/mcp-2026-07-28) for the practical rollout guidance.
 
 ## Extensions protect the core protocol
 

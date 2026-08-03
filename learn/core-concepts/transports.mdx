@@ -8,7 +8,7 @@ description: Understand how MCP transports carry JSON-RPC messages over stdio or
 MCP uses JSON-RPC 2.0 message structures. The transport determines how those messages are framed, delivered, and connected. The current stable MCP specification defines two standard transports:
 
 - `stdio`
-- [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
+- [Streamable HTTP](https://modelcontextprotocol.io/specification)
 
 ## Protocol messages vs transport
 
@@ -79,7 +79,9 @@ Read [Local vs remote MCP](/learn/fundamentals/local-vs-remote-mcp) for the broa
 
 ## Transport lifecycle
 
-After the transport connects, the client and server complete MCP initialization:
+After the transport connects, the client and server must agree on protocol behavior.
+
+Older MCP clients usually complete initialization like this:
 
 1. The client sends an `initialize` request.
 2. Both sides negotiate the protocol version and capabilities.
@@ -87,7 +89,11 @@ After the transport connects, the client and server complete MCP initialization:
 4. Normal requests and notifications begin.
 5. The connection eventually closes or shuts down.
 
-A working network connection does not guarantee a valid MCP session. The messages must still follow the negotiated protocol.
+Modern MCP 2026-07-28 clients use discovery and request-contained metadata instead of the older session-oriented lifecycle.
+
+A working network connection does not guarantee a valid MCP exchange. The messages must still follow the negotiated protocol era.
+
+See [MCP 2026-07-28 compatibility](/guides/mcp-2026-07-28) for how this affects 0mcp endpoints.
 
 ## Streamable HTTP security
 

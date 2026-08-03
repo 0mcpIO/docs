@@ -1,10 +1,66 @@
 ---
 title: Postman collection
-description: Learn the current options for using a Postman Collection with 0mcp, including conversion to OpenAPI and the checks to complete before importing.
+description: Import a Postman Collection v2 document into 0mcp, review the generated MCP tools, and publish a hosted MCP server.
 ---
 
-<Info>Postman Collection import is planned and is not available yet.</Info>
+[0mcp](https://0mcp.io) can convert a **Postman Collection v2** JSON document into MCP tools.
 
-If your collection can be converted to an OpenAPI document, review the result and import it through [OpenAPI specification](/api-sources/openapi). Check the server URL, authentication, input types, and operation names after conversion.
+Use this source when your API workflow already lives in Postman and you want to create a hosted MCP server without manually writing an OpenAPI document first.
 
-Do not upload a [Postman Collection](https://learning.postman.com/docs/collections/collections-overview/) JSON file directly. The OpenAPI importer expects an OpenAPI or Swagger version field.
+## Import methods
+
+You can import a Postman collection in three ways:
+
+### File
+
+Upload a Postman collection `.json` file up to **10 MB**.
+
+### URL
+
+Import from a publicly accessible `http://` or `https://` URL that returns the collection JSON directly.
+
+<Note>
+  The URL must be reachable without requiring a browser login.
+</Note>
+
+### Paste
+
+Paste the full Postman collection JSON document into the editor.
+
+## Optional environment file
+
+You can upload a Postman environment JSON file during import.
+
+Environment values help 0mcp resolve collection variables while converting requests into MCP tools.
+
+## Upstream base URL
+
+If the collection does not provide a clear upstream base URL, enter one during import.
+
+Use the public API origin that 0mcp should call, such as:
+
+```text
+https://api.example.com
+```
+
+## What happens during import?
+
+0mcp converts the collection into an OpenAPI document, then shows an import preview.
+
+The preview lets you:
+
+- Review the detected base URL, authentication, and operation count.
+- Select which requests should become [MCP tools](/learn/core-concepts/tools).
+- Rename tools and improve descriptions before creating the server.
+- Review validation findings before publishing.
+- Download the generated OpenAPI document for inspection or future reuse.
+
+<Warning>
+  Review write, delete, administrative, and payment requests carefully before exposing them as tools.
+</Warning>
+
+## When to use OpenAPI instead
+
+If your API already has an OpenAPI 3.x or Swagger 2.0 document, use the [OpenAPI source](/api-sources/openapi).
+
+Use Postman import when the collection is your best available API description.

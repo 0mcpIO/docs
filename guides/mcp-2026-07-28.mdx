@@ -1,0 +1,122 @@
+---
+title: MCP 2026-07-28 compatibility
+description: Understand how 0mcp works with the MCP 2026-07-28 protocol era, Streamable HTTP, version negotiation, and client compatibility.
+---
+
+MCP 2026-07-28 is a major protocol update.
+
+It changes how modern clients discover servers, identify requests, and communicate over HTTP. 0mcp uses **Streamable HTTP** and is being aligned with this newer protocol era while continuing to support practical client compatibility during rollout.
+
+<Info>
+  Client behavior depends on the MCP client you use. Some clients may still use an older protocol era even when the server is ready for newer behavior.
+</Info>
+
+## What changed
+
+The 2026-07-28 protocol era moves remote MCP toward stateless HTTP requests.
+
+Important changes include:
+
+- Session identifiers are no longer part of the modern HTTP flow.
+- Modern clients use `server/discover` to learn supported protocol versions and capabilities.
+- Requests carry protocol version and identity metadata with each request.
+- Modern HTTP requests include MCP headers such as `Mcp-Protocol-Version`, `Mcp-Method`, and `Mcp-Name`.
+- Server results include protocol-managed result metadata.
+- Long-lived resource subscriptions use newer subscription behavior instead of the older resource subscribe methods.
+- Older utilities such as `ping` and `logging/setLevel` are removed or deprecated in the modern era.
+
+For the formal specification, use the official [Model Context Protocol specification](https://modelcontextprotocol.io/specification).
+
+## How 0mcp serves remote MCP
+
+0mcp serves your published MCP server over **Streamable HTTP**.
+
+Your hosted endpoint is shown on the server **Setup** page. It usually looks like:
+
+```text
+https://your-server.0mcp.io/mcp
+```
+
+If you configure a verified custom domain, your Setup page shows the custom MCP endpoint instead.
+
+0mcp keeps the hosted MCP layer separate from your upstream API. The MCP client calls 0mcp, and 0mcp forwards tool requests to your API according to the published server version.
+
+## Version negotiation
+
+Modern MCP clients can negotiate the protocol era with the server.
+
+During rollout, this matters because not every client upgrades at the same time.
+
+- A modern client can discover newer behavior automatically.
+- A legacy client may continue using older initialization behavior.
+- Some clients may require a restart before they refresh capabilities or configuration.
+
+0mcp documentation avoids claiming universal MCP 2026-07-28 behavior for every client. The server endpoint is designed for Streamable HTTP compatibility, but the active protocol era depends on the client implementation.
+
+## Published versions still control capabilities
+
+The MCP protocol version does not change 0mcp's release model.
+
+Connected clients only see the **published version** of your server.
+
+Draft edits remain private until you publish a new version. After publishing, reconnect the client if it still shows an older tool, resource, or prompt list.
+
+## Authentication and OAuth
+
+0mcp uses pass-through authentication for upstream API credentials.
+
+If your published tools require Bearer tokens or API keys, the Setup page shows the headers or environment variables your client must provide.
+
+For OAuth-protected MCP tools, 0mcp also exposes MCP OAuth setup details when required, including:
+
+- The MCP resource URL.
+- Protected resource metadata URLs.
+- Any configuration issue that must be fixed before client setup is usable.
+
+Configure the OAuth issuer and JWKS details from server **Settings** when your source requires MCP OAuth metadata.
+
+<Warning>
+  Signing in to 0mcp does not authenticate calls to your upstream API. Your API still decides whether each forwarded request is allowed.
+</Warning>
+
+## Browser and CORS behavior
+
+Browser-based MCP clients perform CORS preflight checks before making remote MCP requests.
+
+Modern MCP requests may include protocol headers such as:
+
+```text
+Mcp-Protocol-Version
+Mcp-Method
+Mcp-Name
+```
+
+If a browser client cannot complete the preflight request, it may fail to connect or fall back to older behavior depending on the client.
+
+When troubleshooting browser or web playground issues, verify the request reaches 0mcp and that the client is using the endpoint copied from **Setup**.
+
+## What this means for you
+
+For most 0mcp users, the workflow stays the same:
+
+1. Import an API source.
+2. Review the generated tools.
+3. Publish a version.
+4. Copy the generated client configuration from **Setup**.
+5. Reconnect the MCP client.
+
+The protocol update mainly affects client compatibility, connection diagnostics, and the exact HTTP headers used by modern clients.
+
+## Troubleshooting checklist
+
+If a client does not connect:
+
+- Confirm the server has a published version.
+- Confirm serving is enabled.
+- Copy the MCP endpoint again from **Setup**.
+- Verify the client supports remote Streamable HTTP.
+- Check whether the client requires authentication headers or OAuth setup.
+- Restart or reconnect the client.
+- Review [MCP connection issues](/troubleshooting/mcp-connection-issues).
+
+If a client connects but capabilities look stale, see [Tool discovery problems](/troubleshooting/tool-discovery-problems).

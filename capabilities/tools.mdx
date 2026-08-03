@@ -5,7 +5,9 @@ description: Learn how 0mcp turns your API operations into MCP tools.
 
 A **tool** is an action that an MCP client can invoke.
 
-In [0mcp](https://0mcp.io), each tool is generated from an API operation in your [**OpenAPI** specification](/api-sources/openapi). When you import your API, 0mcp automatically creates a tool for every available operation, allowing AI clients to interact with your API through the Model Context Protocol.
+In [0mcp](https://0mcp.io), each tool is generated from an operation in your imported API source. The source can be an [OpenAPI specification](/api-sources/openapi), a [REST API definition](/api-sources/rest-api), or a [Postman collection](/api-sources/postman).
+
+When you import your API, 0mcp creates tool previews for the available operations. You choose which tools to expose before creating and publishing the MCP server.
 
 For example:
 

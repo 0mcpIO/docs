@@ -37,23 +37,34 @@ Make sure your MCP client is configured to use the hosted HTTP endpoint instead 
   Do not place a hosted 0mcp URL in a client field that expects a local command.
 </Warning>
 
-## 5. Review authentication
+## 5. Check protocol compatibility
+
+Modern MCP clients may use MCP 2026-07-28 discovery and request headers.
+
+If a browser-based client fails before any log appears in 0mcp, check whether the browser request completed its CORS preflight and whether the client supports remote Streamable HTTP.
+
+Use the generated configuration from **Setup** whenever possible.
+
+See [MCP 2026-07-28 compatibility](/guides/mcp-2026-07-28) for more detail.
+
+## 6. Review authentication
 
 If your server requires authentication, confirm that:
 
 - Required environment variables are configured.
 - Authentication headers are present.
 - Credentials are valid.
+- OAuth issuer settings are configured when Setup reports they are required.
 
 See [**Authentication errors**](/troubleshooting/authentication-errors) if requests are being rejected with `401` or `403`.
 
-## 6. Restart your client
+## 7. Restart your client
 
 Many MCP clients load their configuration only when they start.
 
 After updating your configuration or credentials, restart or reconnect the client before testing again.
 
-## 7. Check the logs
+## 8. Check the logs
 
 Open [**Logs**](/guides/logs) and look for activity at the time you attempted to connect.
 

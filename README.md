@@ -10,7 +10,7 @@
   <h3>Turn your API into a hosted MCP server</h3>
 
   <p>
-    Connect an OpenAPI document, REST API, or GraphQL API,<br>
+    Connect an OpenAPI document, REST API, or Postman collection,<br>
     choose what AI clients can access,
     and publish a managed MCP endpoint in minutes.
   </p>
@@ -34,7 +34,7 @@
 
 ## What is 0mcp?
 
-[0mcp](https://0mcp.io) turns an existing API into a hosted [Model Context Protocol](learn/fundamentals/what-is-mcp.mdx) server. Start with an OpenAPI 3.x or Swagger 2.0 document, configure REST operations directly, or connect a GraphQL API. Select the operations you want to expose, and 0mcp converts them into tools that compatible AI clients can discover and call.
+[0mcp](https://0mcp.io) turns an existing API into a hosted [Model Context Protocol](learn/fundamentals/what-is-mcp.mdx) server. Start with an OpenAPI 3.x or Swagger 2.0 document, configure REST operations directly, or import a Postman Collection v2 document. Select the operations you want to expose, and 0mcp converts them into tools that compatible AI clients can discover and call.
 
 You do not need to change your API or maintain a separate MCP service. Your API remains responsible for its data, business logic, authentication, and authorization.
 
@@ -53,7 +53,7 @@ flowchart LR
 | Step | What you do |
 | ---: | --- |
 | **1. Create** | Sign in to the [0mcp dashboard](https://0mcp.io/dashboard) and create a server. |
-| **2. Connect** | Import an OpenAPI or Swagger document, configure REST operations directly, or connect a GraphQL API. |
+| **2. Connect** | Import an OpenAPI or Swagger document, configure REST operations directly, or import a Postman collection. |
 | **3. Choose** | Select the operations that should become MCP tools. Rename them or improve their descriptions when needed. |
 | **4. Publish** | Publish a version to make the server available at its hosted endpoint. |
 | **5. Test** | Use the Playground to test read-only tools and verify authentication before allowing write operations. |
@@ -124,6 +124,8 @@ To connect a compatible client:
 
 The **Setup** page provides ready-to-use configuration for popular clients. You can use the same endpoint with any other MCP-compatible client that supports the transport and authentication requirements. See the [client setup overview](guides/setup.mdx) for details.
 
+For current protocol-era behavior, see [MCP 2026-07-28 compatibility](guides/mcp-2026-07-28.mdx).
+
 ## Your credentials stay with the caller
 
 0mcp uses [pass-through authentication](concepts/authentication-model.mdx). The MCP client supplies the Bearer token or API key required by your API, and 0mcp forwards it for that request. Your upstream API makes the final authorization decision.
@@ -146,8 +148,8 @@ Operational records contain only the details needed to understand usage and fail
 | OpenAPI 3.x | Available | [Prepare an OpenAPI document](api-sources/openapi.mdx) |
 | Swagger 2.0 | Available | [Review import requirements](api-sources/openapi.mdx) |
 | Direct REST API conversion | Available | [Configure REST operations](api-sources/rest-api.mdx) |
-| GraphQL-to-MCP conversion | Available | [Connect a GraphQL API](api-sources/graphql.mdx) |
-| Postman Collection import | Planned | [Convert to OpenAPI first](api-sources/postman.mdx) |
+| Postman Collection v2 import | Available | [Import a Postman collection](api-sources/postman.mdx) |
+| GraphQL-to-MCP conversion | Coming soon | [Review GraphQL status](api-sources/graphql.mdx) |
 
 ## Find your path
 

@@ -20,6 +20,22 @@ For each operation, define:
 
 Start with a small set of useful read-only operations. Add write operations after you have tested authentication, authorization, logging, and user confirmation.
 
+## Preview before creating the server
+
+Before creating the MCP server, 0mcp shows a preview of the generated tools.
+
+Use the preview to:
+
+- Confirm the upstream base URL.
+- Review detected authentication.
+- Select only the endpoints you want to expose.
+- Rename generated tool names.
+- Improve tool and input descriptions.
+- Check validation findings.
+- Download the generated OpenAPI document.
+
+Blocking validation findings must be fixed before import. Warnings, such as missing descriptions, should be reviewed because clear metadata helps AI clients call tools correctly.
+
 ## What 0mcp provides
 
 The direct REST workflow includes:
